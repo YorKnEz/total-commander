@@ -1,0 +1,21 @@
+ Volume in drive D is Costofia
+ Volume Serial Number is AC34-E108
+
+ Directory of D:\alex_\Documents
+
+17/11/2022  09:46 PM    <DIR>          .
+17/11/2022  09:46 PM    <DIR>          ..
+17/11/2022  09:46 PM         2,168,251 111722 513 PM.pdf
+11/06/2022  01:19 PM    <DIR>          Genul dramatic
+29/10/2022  09:34 PM    <DIR>          Genul epic
+11/06/2022  01:19 PM    <DIR>          Genul liric
+20/10/2022  05:37 PM    <DIR>          IP
+26/05/2022  11:02 AM               964 Lista opere BAC
+15/06/2022  08:48 PM               108 lista programe mutabile.txt
+09/06/2022  08:48 AM        39,058,116 Not partitioned June-09 9_48.ddwscan
+16/07/2022  05:20 PM               108 Old java paths.txt
+17/11/2022  09:46 PM         9,772,869 Partiale.pdf
+29/10/2022  11:57 PM             1,259 sarut mana pentru document
+29/10/2022  11:57 PM         8,028,351 Wow ce font frumos nici nu zici ca.pptx
+               8 File(s)     59,030,026 bytes
+               6 Dir(s)  329,278,521,344 bytes free
