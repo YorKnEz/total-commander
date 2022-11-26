@@ -149,23 +149,28 @@ void drawText(Text text) {
 }
 
 void drawFile(File file) {
-  Text filename, size, date;
+  Text filename, ext, size, date;
 
   filename = createText(file.coords.x, file.coords.y, file.filenameColumn,
                         file.height, file.data.filename, file.textColor,
                         file.backgroundColor, file.borderColor);
 
+  ext = createText(file.coords.x + filename.width, file.coords.y,
+                   file.extColumn, file.height, file.data.ext, file.textColor,
+                   file.backgroundColor, file.borderColor);
+
   string sizeString = int2str(file.data.size);
 
-  size = createText(file.coords.x + filename.width, file.coords.y,
+  size = createText(file.coords.x + filename.width + ext.width, file.coords.y,
                     file.sizeColumn, file.height, sizeString, file.textColor,
                     file.backgroundColor, file.borderColor);
 
-  date = createText(file.coords.x + filename.width + size.width, file.coords.y,
-                    file.dateColumn, file.height, file.data.date,
+  date = createText(file.coords.x + filename.width + ext.width + size.width,
+                    file.coords.y, file.dateColumn, file.height, file.data.date,
                     file.textColor, file.backgroundColor, file.borderColor);
 
   drawText(filename);
+  drawText(ext);
   drawText(size);
   drawText(date);
 }
