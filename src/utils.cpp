@@ -70,12 +70,14 @@ Filedata parseFileDataString(string filedataString) {
   return filedata;
 }
 
+// extracts the rgb values from a hexcode and updates an RGB structure
 void hexColorToRGB(RGB &color, unsigned int hex) {
   color.r = (hex & 0xFF0000) >> 4 * 4;
   color.g = (hex & 0x00FF00) >> 4 * 2;
   color.b = (hex & 0x0000FF) >> 4 * 0;
 }
 
+// extracts the rgb values from a hexcode and returns an RGB structure
 RGB getRGBFromHex(unsigned int hex) {
   RGB color;
 

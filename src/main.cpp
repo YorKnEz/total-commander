@@ -28,9 +28,7 @@ int main() {
   list l;
   init(l);
 
-  char path[MAX_PATH + 1];
-
-  strcpy(path, "D:\\alex_\\Documents");
+  string path = "D:\\alex_\\Documents";
 
   getFilesFromPath(l, path);
 
