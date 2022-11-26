@@ -60,7 +60,7 @@ Filedata parseFileDataString(string filedataString) {
   int nextSpace = filedataString.find(' ', spacePos + 1);
 
   filedata.size =
-      str2int(filedataString.substr(spacePos + 1, nextSpace - (spacePos + 1)));
+      filedataString.substr(spacePos + 1, nextSpace - (spacePos + 1));
 
   spacePos = nextSpace;
 
@@ -69,8 +69,8 @@ Filedata parseFileDataString(string filedataString) {
 
   int lastDotPos = filedata.filename.find_last_of('.');
 
-  if (lastDotPos != string::npos && filedata.size != -1) {
-    filedata.ext = filedata.filename.substr(lastDotPos);
+  if (lastDotPos != string::npos && filedata.size.compare("<DIR>")) {
+    filedata.ext = filedata.filename.substr(lastDotPos + 1);
     filedata.filename.erase(filedata.filename.find_last_of('.'));
   } else
     filedata.ext = "";
