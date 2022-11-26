@@ -13,7 +13,7 @@ bool byDate(node *a, node *b) {
 void getFilesFromPath(list &l, string path) {
   // we call system("dir path >> buffer.txt");
   string bufferFileName = "buffer.txt";
-  string command = "dir " + path + " > " + bufferFileName;
+  string command = "dir \"" + path + "\" > " + bufferFileName;
 
   system(command.c_str());
 
