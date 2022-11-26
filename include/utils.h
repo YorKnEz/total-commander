@@ -1,7 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 #include "dllist.h"
-#include <string.h>
+#include <string>
+
+using namespace std;
 
 struct Point {
   int x, y;
@@ -11,11 +13,11 @@ struct RGB {
   unsigned int r, g, b;
 };
 
-int str2int(char *stringNumber);
+int str2int(string numberString);
 
-char *int2str(int a);
+string int2str(int a);
 
-Filedata parseFileDataString(char *filedataString);
+Filedata parseFileDataString(string filedataString);
 
 void hexColorToRGB(RGB &color, unsigned int hex);
 

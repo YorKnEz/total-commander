@@ -2,9 +2,12 @@
 #define EXPLORER_H
 #include "element.h"
 #include "filetree.h"
+#include <string>
+
+using namespace std;
 
 struct Explorer {
-  char *path;
+  string path;
   list files;
   Element *elements;
 };

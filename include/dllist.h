@@ -1,15 +1,18 @@
 #ifndef DLLIST_H
 #define DLLIST_H
-#include <stdio.h>
+#include <iostream>
+#include <string>
+
+using namespace std;
 
 #define MAX_PATH 260
 #define MAX_DATE 24
 
 struct Filedata {
-  char filename[MAX_PATH + 1]; // windows allows names of max 260 characters
-  char ext[MAX_PATH + 1];
+  string filename; // windows allows names of max 260 characters
+  string ext;
   int size;
-  char date[MAX_DATE + 1]; // date is about 20 characters
+  string date; // date is about 20 characters
 };
 
 struct node {

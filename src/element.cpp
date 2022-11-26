@@ -1,5 +1,29 @@
 #include "element.h"
 
+Button createButton(string text, int x, int y, RGB textColor,
+                    RGB backgroundColor, RGB borderColor) {
+  Button b;
+
+  b.text = text;
+
+  char *tmpString = new char[b.text.size() + 1];
+  strcpy(tmpString, b.text.c_str());
+
+  b.width = textwidth(tmpString) + 10;
+  b.height = textheight(tmpString) + 2;
+
+  delete[] tmpString;
+
+  b.coords.x = x;
+  b.coords.y = y;
+
+  b.textColor = textColor;
+  b.backgroundColor = backgroundColor;
+  b.borderColor = borderColor;
+
+  return b;
+}
+
 void drawButton(Button button) {
   if (button.oldState != button.state) {
     switch (button.state) {
@@ -38,19 +62,23 @@ void drawButton(Button button) {
     setbkcolor(COLOR(button.backgroundColor.r, button.backgroundColor.g,
                      button.backgroundColor.b));
 
-    if (textwidth(button.text) > button.width) {
-      strcat(button.text, "...");
+    char *textString = new char[button.text.size() + 3];
+    strcpy(textString, button.text.c_str());
+
+    if (textwidth(textString) > button.width) {
+      strcat(textString, "..");
     }
 
-    int len = strlen(button.text) - 4;
+    int len = button.text.size() - 1;
 
-    while (textwidth(button.text) > button.width) {
-      strcpy(button.text + len, button.text + len + 1);
+    while (textwidth(textString) > button.width) {
+      strcpy(textString + len, textString + len + 1);
+      len--;
     }
 
-    outtextxy(button.coords.x + button.width / 2 - textwidth(button.text) / 2,
-              button.coords.y + button.height / 2 - textheight(button.text) / 2,
-              button.text);
+    outtextxy(button.coords.x + button.width / 2 - textwidth(textString) / 2,
+              button.coords.y + button.height / 2 - textheight(textString) / 2,
+              textString);
   }
 }
 
@@ -65,7 +93,7 @@ bool isHovered(Button &button, Point mouse) {
   return false;
 }
 
-Text createText(int x, int y, int width, int height, char *textString,
+Text createText(int x, int y, int width, int height, string textString,
                 RGB textColor, RGB backgroundColor, RGB borderColor) {
   Text text;
 
@@ -75,8 +103,7 @@ Text createText(int x, int y, int width, int height, char *textString,
   text.width = width;
   text.height = height;
 
-  text.text = new char[strlen(textString)];
-  strcpy(text.text, textString);
+  text.text = textString;
 
   text.textColor = textColor;
   text.backgroundColor = backgroundColor;
@@ -100,21 +127,25 @@ void drawText(Text text) {
   setbkcolor(COLOR(text.backgroundColor.r, text.backgroundColor.g,
                    text.backgroundColor.b));
 
-  if (textwidth(text.text) > text.width) {
-    strcat(text.text, "...");
+  char *textString = new char[text.text.size() + 3];
+  strcpy(textString, text.text.c_str());
+
+  if (textwidth(textString) > text.width) {
+    strcat(textString, "..");
   }
 
-  int len = strlen(text.text) - 3;
+  int len = text.text.size() - 1;
 
-  while (textwidth(text.text) > text.width) {
-    strcpy(text.text + len, text.text + len + 1);
+  while (textwidth(textString) > text.width) {
+    strcpy(textString + len, textString + len + 1);
     len--;
   }
 
-  // outtextxy(text.coords.x + text.width / 2 - textwidth(text.text) / 2,
-  //           text.coords.y + text.height / 2 - textheight(text.text) / 2,
-  //           text.text);
-  outtextxy(text.coords.x, text.coords.y, text.text);
+  // outtextxy(button.coords.x + button.width / 2 - textwidth(textString) / 2,
+  //           button.coords.y + button.height / 2 - textheight(textString) / 2,
+  //           textString);
+
+  outtextxy(text.coords.x, text.coords.y, textString);
 }
 
 void drawFile(File file) {
@@ -124,8 +155,7 @@ void drawFile(File file) {
                         file.height, file.data.filename, file.textColor,
                         file.backgroundColor, file.borderColor);
 
-  char sizeString[100];
-  strcpy(sizeString, int2str(file.data.size));
+  string sizeString = int2str(file.data.size);
 
   size = createText(file.coords.x + filename.width, file.coords.y,
                     file.sizeColumn, file.height, sizeString, file.textColor,

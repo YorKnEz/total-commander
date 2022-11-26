@@ -3,13 +3,17 @@
 #include "dllist.h"
 #include "utils.h"
 #include "winbgim.h"
+#include <string.h>
+#include <string>
+
+using namespace std;
 
 enum State { INACTIVE, HOVERED, CLICKED, DCLICKED };
 
 struct Button {
   Point coords;
   int width, height;
-  char *text;
+  string text;
   RGB textColor, borderColor, backgroundColor;
   State state, oldState;
 };
@@ -17,7 +21,7 @@ struct Button {
 struct Text {
   Point coords;
   int width, height;
-  char *text;
+  string text;
   RGB textColor, borderColor, backgroundColor;
 };
 
@@ -32,8 +36,8 @@ struct File {
 struct Input {
   Point coords;
   int width, height;
-  char *placeholder;
-  char *value;
+  string placeholder;
+  string value;
 };
 
 union Element {
@@ -44,11 +48,17 @@ union Element {
 };
 
 // button functions
+Button createButton(string text, int x, int y, RGB textColor,
+                    RGB backgroundColor, RGB borderColor);
+
 void drawButton(Button button);
 
 bool isHovered(Button &button, Point mouse);
 
 // text functions
+Text createText(int x, int y, int width, int height, string textString,
+                RGB textColor, RGB backgroundColor, RGB borderColor);
+
 void drawText(Text text);
 
 // file functions

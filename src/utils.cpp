@@ -1,9 +1,10 @@
 #include "utils.h"
 
-int str2int(char *stringNumber) {
-  int number = 0, len = strlen(stringNumber);
+// converts a string to an integer
+int str2int(string stringNumber) {
+  int number = 0;
 
-  for (int i = 0; i < len; i++) {
+  for (int i = 0; i < stringNumber.size(); i++) {
     if (stringNumber[i] == ',') {
       continue;
     }
@@ -18,71 +19,65 @@ int str2int(char *stringNumber) {
   return number;
 }
 
-char *int2str(int a) {
-  if (a < 0)
+// converts an integer to string
+string int2str(int a) {
+  if (a == -1) {
     return "<DIR>";
-
-  char *s = new char[100];
-  int l = 0, ca = a;
-
-  while (ca) {
-    l++;
-    ca /= 10;
   }
 
-  s[l] = '\0';
+  string stringNumber;
 
   while (a) {
-    s[--l] = a % 10 + '0';
+    stringNumber.insert(stringNumber.begin(), char(a % 10 + '0'));
     a /= 10;
   }
 
-  return s;
+  return stringNumber;
 }
 
-Filedata parseFileDataString(char *filedataString) {
+// parses a string into a Filedata structure
+Filedata parseFileDataString(string filedataString) {
+  // remove extra spaces from string
+  for (int i = 1; i < filedataString.size(); i++) {
+    if (filedataString[i] == filedataString[i - 1] &&
+        filedataString[i] == ' ') {
+      filedataString.erase(i--, 1);
+    }
+  }
+
   // the structure of the file data string is:
   // DATE TIME AM/PM <DIR>/SIZE NAME
-  char *p = strtok(filedataString, " ");
-
   Filedata filedata;
 
-  strcpy(filedata.date, p);
+  int spacePos = -1;
 
-  p = strtok(NULL, " ");
-
-  for (int i = 0; i < 2; i++) {
-    strcat(filedata.date, " ");
-    strcat(filedata.date, p);
-
-    p = strtok(NULL, " ");
+  for (int i = 0; i < 3; i++) {
+    spacePos = filedataString.find(' ', spacePos + 1);
   }
 
-  // size will be -1 if the file is a directory
-  filedata.size = str2int(p);
+  filedata.date = filedataString.substr(0, spacePos);
 
-  p = strtok(NULL, " ");
+  int nextSpace = filedataString.find(' ', spacePos + 1);
 
-  strcpy(filedata.filename, p);
+  filedata.size =
+      str2int(filedataString.substr(spacePos + 1, nextSpace - (spacePos + 1)));
 
-  p = strtok(NULL, " ");
+  spacePos = nextSpace;
 
-  while (p) {
-    strcat(filedata.filename, " ");
-    strcat(filedata.filename, p);
-
-    p = strtok(NULL, " ");
-  }
+  filedata.filename = filedataString.substr(
+      nextSpace + 1, filedataString.size() - (nextSpace + 1));
 
   return filedata;
 }
 
+// extracts the rgb values from a hexcode and updates an RGB structure
 void hexColorToRGB(RGB &color, unsigned int hex) {
   color.r = (hex & 0xFF0000) >> 4 * 4;
   color.g = (hex & 0x00FF00) >> 4 * 2;
   color.b = (hex & 0x0000FF) >> 4 * 0;
 }
 
+// extracts the rgb values from a hexcode and returns an RGB structure
 RGB getRGBFromHex(unsigned int hex) {
   RGB color;
 

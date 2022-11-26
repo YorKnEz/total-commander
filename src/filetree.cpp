@@ -1,7 +1,7 @@
 #include "filetree.h"
 
 bool byName(node *a, node *b) {
-  return strcmp(a->data.filename, b->data.filename) <= 0;
+  return a->data.filename.compare(b->data.filename) <= 0;
 }
 
 bool bySize(node *a, node *b) { return a->data.size < b->data.size; }
@@ -10,40 +10,34 @@ bool byDate(node *a, node *b) {
   // implement date comparison
 }
 
-void getFilesFromPath(list &l, char *path) {
+void getFilesFromPath(list &l, string path) {
   // we call system("dir path >> buffer.txt");
-  char bufferFileName[] = "buffer.txt";
-  char command[100];
+  string bufferFileName = "buffer.txt";
+  string command = "dir " + path + " > " + bufferFileName;
 
-  strcpy(command, "dir ");
-  strcat(command, path);
-  strcat(command, " > ");
-  strcat(command, bufferFileName);
+  system(command.c_str());
 
-  system(command);
-
-  FILE *bufferFile = fopen(bufferFileName, "r");
+  FILE *bufferFile = freopen(bufferFileName.c_str(), "r", stdin);
 
   if (!bufferFile) {
-    perror("File not found");
+    cout << "File not found";
     return;
   }
 
-  char currentFileData[1000];
+  string currentBufferLine;
 
   // first 6 lines are unnecessary
   for (int i = 0; i < 6; i++) {
-    fgets(currentFileData, 1000, bufferFile);
+    getline(cin, currentBufferLine);
   }
 
   Filedata currentData;
   int lastDir = 0;
   // read the filedataStrings from the file while the first character is not a
   // space if it is a space, it means we got to the last two lines
-  while (fgets(currentFileData, 1000, bufferFile) &&
-         currentFileData[0] != ' ') {
-    if (currentFileData[0] != ' ') {
-      currentData = parseFileDataString(currentFileData);
+  while ((getline(cin, currentBufferLine)) && currentBufferLine[0] != ' ') {
+    if (currentBufferLine[0] != ' ') {
+      currentData = parseFileDataString(currentBufferLine);
 
       if (currentData.size == -1) {
         add(l, currentData, lastDir);
@@ -53,6 +47,9 @@ void getFilesFromPath(list &l, char *path) {
       }
     }
   }
+
+  fclose(stdin);
+  remove(bufferFileName.c_str());
 }
 
 void sortFiletree(list &l, sortBy criteria) {
@@ -67,16 +64,16 @@ void sortFiletree(list &l, sortBy criteria) {
     sort(l, byDate);
     break;
   default:
-    printf("Invalid sort option\n");
+    cout << "Invalid sort option\n";
     break;
   }
 }
 
-node *find(list l, char *filename) {
+node *find(list l, string filename) {
   node *p = l.head;
 
   while (p) {
-    if (!strcmp(p->data.filename, filename)) {
+    if (!p->data.filename.compare(filename)) {
       return p;
     }
 
