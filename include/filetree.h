@@ -2,6 +2,7 @@
 #define FILE_TREE_H
 #include "dllist.h"
 #include "utils.h"
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>

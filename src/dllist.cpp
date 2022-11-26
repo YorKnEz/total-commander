@@ -83,13 +83,14 @@ void printList(list l) {
   unsigned int index = 0;
 
   while (p != NULL) {
-    printf("Name: %s | Size: %d | Date: %s\n", p->data.filename, p->data.size,
-           p->data.date);
+    cout << "Name: " << p->data.filename << " | ";
+    cout << "Size: " << p->data.size << " | ";
+    cout << "Date: " << p->data.date << '\n';
 
     p = p->next;
   }
 
-  printf("\n");
+  cout << '\n';
 }
 
 void free(list l) {
@@ -105,7 +106,7 @@ void free(list l) {
     delete p;
   }
 
-  // printf("\nFreed list\n");
+  // cout << "\nFreed list\n";
 }
 
 void sort(list &l, bool (*sortCriteria)(node *a, node *b)) {
