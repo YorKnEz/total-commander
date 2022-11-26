@@ -44,8 +44,9 @@ int main() {
   file.height = 30;
 
   file.dateColumn = textwidth("dd/mm/yyyy hh:mm xx");
+  file.extColumn = (file.width - file.dateColumn) / 4;
   file.filenameColumn = (file.width - file.dateColumn) / 2;
-  file.sizeColumn = (file.width - file.dateColumn) / 2;
+  file.sizeColumn = (file.width - file.dateColumn) / 4;
 
   file.textColor = dark.text;
   file.backgroundColor = dark.background;

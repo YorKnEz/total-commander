@@ -67,6 +67,14 @@ Filedata parseFileDataString(string filedataString) {
   filedata.filename = filedataString.substr(
       nextSpace + 1, filedataString.size() - (nextSpace + 1));
 
+  int lastDotPos = filedata.filename.find_last_of('.');
+
+  if (lastDotPos != string::npos && filedata.size != -1) {
+    filedata.ext = filedata.filename.substr(lastDotPos);
+    filedata.filename.erase(filedata.filename.find_last_of('.'));
+  } else
+    filedata.ext = "";
+
   return filedata;
 }
 
