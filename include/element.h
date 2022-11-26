@@ -48,6 +48,9 @@ union Element {
 };
 
 // button functions
+Button createButton(string text, int x, int y, RGB textColor,
+                    RGB backgroundColor, RGB borderColor);
+
 void drawButton(Button button);
 
 bool isHovered(Button &button, Point mouse);

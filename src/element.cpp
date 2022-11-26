@@ -1,5 +1,29 @@
 #include "element.h"
 
+Button createButton(string text, int x, int y, RGB textColor,
+                    RGB backgroundColor, RGB borderColor) {
+  Button b;
+
+  b.text = text;
+
+  char *tmpString = new char[b.text.size() + 1];
+  strcpy(tmpString, b.text.c_str());
+
+  b.width = textwidth(tmpString) + 10;
+  b.height = textheight(tmpString) + 2;
+
+  delete[] tmpString;
+
+  b.coords.x = x;
+  b.coords.y = y;
+
+  b.textColor = textColor;
+  b.backgroundColor = backgroundColor;
+  b.borderColor = borderColor;
+
+  return b;
+}
+
 void drawButton(Button button) {
   if (button.oldState != button.state) {
     switch (button.state) {

@@ -14,35 +14,13 @@ void initGraphics();
 int main() {
   initGraphics();
 
-  Button b;
+  Button b = createButton("test12312", WINDOW_W - 120, WINDOW_H - 40,
+                          getRGBFromHex(0xEB4034), getRGBFromHex(0xEEEEEE),
+                          getRGBFromHex(0xEB4034));
 
-  b.text = new char[10];
-  strcpy(b.text, "test12312");
-
-  b.width = textwidth(b.text) + 10;
-  b.height = textheight(b.text) + 2;
-
-  b.coords.x = WINDOW_W - b.width - 8;
-  b.coords.y = WINDOW_H - b.height - 8;
-
-  hexColorToRGB(b.textColor, 0xEB4034);
-  hexColorToRGB(b.backgroundColor, 0xEEEEEE);
-  hexColorToRGB(b.borderColor, 0xEB4034);
-
-  Button b2;
-
-  b2.text = new char[10];
-  strcpy(b2.text, "alt buton");
-
-  b2.width = b.width;
-  b2.height = b.height;
-
-  b2.coords.x = b.coords.x - b.width - 20;
-  b2.coords.y = b.coords.y;
-
-  hexColorToRGB(b2.textColor, 0xEB4034);
-  hexColorToRGB(b2.backgroundColor, 0xEEEEEE);
-  hexColorToRGB(b2.borderColor, 0xEB4034);
+  Button b2 = createButton("alt buton", b.coords.x - b.width - 20, b.coords.y,
+                           getRGBFromHex(0xEB4034), getRGBFromHex(0xEEEEEE),
+                           getRGBFromHex(0xEB4034));
 
   drawButton(b);
   drawButton(b2);
