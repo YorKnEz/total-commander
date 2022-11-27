@@ -40,7 +40,7 @@ void getFilesFromPath(list &l, string path) {
     if (currentBufferLine[0] != ' ') {
       currentData = parseFileDataString(currentBufferLine);
 
-      if (currentData.size == -1) {
+      if (!currentData.size.compare("<DIR>")) {
         add(l, currentData, lastDir);
         lastDir++;
       } else {

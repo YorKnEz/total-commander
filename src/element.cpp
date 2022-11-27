@@ -159,11 +159,9 @@ void drawFile(File file) {
                    file.extColumn, file.height, file.data.ext, file.textColor,
                    file.backgroundColor, file.borderColor);
 
-  string sizeString = int2str(file.data.size);
-
   size = createText(file.coords.x + filename.width + ext.width, file.coords.y,
-                    file.sizeColumn, file.height, sizeString, file.textColor,
-                    file.backgroundColor, file.borderColor);
+                    file.sizeColumn, file.height, file.data.size,
+                    file.textColor, file.backgroundColor, file.borderColor);
 
   date = createText(file.coords.x + filename.width + ext.width + size.width,
                     file.coords.y, file.dateColumn, file.height, file.data.date,
