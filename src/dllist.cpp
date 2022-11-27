@@ -109,15 +109,33 @@ void free(list l) {
   // cout << "\nFreed list\n";
 }
 
-void sort(list &l, bool (*sortCriteria)(node *a, node *b)) {
-  node *p = l.head, *q;
+void sort(list &l, sortOrder order,
+          bool (*sortCriteria)(node *a, node *b, sortOrder order)) {
+  node *p = l.head->data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
+  node *q;
   Filedata aux;
+
+  while (p->next && !p->data.size.compare("<DIR>")) {
+    q = p->next;
+
+    while (q && !q->data.size.compare("<DIR>")) {
+      if (sortCriteria(q, p, order)) {
+        aux = p->data;
+        p->data = q->data;
+        q->data = aux;
+      }
+
+      q = q->next;
+    }
+
+    p = p->next;
+  }
 
   while (p->next) {
     q = p->next;
 
     while (q) {
-      if (sortCriteria(q, p)) {
+      if (sortCriteria(q, p, order)) {
         aux = p->data;
         p->data = q->data;
         q->data = aux;

@@ -8,6 +8,8 @@ using namespace std;
 #define MAX_PATH 260
 #define MAX_DATE 24
 
+enum sortOrder { DESC = -1, ASC = 1 };
+
 struct Filedata {
   string filename; // windows allows names of max 260 characters
   string ext;
@@ -37,5 +39,6 @@ void printList(list l);
 
 void free(list l);
 
-void sort(list &l, bool (*sortCriteria)(node *a, node *b));
+void sort(list &l, sortOrder order,
+          bool (*sortCriteria)(node *a, node *b, sortOrder order));
 #endif

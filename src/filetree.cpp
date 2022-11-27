@@ -1,13 +1,65 @@
 #include "filetree.h"
 
-bool byName(node *a, node *b) {
-  return a->data.filename.compare(b->data.filename) <= 0;
+// sort nodes by name
+bool byName(node *a, node *b, sortOrder order) {
+  // try to sort by filename
+  int comp = order * a->data.filename.compare(b->data.filename);
+
+  if (comp) {
+    return comp <= 0;
+  }
+
+  // try to sort by extenions
+  return order * (a->data.ext.compare(b->data.ext)) <= 0;
 }
 
-bool bySize(node *a, node *b) { return a->data.size < b->data.size; }
+// sort nodes by size
+bool bySize(node *a, node *b, sortOrder order) {
+  // try to sort by length of sizes
+  if (a->data.size.size() > b->data.size.size()) {
+    return order != ASC;
+  } else if (a->data.size.size() < b->data.size.size()) {
+    return order == ASC;
+  }
 
-bool byDate(node *a, node *b) {
-  // implement date comparison
+  // try to sort by comparing the numbers
+  int comp = order * (a->data.size.compare(b->data.size));
+
+  if (comp) {
+    return comp <= 0;
+  }
+
+  // try to sort by filename
+  return byName(a, b, order);
+}
+
+// sort nodes by date
+bool byDate(node *a, node *b, sortOrder order) {
+  // date is of format "dd/mm/yyyy hh:mm xx", where xx is AM or PM
+  // we use the following struct to store the start and length of a token from
+  // the string a token can be: dd, mm, yyyy etc.
+  struct {
+    int start,
+        len; // start position and length of each of the tokens mentioned above
+  } substrPositions[] = {{6, 4}, {3, 2}, {0, 2}, {17, 2}, {11, 2}, {14, 2}};
+
+  int comp;
+  string substrA, substrB; // for storing the year, month etc. when comparing
+
+  for (int i = 0; i < 6; i++) {
+    substrA =
+        a->data.date.substr(substrPositions[i].start, substrPositions[i].len);
+    substrB =
+        b->data.date.substr(substrPositions[i].start, substrPositions[i].len);
+
+    comp = order * substrA.compare(substrB);
+
+    if (comp) {
+      return comp <= 0;
+    }
+  }
+
+  return byName(a, b, order);
 }
 
 void getFilesFromPath(list &l, string path) {
@@ -52,16 +104,18 @@ void getFilesFromPath(list &l, string path) {
   remove(bufferFileName.c_str());
 }
 
-void sortFiletree(list &l, sortBy criteria) {
+// sorting keeps the directories before any files and sorts them separately
+// it also assumes that directories have been put before any files by default
+void sortFiletree(list &l, sortBy criteria, sortOrder order) {
   switch (criteria) {
   case FILE_NAME:
-    sort(l, byName);
+    sort(l, order, byName);
     break;
   case FILE_SIZE:
-    sort(l, bySize);
+    sort(l, order, bySize);
     break;
   case FILE_DATE:
-    sort(l, byDate);
+    sort(l, order, byDate);
     break;
   default:
     cout << "Invalid sort option\n";
