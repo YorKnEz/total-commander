@@ -7,6 +7,7 @@ bool byName(node *a, node *b) {
 bool bySize(node *a, node *b) { return a->data.size < b->data.size; }
 
 bool byDate(node *a, node *b) {
+  return false;
   // implement date comparison
 }
 
