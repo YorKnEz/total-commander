@@ -11,7 +11,7 @@ using namespace std;
 struct Filedata {
   string filename; // windows allows names of max 260 characters
   string ext;
-  int size;
+  string size;
   string date; // date is about 20 characters
 };
 
