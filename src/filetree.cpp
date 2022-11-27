@@ -82,3 +82,41 @@ node *find(list l, string filename) {
 
   return NULL;
 }
+
+void copyFile(string fromPath, string toPath) {
+  string command = "copy \"" + fromPath + "\" \"" + toPath + "\"";
+  system(command.c_str());
+}
+
+void moveFile(string fromPath, string toPath) {
+  string command = "copy \"" + fromPath + "\" \"" + toPath + "\"";
+  system(command.c_str());
+  command = "del \"" + fromPath + "\"";
+  system(command.c_str());
+};
+
+void deleteFile(string path) {
+
+  string command = "del \"" + path + "\"";
+  system(command.c_str());
+}
+
+void deleteFolder(string path) {
+
+  string command = "erase \"" + path + "\"";
+  system(command.c_str());
+}
+
+void editFileName(string path, string newName) {
+  string command = "ren \"" + path + "\" \"" + newName + "\"";
+  system(command.c_str());
+}
+
+void createFolder(string path, string name) {
+  string command = "md \"" + path + "\\" + name + "\"";
+  system(command.c_str());
+}
+
+void openFolder(string &path, string name) {
+  path = "\"" + path + "\\" + name + "\"";
+}
