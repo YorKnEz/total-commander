@@ -1,5 +1,6 @@
 #ifndef FILE_TREE_H
 #define FILE_TREE_H
+
 #include "dllist.h"
 #include "utils.h"
 #include <iostream>
@@ -34,7 +35,7 @@ void createFolder(string path, string name);
 
 void getFilesFromPath(list &l, string path);
 
-void sortFiletree(list &l, sortBy criteria);
+void sortFiletree(list &l, sortBy criteria, sortOrder order);
 
 node *find(list l, string filename);
 
