@@ -43,7 +43,7 @@ int main() {
   file.width = WINDOW_W / 2;
   file.height = 30;
 
-  file.dateColumn = textwidth("dd/mm/yyyy hh:mm xx");
+  file.dateColumn = textwidth((char *)"dd/mm/yyyy hh:mm xx");
   file.extColumn = (file.width - file.dateColumn) / 4;
   file.filenameColumn = (file.width - file.dateColumn) / 2;
   file.sizeColumn = (file.width - file.dateColumn) / 4;
