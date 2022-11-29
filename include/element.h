@@ -1,71 +1,75 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
-#include "dllist.h"
-#include "utils.h"
-#include "winbgim.h"
-#include <string.h>
+// #include "dllist.h"
+// #include "utils.h"
+#include <SFML/Graphics.hpp>
+#include <iostream>
 #include <string>
 
+using namespace sf;
 using namespace std;
 
+#define MAX_STATES 4
+
+enum MouseEventType { MOVE, RELEASE, CLICK, DCLICK };
 enum State { INACTIVE, HOVERED, CLICKED, DCLICKED };
 
+struct ButtonStateColors {
+  Color primary, background;
+};
+
 struct Button {
-  Point coords;
-  int width, height;
-  string text;
-  RGB textColor, borderColor, backgroundColor;
+  string fullText;
+  ButtonStateColors buttonStateColors[MAX_STATES];
+  RectangleShape background;
+  Text text;
   State state, oldState;
 };
 
-struct Text {
-  Point coords;
-  int width, height;
-  string text;
-  RGB textColor, borderColor, backgroundColor;
-};
+// struct File {
+//   Point coords;
+//   int width, height;
+//   int filenameColumn, extColumn, sizeColumn, dateColumn;
+//   Filedata data;
+//   RGB textColor, borderColor, backgroundColor;
+// };
 
-struct File {
-  Point coords;
-  int width, height;
-  int filenameColumn, extColumn, sizeColumn, dateColumn;
-  Filedata data;
-  RGB textColor, borderColor, backgroundColor;
-};
+// struct Input {
+//   Point coords;
+//   int width, height;
+//   string placeholder;
+//   string value;
+// };
 
-struct Input {
-  Point coords;
-  int width, height;
-  string placeholder;
-  string value;
-};
-
-union Element {
-  Button button;
-  Text text;
-  File file;
-  Input input;
-};
+// union Element {
+//   Button button;
+//   Text text;
+//   File file;
+//   Input input;
+// };
 
 // button functions
-Button createButton(string text, int x, int y, RGB textColor,
-                    RGB backgroundColor, RGB borderColor);
+Button createButton(string text, Font &font, int x, int y, int width,
+                    int height, ButtonStateColors buttonStateColors[MAX_STATES],
+                    unsigned int borderThickness);
 
-void drawButton(Button button);
+void drawButton(RenderWindow &window, Button button);
 
-bool isHovered(Button &button, Point mouse);
+void updateButtonState(Button &button, Event event, MouseEventType type);
 
-// text functions
-Text createText(int x, int y, int width, int height, string textString,
-                RGB textColor, RGB backgroundColor, RGB borderColor);
+bool isHovered(Button &button, int mouseX, int mouseY);
 
-void drawText(Text text);
+// // text functions
+// Text createText(int x, int y, int width, int height, string textString,
+//                 RGB textColor, RGB backgroundColor, RGB borderColor);
 
-// file functions
-void drawFile(File file);
+// void drawText(Text text);
 
-void isClicked(File file);
+// // file functions
+// void drawFile(File file);
 
-void isDoubleClicked(File file);
+// void isClicked(File file);
+
+// void isDoubleClicked(File file);
 
 #endif
