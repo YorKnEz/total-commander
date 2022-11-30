@@ -89,7 +89,6 @@ void drawButton(RenderWindow &window, Button button) {
 }
 
 bool isHovered(Button &button, int mouseX, int mouseY) {
-  Vector2f buttonPosition = button.background.getPosition();
   FloatRect buttonBounds = button.background.getGlobalBounds();
 
   if ((buttonBounds.left <= mouseX &&
@@ -126,69 +125,52 @@ Text createText(string textString, Font &font, int charSize, int x, int y,
 
 void drawText(RenderWindow &window, Text text) { window.draw(text); }
 
-  //   setcolor(COLOR(text.borderColor.r, text.borderColor.g,
-  //   text.borderColor.b)); setlinestyle(SOLID_LINE, 1, THICK_WIDTH);
-  //   rectangle(text.coords.x, text.coords.y, text.coords.x + text.width,
-  //             text.coords.y + text.height);
+File createFile(Filedata data, Font &font, int charSize, int x, int y,
+                int width, int height, Color textColor) {
+  File file;
+  file.background.setSize(Vector2f(width, height));
+  file.background.setFillColor(Color(0xFFFFFF00));
+  file.background.setPosition(x, y);
 
-  //   setcolor(COLOR(text.textColor.r, text.textColor.g, text.textColor.b));
-  //   setbkcolor(COLOR(text.backgroundColor.r, text.backgroundColor.g,
-  //                    text.backgroundColor.b));
+  int dateColumn, extColumn, filenameColumn, sizeColumn;
+  Text date("dd/mm/yyyy hh:mm xx", font, charSize);
 
-  //   char *textString = new char[text.text.size() + 3];
-  //   strcpy(textString, text.text.c_str());
+  dateColumn = date.getGlobalBounds().width;
+  extColumn = (width - dateColumn) / 4;
+  filenameColumn = (width - dateColumn) / 2;
+  sizeColumn = (width - dateColumn) / 4;
 
-  //   if (textwidth(textString) > text.width) {
-  //     strcat(textString, "..");
+  file.filename = createText(data.filename, font, charSize, x, y,
+                             filenameColumn, textColor);
+  file.ext = createText(data.ext, font, charSize, x + filenameColumn, y,
+                        extColumn, textColor);
+  file.size =
+      createText(data.size, font, charSize, x + filenameColumn + extColumn, y,
+                 sizeColumn, textColor);
+  file.date = createText(data.date, font, charSize,
+                         x + filenameColumn + extColumn + sizeColumn, y,
+                         dateColumn, textColor);
+
+  return file;
 }
 
-//   int len = text.text.size() - 1;
+void drawFile(RenderWindow &window, File file) {
+  window.draw(file.background);
+  drawText(window, file.filename);
+  drawText(window, file.ext);
+  drawText(window, file.size);
+  drawText(window, file.date);
+}
 
-//   while (textwidth(textString) > text.width) {
-//     strcpy(textString + len, textString + len + 1);
-//     len--;
-//   }
+bool isHovered(File &file, int mouseX, int mouseY) {
+  FloatRect fileBounds = file.background.getGlobalBounds();
 
-//   // outtextxy(button.coords.x + button.width / 2 - textwidth(textString) /
-//   2,
-//   //           button.coords.y + button.height / 2 - textheight(textString) /
-//   //           2, textString);
+  if ((fileBounds.left <= mouseX &&
+       mouseX <= fileBounds.left + fileBounds.width) &&
+      (fileBounds.top <= mouseY &&
+       mouseY <= fileBounds.top + fileBounds.height)) {
+    return true;
+  }
 
-//   outtextxy(text.coords.x, text.coords.y, textString);
-// }
-
-// void drawFile(File file) {
-//   Text filename, ext, size, date;
-
-//   filename = createText(file.coords.x, file.coords.y, file.filenameColumn,
-//                         file.height, file.data.filename, file.textColor,
-//                         file.backgroundColor, file.borderColor);
-
-//   ext = createText(file.coords.x + filename.width, file.coords.y,
-//                    file.extColumn, file.height, file.data.ext,
-//                    file.textColor, file.backgroundColor, file.borderColor);
-
-//   size = createText(file.coords.x + filename.width + ext.width,
-//   file.coords.y,
-//                     file.sizeColumn, file.height, file.data.size,
-//                     file.textColor, file.backgroundColor, file.borderColor);
-
-//   date = createText(file.coords.x + filename.width + ext.width + size.width,
-//                     file.coords.y, file.dateColumn, file.height,
-//                     file.data.date, file.textColor, file.backgroundColor,
-//                     file.borderColor);
-
-//   drawText(filename);
-//   drawText(ext);
-//   drawText(size);
-//   drawText(date);
-// }
-
-// bool isHovered(File &file, Point mouse) {
-//   if ((file.coords.x <= mouse.x && mouse.x <= file.coords.x + file.width) &&
-//       (file.coords.y <= mouse.y && mouse.y <= file.coords.y + file.height)) {
-//     return true;
-//   }
-
-//   return false;
-// }
+  return false;
+}

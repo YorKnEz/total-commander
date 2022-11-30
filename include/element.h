@@ -1,7 +1,7 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
-// #include "dllist.h"
-// #include "utils.h"
+#include "dllist.h"
+#include "utils.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <string>
@@ -26,13 +26,11 @@ struct Button {
   State state, oldState;
 };
 
-// struct File {
-//   Point coords;
-//   int width, height;
-//   int filenameColumn, extColumn, sizeColumn, dateColumn;
-//   Filedata data;
-//   RGB textColor, borderColor, backgroundColor;
-// };
+struct File {
+  Filedata data;
+  RectangleShape background;
+  Text filename, ext, size, date;
+};
 
 // struct Input {
 //   Point coords;
@@ -60,17 +58,17 @@ void updateButtonState(Button &button, Event event, MouseEventType type);
 bool isHovered(Button &button, int mouseX, int mouseY);
 
 // // text functions
-// Text createText(int x, int y, int width, int height, string textString,
-//                 RGB textColor, RGB backgroundColor, RGB borderColor);
 Text createText(string textString, Font &font, int charSize, int x, int y,
                 int width, Color textColor);
 
 void drawText(RenderWindow &window, Text text);
-// // file functions
-// void drawFile(File file);
 
-// void isClicked(File file);
+// file functions
+File createFile(Filedata data, Font &font, int charSize, int x, int y,
+                int width, int height, Color textColor);
 
-// void isDoubleClicked(File file);
+void drawFile(RenderWindow &window, File file);
+
+bool isHovered(File &file, int mouseX, int mouseY);
 
 #endif
