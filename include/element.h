@@ -62,9 +62,10 @@ bool isHovered(Button &button, int mouseX, int mouseY);
 // // text functions
 // Text createText(int x, int y, int width, int height, string textString,
 //                 RGB textColor, RGB backgroundColor, RGB borderColor);
+Text createText(string textString, Font &font, int charSize, int x, int y,
+                int width, Color textColor);
 
-// void drawText(Text text);
-
+void drawText(RenderWindow &window, Text text);
 // // file functions
 // void drawFile(File file);
 

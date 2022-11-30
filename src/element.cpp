@@ -21,34 +21,23 @@ Button createButton(string text, Font &font, int x, int y, int width,
   button.background.setPosition(x, y);
 
   // initialize the text of the button
-  button.text.setString(text);
-  button.text.setFont(font);
-  button.text.setCharacterSize(30);
-  button.text.setStyle(Text::Regular);
-  button.text.setFillColor(buttonStateColors[INACTIVE].primary);
+  button.text = createText(text, font, 30, x, y,
+                           button.background.getGlobalBounds().width -
+                               2 * (borderThickness + 1),
+                           buttonStateColors[INACTIVE].primary);
 
-  // shrink the text that is shown on the screen to avoid overflow
-  if (button.text.getGlobalBounds().width >
-      button.background.getGlobalBounds().width - borderThickness * 2 - 2) {
-    text.append("..");
-    button.text.setString(text);
-  }
+  // set the offset to the text relative to the button
+  int offsetX = button.background.getGlobalBounds().left +
+                button.background.getGlobalBounds().width / 2 -
+                button.text.getGlobalBounds().left -
+                button.text.getGlobalBounds().width / 2;
 
-  while (button.text.getGlobalBounds().width >
-         button.background.getGlobalBounds().width - borderThickness * 2 - 2) {
-    text.erase(text.size() - 3, 1);
-    button.text.setString(text);
-  }
+  int offsetY = button.background.getGlobalBounds().top +
+                button.background.getGlobalBounds().height / 2 -
+                button.text.getGlobalBounds().top -
+                button.text.getGlobalBounds().height / 2;
 
-  // center the text on the button
-  button.text.setPosition(button.background.getGlobalBounds().left +
-                              button.background.getGlobalBounds().width / 2 -
-                              button.text.getGlobalBounds().width / 2 -
-                              button.text.getGlobalBounds().left,
-                          button.background.getGlobalBounds().top +
-                              button.background.getGlobalBounds().height / 2 -
-                              button.text.getGlobalBounds().height / 2 -
-                              button.text.getGlobalBounds().top);
+  button.text.setPosition(x + offsetX, y + offsetY);
 
   return button;
 }
@@ -113,47 +102,51 @@ bool isHovered(Button &button, int mouseX, int mouseY) {
   return false;
 }
 
-// Text createText(int x, int y, int width, int height, string textString,
-//                 RGB textColor, RGB backgroundColor, RGB borderColor) {
-//   Text text;
+Text createText(string textString, Font &font, int charSize, int x, int y,
+                int width, Color textColor) {
+  Text text;
+  text.setFont(font);
+  text.setPosition(x, y);
+  text.setCharacterSize(charSize);
+  text.setStyle(Text::Regular);
+  text.setString(textString);
+  text.setFillColor(textColor);
+  // shrink the text that is shown on the screen to avoid overflow
+  if (text.getGlobalBounds().width > width) {
+    textString.append("..");
+    text.setString(textString);
+  }
 
-//   text.coords.x = x;
-//   text.coords.y = y;
+  while (text.getGlobalBounds().width > width) {
+    textString.erase(textString.size() - 3, 1);
+    text.setString(textString);
+  }
+  return text;
+}
 
-//   text.width = width;
-//   text.height = height;
+void drawText(RenderWindow &window, Text text) {
+  window.draw(text);
+  //   setfillstyle(SOLID_FILL, COLOR(text.backgroundColor.r,
+  //   text.backgroundColor.g,
+  //                                  text.backgroundColor.b));
+  //   bar(text.coords.x, text.coords.y, text.coords.x + text.width,
+  //       text.coords.y + text.height);
 
-//   text.text = textString;
+  //   setcolor(COLOR(text.borderColor.r, text.borderColor.g,
+  //   text.borderColor.b)); setlinestyle(SOLID_LINE, 1, THICK_WIDTH);
+  //   rectangle(text.coords.x, text.coords.y, text.coords.x + text.width,
+  //             text.coords.y + text.height);
 
-//   text.textColor = textColor;
-//   text.backgroundColor = backgroundColor;
-//   text.borderColor = borderColor;
+  //   setcolor(COLOR(text.textColor.r, text.textColor.g, text.textColor.b));
+  //   setbkcolor(COLOR(text.backgroundColor.r, text.backgroundColor.g,
+  //                    text.backgroundColor.b));
 
-//   return text;
-// }
+  //   char *textString = new char[text.text.size() + 3];
+  //   strcpy(textString, text.text.c_str());
 
-// void drawText(Text text) {
-//   setfillstyle(SOLID_FILL, COLOR(text.backgroundColor.r,
-//   text.backgroundColor.g,
-//                                  text.backgroundColor.b));
-//   bar(text.coords.x, text.coords.y, text.coords.x + text.width,
-//       text.coords.y + text.height);
-
-//   setcolor(COLOR(text.borderColor.r, text.borderColor.g,
-//   text.borderColor.b)); setlinestyle(SOLID_LINE, 1, THICK_WIDTH);
-//   rectangle(text.coords.x, text.coords.y, text.coords.x + text.width,
-//             text.coords.y + text.height);
-
-//   setcolor(COLOR(text.textColor.r, text.textColor.g, text.textColor.b));
-//   setbkcolor(COLOR(text.backgroundColor.r, text.backgroundColor.g,
-//                    text.backgroundColor.b));
-
-//   char *textString = new char[text.text.size() + 3];
-//   strcpy(textString, text.text.c_str());
-
-//   if (textwidth(textString) > text.width) {
-//     strcat(textString, "..");
-//   }
+  //   if (textwidth(textString) > text.width) {
+  //     strcat(textString, "..");
+}
 
 //   int len = text.text.size() - 1;
 
