@@ -36,6 +36,8 @@ int main() {
   Clock clock;
   bool click = false;
 
+  Text test1 = createText("test pentru text", font, 30, 200, 200, 300,
+                          Color(0xEF3030FF));
   while (window.isOpen()) {
     Event event;
     while (window.pollEvent(event)) {
@@ -76,7 +78,6 @@ int main() {
           for (int i = 1; i <= 10; i++) {
             updateButtonState(buttons[i], event, CLICK);
           }
-
           click = true;
           clock.restart();
         }
@@ -99,6 +100,8 @@ int main() {
     for (int i = 1; i <= 10; i++) {
       drawButton(window, buttons[i]);
     }
+
+    drawText(window, test1);
     window.display();
   }
 
