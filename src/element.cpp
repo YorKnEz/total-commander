@@ -124,13 +124,7 @@ Text createText(string textString, Font &font, int charSize, int x, int y,
   return text;
 }
 
-void drawText(RenderWindow &window, Text text) {
-  window.draw(text);
-  //   setfillstyle(SOLID_FILL, COLOR(text.backgroundColor.r,
-  //   text.backgroundColor.g,
-  //                                  text.backgroundColor.b));
-  //   bar(text.coords.x, text.coords.y, text.coords.x + text.width,
-  //       text.coords.y + text.height);
+void drawText(RenderWindow &window, Text text) { window.draw(text); }
 
   //   setcolor(COLOR(text.borderColor.r, text.borderColor.g,
   //   text.borderColor.b)); setlinestyle(SOLID_LINE, 1, THICK_WIDTH);
