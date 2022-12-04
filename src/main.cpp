@@ -36,31 +36,24 @@ int main() {
   Clock clock;
   bool click = false;
 
-  Text test1 = createText("test pentru text", font, 30, 200, 200, 300,
+  Text test1 = createText("test pentru text", font, 30, 800, 200, 300,
                           Color(0xEF3030FF));
 
-  // list l;
-  // init(l);
+  list l;
+  init(l);
 
-  // string path = "C:\\Proiect";
+  string path = "C:\\testam\\doar ceva";
 
-  // getFilesFromPath(l, path);
+  getFilesFromPath(l, path);
 
-  // // printList(l);
+  printList(l);
 
-  // node *p = l.head;
-  // File file;
+  node *p = l.head;
+  File file;
+  int fileY = 0;
 
-  // sortFiletree(l, FILE_DATE, ASC);
-
-  // while (p) {
-  //   file.data = p->data;
-
-  //   drawFile(file);
-
-  //   file.coords.y += file.height;
-  //   p = p->next;
-  // }
+  if (l.length >= 2)
+    sortFiletree(l, FILE_DATE, ASC);
 
   while (window.isOpen()) {
     Event event;
@@ -107,7 +100,18 @@ int main() {
     for (int i = 1; i <= 10; i++) {
       drawButton(window, buttons[i]);
     }
+    p = l.head;
+    fileY = 0;
 
+    while (p) {
+      file = createFile(p->data, font, 20, 20, fileY, WINDOW_W / 2, 40,
+                        theme.text);
+
+      drawFile(window, file);
+
+      fileY += file.background.getGlobalBounds().height;
+      p = p->next;
+    }
     drawText(window, test1);
     window.display();
   }
