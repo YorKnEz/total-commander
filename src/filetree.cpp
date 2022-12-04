@@ -61,47 +61,59 @@ bool byDate(node *a, node *b, sortOrder order) {
 
   return byName(a, b, order);
 }
-
 void getFilesFromPath(list &l, string path) {
-  // we call system("dir path >> buffer.txt");
-  string bufferFileName = "buffer.txt";
-  string command = "dir \"" + path + "\" > " + bufferFileName;
-
-  system(command.c_str());
-
-  FILE *bufferFile = freopen(bufferFileName.c_str(), "r", stdin);
-
-  if (!bufferFile) {
-    cout << "File not found";
-    return;
-  }
-
-  string currentBufferLine;
-
-  // first 6 lines are unnecessary
-  for (int i = 0; i < 6; i++) {
-    getline(cin, currentBufferLine);
-  }
-
   Filedata currentData;
   int lastDir = 0;
-  // read the filedataStrings from the file while the first character is not a
-  // space if it is a space, it means we got to the last two lines
-  while ((getline(cin, currentBufferLine)) && currentBufferLine[0] != ' ') {
-    if (currentBufferLine[0] != ' ') {
-      currentData = parseFileDataString(currentBufferLine);
 
-      if (!currentData.size.compare("<DIR>")) {
-        add(l, currentData, lastDir);
-        lastDir++;
-      } else {
-        add(l, currentData, l.length);
-      }
+  // adds the special ".." folder to the list
+  const auto fileTime = fs::last_write_time("path\\..");
+  const auto systemTime = chrono::file_clock::to_sys(fileTime);
+  const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
+  string date = asctime(gmtime(&time));
+
+  string specialFolder = formatDate(date) + " <DIR> " + "..";
+  currentData = parseFileDataString(specialFolder);
+
+  add(l, currentData, lastDir);
+  lastDir++;
+
+  // goes through the content of the current path
+  for (const auto &entry : fs::directory_iterator(path)) {
+    // converts filename path to string
+    fs::path directoryPath = entry.path().filename();
+    string fileName = directoryPath.generic_string();
+
+    // gets the date at which the current file was last modified
+    const auto fileTime = fs::last_write_time(entry.path());
+    // converts the result to system time
+    const auto systemTime = chrono::file_clock::to_sys(fileTime);
+    // converts the new result to time_t (seconds that have passed since epoch
+    // time - 1 January 1970 00:00:00) / to UNIX timestamp
+    const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
+
+    // checks if the current entry is a file, in which case it prints its
+    // extension and size
+    string size = is_regular_file(entry.path())
+                      ? int2str(file_size(entry.path()))
+                      : "<DIR>";
+    if (size == "") {
+      size = "0";
+    }
+
+    // generates a converted string from timestamp to GMT
+    string date = asctime(gmtime(&time));
+
+    string currentBufferLine = formatDate(date) + " " + size + " " + fileName;
+
+    // parses the currentBufferLine and adds it to the list
+    currentData = parseFileDataString(currentBufferLine);
+    if (!size.compare("<DIR>")) {
+      add(l, currentData, lastDir);
+      lastDir++;
+    } else {
+      add(l, currentData, l.length);
     }
   }
-
-  fclose(stdin);
-  remove(bufferFileName.c_str());
 }
 
 // sorting keeps the directories before any files and sorts them separately

@@ -11,4 +11,6 @@ string int2str(int a);
 
 Filedata parseFileDataString(string filedataString);
 
+string formatDate(string date);
+
 #endif
