@@ -63,6 +63,10 @@ bool byDate(node *a, node *b, sortOrder order) {
 }
 void getFilesFromPath(list &l, string path) {
   Filedata currentData;
+
+  // lastDir is used in order to separate files from directories in the list.
+  // The directories are inserted after the last directory or at the beginning
+  // of the list if there are none, and the files are always added at the end.
   int lastDir = 0;
 
   // adds the special ".." folder to the list
@@ -71,17 +75,22 @@ void getFilesFromPath(list &l, string path) {
   const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
   string date = asctime(gmtime(&time));
 
-  string specialFolder = formatDate(date) + " <DIR> " + "..";
-  currentData = parseFileDataString(specialFolder);
+  Filedata filedata;
 
-  add(l, currentData, lastDir);
+  // generates the filedata for the special folder
+  filedata.filename = "..";
+  filedata.size = "<DIR>";
+  filedata.date = formatDate(date);
+  filedata.ext = "";
+
+  add(l, filedata, lastDir);
   lastDir++;
 
   // goes through the content of the current path
   for (const auto &entry : fs::directory_iterator(path)) {
     // converts filename path to string
     fs::path directoryPath = entry.path().filename();
-    string fileName = directoryPath.generic_string();
+    string filename = directoryPath.generic_string();
 
     // gets the date at which the current file was last modified
     const auto fileTime = fs::last_write_time(entry.path());
@@ -91,8 +100,9 @@ void getFilesFromPath(list &l, string path) {
     // time - 1 January 1970 00:00:00) / to UNIX timestamp
     const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
 
-    // checks if the current entry is a file, in which case it prints its
-    // extension and size
+    // checks whether the current entry is a file or a directory and sets the
+    // size accordingly (directory size = "<DIR>", file size is an integer
+    // value)
     string size = is_regular_file(entry.path())
                       ? int2str(file_size(entry.path()))
                       : "<DIR>";
@@ -102,16 +112,27 @@ void getFilesFromPath(list &l, string path) {
 
     // generates a converted string from timestamp to GMT
     string date = asctime(gmtime(&time));
+    Filedata filedata;
 
-    string currentBufferLine = formatDate(date) + " " + size + " " + fileName;
+    // generates the filedata with the previously obtained strings and adds them
+    // to the list
+    filedata.filename = filename;
+    filedata.size = size;
+    filedata.date = formatDate(date);
+    int lastDotPos = filedata.filename.find_last_of('.');
 
-    // parses the currentBufferLine and adds it to the list
-    currentData = parseFileDataString(currentBufferLine);
+    if (lastDotPos != string::npos && lastDotPos != 0 &&
+        filedata.size.compare("<DIR>")) {
+      filedata.ext = filedata.filename.substr(lastDotPos + 1);
+      filedata.filename.erase(filedata.filename.find_last_of('.'));
+    } else
+      filedata.ext = "";
+
     if (!size.compare("<DIR>")) {
-      add(l, currentData, lastDir);
+      add(l, filedata, lastDir);
       lastDir++;
     } else {
-      add(l, currentData, l.length);
+      add(l, filedata, l.length);
     }
   }
 }
