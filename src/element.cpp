@@ -98,9 +98,6 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
 }
 
 void drawButton(RenderWindow &window, Button button) {
-  // if (button.oldState != button.state) {
-  Color textColor, borderColor;
-
   // update the color of the button depending on it's state
   button.text.setFillColor(button.buttonStateColors[button.state].primary);
   button.background.setOutlineColor(
@@ -139,7 +136,7 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 int width, int height, Color textColor) {
   File file;
   file.background.setSize(Vector2f(width, height));
-  file.background.setFillColor(Color(0xFFFFFF00));
+  file.background.setFillColor(Color(0x123456FF));
   file.background.setPosition(x, y);
 
   int dateColumn, extColumn, filenameColumn, sizeColumn;

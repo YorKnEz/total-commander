@@ -27,8 +27,8 @@ struct Button {
 };
 
 struct File {
-  Filedata data;
   RectangleShape background;
+  Filedata data;
   Text filename, ext, size, date;
 };
 

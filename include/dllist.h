@@ -5,16 +5,13 @@
 
 using namespace std;
 
-#define MAX_PATH 260
-#define MAX_DATE 24
-
 enum sortOrder { DESC = -1, ASC = 1 };
 
 struct Filedata {
-  string filename; // windows allows names of max 260 characters
+  string filename;
   string ext;
   string size;
-  string date; // date is about 20 characters
+  string date;
 };
 
 struct node {
