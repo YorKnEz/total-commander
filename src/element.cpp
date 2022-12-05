@@ -328,26 +328,6 @@ void drawInput(RenderWindow &window, Input &input) {
         input.value.substr(input.startPosition, input.displayLength));
   }
 
-  while (input.displayText.getGlobalBounds().width < input.background.getGlobalBounds().width && input.startPosition + input.displayLength - 1 < input.value.size()) {
-    input.displayLength++;
-
-    input.displayText.setString(
-        input.value.substr(input.startPosition, input.displayLength));
-  }
-
-  while (input.displayText.getGlobalBounds().width > input.background.getGlobalBounds().width) {
-    input.displayLength--;
-    input.startPosition++;
-
-    input.displayText.setString(
-        input.value.substr(input.startPosition, input.displayLength));
-  }
-
-  cout << "Cursor: " << input.cursorLocation << " | ";
-  cout << "Size: " << input.value.size() << " | ";
-  cout << "Start pos: " << input.startPosition << " | ";
-  cout << "Display len: " << input.displayLength << "\n\n";
-
   window.draw(input.displayText);
 
   // temp

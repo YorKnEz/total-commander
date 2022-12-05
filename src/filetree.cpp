@@ -77,7 +77,7 @@ void getFilesFromPath(list &l, string path) {
   int lastDir = 0;
 
   // adds the special ".." folder to the list
-  const auto fileTime = fs::last_write_time("path\\..");
+  const auto fileTime = fs::last_write_time("..");
   const auto systemTime = chrono::file_clock::to_sys(fileTime);
   const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
   string date = asctime(gmtime(&time));

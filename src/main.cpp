@@ -45,22 +45,22 @@ int main() {
   FloatRect clickBounds; // the bounds of the last click
   Input *activeInput = nullptr;
   RectangleShape cursor; // cursor to display on inputs
-
-  list l;
-  init(l);
-
-  string path = "D:\\alex_\\Documents";
-
-  getFilesFromPath(l, path);
-
-  printList(l);
-
-  node *p = l.head;
-  File file;
-  int fileY = 0;
-
-  if (l.length >= 2)
-    sortFiletree(l, FILE_DATE, ASC);
+  //
+  // list l;
+  // init(l);
+  //
+  // string path = "/home/yorknez/Projects/asii-ziar";
+  //
+  // getFilesFromPath(l, path);
+  //
+  // printList(l);
+  //
+  // node *p = l.head;
+  // File file;
+  // int fileY = 0;
+  //
+  // if (l.length >= 2)
+  //   sortFiletree(l, FILE_NAME, ASC);
 
   while (window.isOpen()) {
     Event event;
@@ -118,10 +118,21 @@ int main() {
                                             activeInput->cursorLocation,
                                         1, char(event.text.unicode));
 
-              cout << "Cursor: " << input.cursorLocation << " | ";
-              cout << "Size: " << input.value.size() << " | ";
-              cout << "Start pos: " << input.startPosition << " | ";
-              cout << "Display len: " << input.displayLength << "\n\n";
+              // cout << "Cursor: " << input.cursorLocation << " | ";
+              // cout << "Size: " << input.value.size() << " | ";
+              // cout << "Start pos: " << input.startPosition << " | ";
+              // cout << "Display len: " << input.displayLength << "\n\n";
+
+              // try to expand the displayed text
+              if (activeInput->displayText.getGlobalBounds().width < activeInput->background.getGlobalBounds().width - 20) {
+                activeInput->displayLength++;
+                activeInput->cursorLocation++;
+                activeInput->displayText.setString(activeInput->value.substr(activeInput->startPosition, activeInput->displayLength));
+              }
+              // we need to move the text
+              else {
+                activeInput->startPosition++;
+              }
             }
           }
         }
@@ -154,7 +165,7 @@ int main() {
 
             // we reset the click flag only if a double click happened
             if (buttons[i].state == B_DCLICKED) {
-          click = false;
+              click = false;
             }
             // we reset the click timer only if a click happened
             else if (buttons[i].state == B_CLICKED) {
@@ -190,19 +201,19 @@ int main() {
     }
     drawInput(window, input);
     drawInput(window, input2);
-
-    p = l.head;
-    fileY = 0;
-
-    while (p) {
-      file = createFile(p->data, font, 20, 20, fileY, WINDOW_W / 2, 40,
-                        theme.text);
-
-      drawFile(window, file);
-
-      fileY += file.background.getGlobalBounds().height;
-      p = p->next;
-    }
+    //
+    // p = l.head;
+    // fileY = 0;
+    //
+    // while (p) {
+    //   file = createFile(p->data, font, WINDOW_W / 2, 20, fileY, WINDOW_W / 2, 40,
+    //                     theme.text);
+    //
+    //   drawFile(window, file);
+    //
+    //   fileY += file.background.getGlobalBounds().height;
+    //   p = p->next;
+    // }
 
     window.display();
   }
