@@ -10,7 +10,7 @@
 #define WINDOW_W 1280
 #define WINDOW_H 720
 
-#define DCLICK_MAX_DELAY 500
+#define DCLICK_MAX_DELAY 300
 
 using namespace sf;
 using namespace std;
@@ -36,8 +36,10 @@ int main() {
   Clock clock;
   bool click = false;
 
-  Text test1 = createText("test pentru text", font, 30, 200, 200, 300,
-                          Color(0xEF3030FF));
+  // useful for determining double clicks
+  Clock clock;           // a timer that is set between two clicks
+  bool click = false;    // a flag which checks if we have a double click
+  FloatRect clickBounds; // the bounds of the last click
 
   // list l;
   // init(l);
@@ -72,7 +74,7 @@ int main() {
         break;
       case Event::MouseButtonReleased:
         for (int i = 1; i <= 10; i++) {
-          updateButtonState(buttons[i], event, RELEASE);
+          updateButtonState(buttons[i], event, RELEASE, clickBounds);
         }
         break;
       case Event::MouseButtonPressed:
@@ -80,16 +82,25 @@ int main() {
         if (click &&
             clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 1; i <= 10; i++) {
-            updateButtonState(buttons[i], event, DCLICK);
-          }
+            updateButtonState(buttons[i], event, DCLICK, clickBounds);
 
+            // we reset the click flag only if a double click happened
+            if (buttons[i].state == B_DCLICKED) {
           click = false;
+            }
+            // we reset the click timer only if a click happened
+            else if (buttons[i].state == B_CLICKED) {
+              clock.restart();
+            }
+          }
         }
         // simple click
         else {
           for (int i = 1; i <= 10; i++) {
-            updateButtonState(buttons[i], event, CLICK);
+            updateButtonState(buttons[i], event, CLICK, clickBounds);
           }
+
+          // start the timer and set the click flag to true if a click happens
           click = true;
           clock.restart();
         }
@@ -97,7 +108,7 @@ int main() {
         break;
       case Event::MouseMoved:
         for (int i = 1; i <= 10; i++) {
-          updateButtonState(buttons[i], event, MOVE);
+          updateButtonState(buttons[i], event, MOVE, clickBounds);
         }
         break;
       }

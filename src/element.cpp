@@ -53,32 +53,45 @@ Button createButton(string text, Font &font, int x, int y, int width,
   return button;
 }
 
-void updateButtonState(Button &button, Event event, MouseEventType type) {
-  button.oldState = button.state;
+void updateButtonState(Button &button, Event event, MouseEventType type,
+                       FloatRect &clickBounds) {
+  button.oldState = button.state; // update old state
+  FloatRect buttonBounds =
+      button.background.getGlobalBounds(); // get bounds of button
 
   switch (type) {
   case RELEASE:
-    if (button.state == CLICKED || button.state == DCLICKED) {
-      button.state = isHovered(button, event.mouseButton.x, event.mouseButton.y)
-                         ? HOVERED
-                         : INACTIVE;
+    if (button.state == B_CLICKED || button.state == B_DCLICKED) {
+      button.state =
+          isHovered(buttonBounds, event.mouseButton.x, event.mouseButton.y)
+              ? B_HOVERED
+              : B_INACTIVE;
     }
     break;
   case DCLICK:
-    button.state = isHovered(button, event.mouseButton.x, event.mouseButton.y)
-                       ? DCLICKED
-                       : INACTIVE;
+    // if a double click happens, then we execute the if, else we jump to the
+    // simple click case, which is guarenteed to handle the event
+    if (isHovered(buttonBounds, event.mouseButton.x, event.mouseButton.y) &&
+        isHovered(clickBounds, event.mouseButton.x, event.mouseButton.y)) {
+      button.state = B_DCLICKED;
+      clickBounds = buttonBounds;
     break;
+    }
   case CLICK:
-    button.state = isHovered(button, event.mouseButton.x, event.mouseButton.y)
-                       ? CLICKED
-                       : INACTIVE;
+    button.state =
+        isHovered(buttonBounds, event.mouseButton.x, event.mouseButton.y)
+            ? B_CLICKED
+            : B_INACTIVE;
+    if (button.state == B_CLICKED) {
+      clickBounds = buttonBounds;
+    }
     break;
   case MOVE:
-    if (button.state != CLICKED && button.state != DCLICKED) {
-      button.state = isHovered(button, event.mouseMove.x, event.mouseMove.y)
-                         ? HOVERED
-                         : INACTIVE;
+    if (button.state != B_CLICKED && button.state != B_DCLICKED) {
+      button.state =
+          isHovered(buttonBounds, event.mouseMove.x, event.mouseMove.y)
+              ? B_HOVERED
+              : B_INACTIVE;
     }
     break;
   }

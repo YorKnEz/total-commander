@@ -55,9 +55,8 @@ Button createButton(string text, Font &font, int x, int y, int width,
 
 void drawButton(RenderWindow &window, Button button);
 
-void updateButtonState(Button &button, Event event, MouseEventType type);
-
-bool isHovered(Button &button, int mouseX, int mouseY);
+void updateButtonState(Button &button, Event event, MouseEventType type,
+                       FloatRect &clickBounds);
 
 // // text functions
 Text createText(string textString, Font &font, int charSize, int x, int y,
