@@ -1,5 +1,11 @@
 #include "filetree.h"
 
+// sort nodes by extension
+bool byExt(node *a, node *b, sortOrder order) {
+  // try to sort by extension
+  return order * (a->data.ext.compare(b->data.ext)) <= 0;
+}
+
 // sort nodes by name
 bool byName(node *a, node *b, sortOrder order) {
   // try to sort by filename
@@ -10,7 +16,7 @@ bool byName(node *a, node *b, sortOrder order) {
   }
 
   // try to sort by extenions
-  return order * (a->data.ext.compare(b->data.ext)) <= 0;
+  return byExt(a, b, order);
 }
 
 // sort nodes by size
@@ -110,6 +116,9 @@ void sortFiletree(list &l, sortBy criteria, sortOrder order) {
   switch (criteria) {
   case FILE_NAME:
     sort(l, order, byName);
+    break;
+  case FILE_EXT:
+    sort(l, order, byExt);
     break;
   case FILE_SIZE:
     sort(l, order, bySize);

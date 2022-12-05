@@ -10,7 +10,7 @@
 
 using namespace std;
 
-enum sortBy { FILE_NAME, FILE_SIZE, FILE_DATE };
+enum sortBy { FILE_NAME, FILE_EXT, FILE_SIZE, FILE_DATE };
 
 // copies a file from a path to another path
 void copyFile(string fromPath, string toPath);
