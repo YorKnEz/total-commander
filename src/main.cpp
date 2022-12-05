@@ -46,20 +46,21 @@ int main() {
   Input *activeInput = nullptr;
   RectangleShape cursor; // cursor to display on inputs
 
-  // list l;
-  // init(l);
-  //
-  // string path = "D:\\alex_\\Documents";
-  //
-  // getFilesFromPath(l, path);
-  //
-  // printList(l);
-  //
-  // node *p = l.head;
-  // File file;
-  // int fileY = 0;
-  //
-  // sortFiletree(l, FILE_EXT, DESC);
+  list l;
+  init(l);
+
+  string path = "D:\\alex_\\Documents";
+
+  getFilesFromPath(l, path);
+
+  printList(l);
+
+  node *p = l.head;
+  File file;
+  int fileY = 0;
+
+  if (l.length >= 2)
+    sortFiletree(l, FILE_DATE, ASC);
 
   while (window.isOpen()) {
     Event event;
@@ -190,18 +191,18 @@ int main() {
     drawInput(window, input);
     drawInput(window, input2);
 
-    // p = l.head;
-    // fileY = 0;
-    //
-    // while (p) {
-    //   file = createFile(p->data, font, 20, 20, fileY, WINDOW_W / 2, 40,
-    //                     theme.text);
-    //
-    //   drawFile(window, file);
-    //
-    //   fileY += file.background.getGlobalBounds().height;
-    //   p = p->next;
-    // }
+    p = l.head;
+    fileY = 0;
+
+    while (p) {
+      file = createFile(p->data, font, 20, 20, fileY, WINDOW_W / 2, 40,
+                        theme.text);
+
+      drawFile(window, file);
+
+      fileY += file.background.getGlobalBounds().height;
+      p = p->next;
+    }
 
     window.display();
   }
