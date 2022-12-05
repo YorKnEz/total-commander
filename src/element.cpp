@@ -1,5 +1,15 @@
 #include "element.h"
 
+// checks if a certain box (button, text, file, etc.) is hoeverd by the mouse
+bool isHovered(FloatRect box, int mouseX, int mouseY) {
+  if ((box.left <= mouseX && mouseX <= box.left + box.width) &&
+      (box.top <= mouseY && mouseY <= box.top + box.height)) {
+    return true;
+  }
+
+  return false;
+}
+
 Button createButton(string text, Font &font, int x, int y, int width,
                     int height,
                     ButtonStateColors buttonStateColors[B_MAX_STATES],
@@ -86,20 +96,6 @@ void drawButton(RenderWindow &window, Button button) {
   // draw the button on the window passed by reference
   window.draw(button.background);
   window.draw(button.text);
-  // }
-}
-
-bool isHovered(Button &button, int mouseX, int mouseY) {
-  FloatRect buttonBounds = button.background.getGlobalBounds();
-
-  if ((buttonBounds.left <= mouseX &&
-       mouseX <= buttonBounds.left + buttonBounds.width) &&
-      (buttonBounds.top <= mouseY &&
-       mouseY <= buttonBounds.top + buttonBounds.height)) {
-    return true;
-  }
-
-  return false;
 }
 
 Text createText(string textString, Font &font, int charSize, int x, int y,
