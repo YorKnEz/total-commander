@@ -151,6 +151,9 @@ void sortFiletree(list &l, sortBy criteria, sortOrder order) {
   case FILE_NAME:
     sort(l, order, byName);
     break;
+  case FILE_EXT:
+    sort(l, order, byExt);
+    break;
   case FILE_SIZE:
     sort(l, order, bySize);
     break;
