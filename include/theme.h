@@ -5,7 +5,7 @@
 
 struct ColorTheme {
   Color text, background, border;
-  ButtonStateColors buttonStateColors[MAX_STATES];
+  ButtonStateColors buttonStateColors[B_MAX_STATES];
 };
 
 ColorTheme dark = {Color(0xEEEEEEFF),

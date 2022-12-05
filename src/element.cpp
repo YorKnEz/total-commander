@@ -1,22 +1,23 @@
 #include "element.h"
 
 Button createButton(string text, Font &font, int x, int y, int width,
-                    int height, ButtonStateColors buttonStateColors[MAX_STATES],
+                    int height,
+                    ButtonStateColors buttonStateColors[B_MAX_STATES],
                     unsigned int borderThickness) {
   Button button;
-  button.state = INACTIVE; // set the state of the button
+  button.state = B_INACTIVE; // set the state of the button
   button.fullText =
       text; // save the string that is supposed to be shown on the screen
 
   // copy the state colors
-  for (int i = 0; i < MAX_STATES; i++) {
+  for (int i = 0; i < B_MAX_STATES; i++) {
     button.buttonStateColors[i] = buttonStateColors[i];
   }
 
   // initialize the background of the button
   button.background.setSize(Vector2f(width, height));
-  button.background.setFillColor(buttonStateColors[INACTIVE].background);
-  button.background.setOutlineColor(buttonStateColors[INACTIVE].primary);
+  button.background.setFillColor(buttonStateColors[B_INACTIVE].background);
+  button.background.setOutlineColor(buttonStateColors[B_INACTIVE].primary);
   button.background.setOutlineThickness(borderThickness);
   button.background.setPosition(x, y);
 
@@ -24,7 +25,7 @@ Button createButton(string text, Font &font, int x, int y, int width,
   button.text = createText(text, font, 30, x, y,
                            button.background.getGlobalBounds().width -
                                2 * (borderThickness + 1),
-                           buttonStateColors[INACTIVE].primary);
+                           buttonStateColors[B_INACTIVE].primary);
 
   // set the offset to the text relative to the button
   int offsetX = button.background.getGlobalBounds().left +

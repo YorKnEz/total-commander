@@ -9,21 +9,21 @@
 using namespace sf;
 using namespace std;
 
-#define MAX_STATES 4
+#define B_MAX_STATES 4
 
 enum MouseEventType { MOVE, RELEASE, CLICK, DCLICK };
-enum State { INACTIVE, HOVERED, CLICKED, DCLICKED };
+enum ButtonState { B_INACTIVE, B_HOVERED, B_CLICKED, B_DCLICKED };
 
 struct ButtonStateColors {
   Color primary, background;
 };
 
 struct Button {
-  string fullText;
-  ButtonStateColors buttonStateColors[MAX_STATES];
+  ButtonStateColors buttonStateColors[B_MAX_STATES];
   RectangleShape background;
+  string fullText;
   Text text;
-  State state, oldState;
+  ButtonState state, oldState;
 };
 
 struct File {
@@ -48,7 +48,7 @@ struct File {
 
 // button functions
 Button createButton(string text, Font &font, int x, int y, int width,
-                    int height, ButtonStateColors buttonStateColors[MAX_STATES],
+                    int height, ButtonStateColors buttonStateColors[B_MAX_STATES],
                     unsigned int borderThickness);
 
 void drawButton(RenderWindow &window, Button button);
