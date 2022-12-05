@@ -34,51 +34,117 @@ int main() {
                      WINDOW_H - 60, btnw, 40, theme.buttonStateColors, 1);
   }
 
-  Clock clock;
-  bool click = false;
+  Input input = createInput("Enter text here", "", font, charSize, 20, 20, 400,
+                            40, theme.inputStateColors, 1);
+  Input input2 = createInput("Enter another text here", "", font, charSize, 20,
+                             80, 400, 40, theme.inputStateColors, 1);
 
   // useful for determining double clicks
   Clock clock;           // a timer that is set between two clicks
   bool click = false;    // a flag which checks if we have a double click
   FloatRect clickBounds; // the bounds of the last click
+  Input *activeInput = nullptr;
+  RectangleShape cursor; // cursor to display on inputs
 
   // list l;
   // init(l);
-
-  // string path = "C:\\Proiect";
-
+  //
+  // string path = "D:\\alex_\\Documents";
+  //
   // getFilesFromPath(l, path);
-
-  // // printList(l);
-
+  //
+  // printList(l);
+  //
   // node *p = l.head;
   // File file;
-
-  // sortFiletree(l, FILE_DATE, ASC);
-
-  // while (p) {
-  //   file.data = p->data;
-
-  //   drawFile(file);
-
-  //   file.coords.y += file.height;
-  //   p = p->next;
-  // }
+  // int fileY = 0;
+  //
+  // sortFiletree(l, FILE_EXT, DESC);
 
   while (window.isOpen()) {
     Event event;
     while (window.pollEvent(event)) {
-
       switch (event.type) {
       case Event::Closed:
         window.close();
+        break;
+      case Event::KeyPressed:
+        if (activeInput) {
+          // move the cursor of the input to the left
+          if (event.key.code == Keyboard::Left) {
+            // try moving the cursor first
+            if (activeInput->cursorLocation > 0) {
+              activeInput->cursorLocation--;
+            }
+            // if the cursor is at the start of the input, decrease start pos
+            else if (activeInput->startPosition > 0) {
+              activeInput->startPosition--;
+            }
+          }
+          // move the cursor of the input to the right
+          else if (event.key.code == Keyboard::Right) {
+            // try moving the cursor first
+            if (activeInput->cursorLocation < activeInput->displayLength) {
+              activeInput->cursorLocation++;
+            }
+            // if the cursor is at the end of the input, increase start pos
+            else if (activeInput->startPosition > 0 &&
+                     activeInput->startPosition + activeInput->displayLength -
+                             1 <
+                         activeInput->value.size()) {
+              activeInput->startPosition++;
+            }
+          }
+        }
+        break;
+      case Event::TextEntered:
+        if (event.text.unicode < 128) {
+          if (activeInput) {
+            // check if key pressed is backspace
+            if (event.text.unicode == 8) {
+              // delete the character before the cursor position
+              if (activeInput->startPosition + activeInput->cursorLocation >
+                  0) {
+                // activeInput->value.erase(activeInput->startPosition +
+                //                              activeInput->cursorLocation - 1,
+                //                          1);
+              }
+
+            }
+            // else add the character entered at the cursor position
+            else {
+              activeInput->value.insert(activeInput->startPosition +
+                                            activeInput->cursorLocation,
+                                        1, char(event.text.unicode));
+
+              cout << "Cursor: " << input.cursorLocation << " | ";
+              cout << "Size: " << input.value.size() << " | ";
+              cout << "Start pos: " << input.startPosition << " | ";
+              cout << "Display len: " << input.displayLength << "\n\n";
+            }
+          }
+        }
         break;
       case Event::MouseButtonReleased:
         for (int i = 1; i <= 10; i++) {
           updateButtonState(buttons[i], event, RELEASE, clickBounds);
         }
+        updateInputState(input, event, RELEASE, activeInput);
+        updateInputState(input2, event, RELEASE, activeInput);
         break;
       case Event::MouseButtonPressed:
+        // disable the last active input if user clicks outside it's box,
+        // regardless of type of click
+        if (activeInput &&
+            !isHovered(activeInput->background.getGlobalBounds(),
+                       event.mouseButton.x, event.mouseButton.y)) {
+          activeInput->state = I_INACTIVE;
+          activeInput = nullptr;
+        }
+
+        updateInputState(input, event, CLICK, activeInput);
+        updateInputState(input2, event, CLICK, activeInput);
+
         // double click
         if (click &&
             clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
@@ -111,6 +177,8 @@ int main() {
         for (int i = 1; i <= 10; i++) {
           updateButtonState(buttons[i], event, MOVE, clickBounds);
         }
+        updateInputState(input, event, MOVE, activeInput);
+        updateInputState(input2, event, MOVE, activeInput);
         break;
       }
     }
@@ -119,8 +187,22 @@ int main() {
     for (int i = 1; i <= 10; i++) {
       drawButton(window, buttons[i]);
     }
+    drawInput(window, input);
+    drawInput(window, input2);
 
-    drawText(window, test1);
+    // p = l.head;
+    // fileY = 0;
+    //
+    // while (p) {
+    //   file = createFile(p->data, font, 20, 20, fileY, WINDOW_W / 2, 40,
+    //                     theme.text);
+    //
+    //   drawFile(window, file);
+    //
+    //   fileY += file.background.getGlobalBounds().height;
+    //   p = p->next;
+    // }
+
     window.display();
   }
 

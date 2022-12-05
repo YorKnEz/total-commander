@@ -10,11 +10,17 @@ using namespace sf;
 using namespace std;
 
 #define B_MAX_STATES 4
+#define I_MAX_STATES 3
 
 enum MouseEventType { MOVE, RELEASE, CLICK, DCLICK };
 enum ButtonState { B_INACTIVE, B_HOVERED, B_CLICKED, B_DCLICKED };
+enum InputState { I_INACTIVE, I_HOVERED, I_ACTIVE };
 
 struct ButtonStateColors {
+  Color primary, background;
+};
+
+struct InputStateColors {
   Color primary, background;
 };
 
@@ -32,12 +38,17 @@ struct File {
   Text filename, ext, size, date;
 };
 
-// struct Input {
-//   Point coords;
-//   int width, height;
-//   string placeholder;
-//   string value;
-// };
+struct Input {
+  InputStateColors
+      inputStateColors[I_MAX_STATES]; 
+  RectangleShape background;
+  string placeholder, value;
+  Text displayText;
+  InputState state;
+  int cursorLocation;
+  int startPosition; // used if the displayText is larger than the box
+  int displayLength; // max length that can be displayed at once
+};
 
 // union Element {
 //   Button button;
@@ -70,6 +81,15 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
 
 void drawFile(RenderWindow &window, File file);
 
-bool isHovered(File &file, int mouseX, int mouseY);
+// input functions
+Input createInput(string placeholder, string value, Font &font, int charSize,
+                  int x, int y, int width, int height,
+                  InputStateColors inputStateColors[I_MAX_STATES],
+                  unsigned int borderThickness);
+
+void updateInputState(Input &input, Event event, MouseEventType type,
+                      Input *&activeInput);
+
+void drawInput(RenderWindow &window, Input &input);
 
 #endif

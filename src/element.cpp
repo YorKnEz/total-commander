@@ -75,7 +75,7 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
         isHovered(clickBounds, event.mouseButton.x, event.mouseButton.y)) {
       button.state = B_DCLICKED;
       clickBounds = buttonBounds;
-    break;
+      break;
     }
   case CLICK:
     button.state =
@@ -169,15 +169,198 @@ void drawFile(RenderWindow &window, File file) {
   drawText(window, file.date);
 }
 
-bool isHovered(File &file, int mouseX, int mouseY) {
-  FloatRect fileBounds = file.background.getGlobalBounds();
-
-  if ((fileBounds.left <= mouseX &&
-       mouseX <= fileBounds.left + fileBounds.width) &&
-      (fileBounds.top <= mouseY &&
-       mouseY <= fileBounds.top + fileBounds.height)) {
-    return true;
+Input createInput(string placeholder, string value, Font &font, int charSize,
+                  int x, int y, int width, int height,
+                  InputStateColors inputStateColors[I_MAX_STATES],
+                  unsigned int borderThickness) {
+  Input input;
+  input.state = I_INACTIVE;        // set the state of the input
+  input.placeholder = placeholder; // text to show if value is empty
+  input.value = value;             // text that the user types
+  input.cursorLocation = 0;
+  // copy the state colors
+  for (int i = 0; i < I_MAX_STATES; i++) {
+    input.inputStateColors[i] = inputStateColors[i];
   }
 
-  return false;
+  // initialize the background of the input
+  input.background.setSize(Vector2f(width, height));
+  input.background.setFillColor(inputStateColors[I_INACTIVE].background);
+  input.background.setOutlineColor(inputStateColors[I_INACTIVE].primary);
+  input.background.setOutlineThickness(borderThickness);
+  input.background.setPosition(x, y);
+
+  // set the text to display on the screen
+  string displayText = value == "" ? placeholder : value;
+  input.displayText = createText(displayText, font, charSize, x, y,
+                                 input.background.getGlobalBounds().width -
+                                     2 * (borderThickness + 1),
+                                 inputStateColors[I_INACTIVE].primary);
+
+  // display only a segment of the text so it fits in the text box
+  input.startPosition = 0;
+  input.displayLength = input.value.size();
+
+  input.displayText.setString(displayText);
+
+  while (input.displayText.getGlobalBounds().width >
+         input.background.getGlobalBounds().width - 10) {
+    input.startPosition++;
+    input.displayLength--;
+    input.displayText.setString(
+        displayText.substr(input.startPosition, input.displayLength));
+  }
+
+  input.displayText.setPosition(x, y);
+
+  return input;
+}
+
+void updateInputState(Input &input, Event event, MouseEventType type,
+                      Input *&activeInput) {
+  FloatRect inputBounds = input.background.getGlobalBounds();
+
+  switch (type) {
+  case CLICK:
+    // update the currently active input
+    if (isHovered(inputBounds, event.mouseButton.x, event.mouseButton.y)) {
+      activeInput = &input;
+      activeInput->state = I_ACTIVE;
+    }
+
+    break;
+  case MOVE:
+    if (input.state != I_ACTIVE) {
+      input.state = isHovered(inputBounds, event.mouseMove.x, event.mouseMove.y)
+                        ? I_HOVERED
+                        : I_INACTIVE;
+    }
+    break;
+  }
+}
+
+void drawInput(RenderWindow &window, Input &input) {
+  // update the color of the input depending on it's state
+  input.displayText.setFillColor(input.inputStateColors[input.state].primary);
+  input.background.setOutlineColor(input.inputStateColors[input.state].primary);
+
+  // draw the input on the window
+  window.draw(input.background);
+
+  int radius = 10;
+
+  CircleShape c(radius);
+  c.setFillColor(input.inputStateColors[input.state].background);
+  c.setOutlineThickness(input.background.getOutlineThickness());
+  c.setOutlineColor(input.inputStateColors[input.state].primary);
+
+  RectangleShape sq(Vector2f(2 * radius, 2 * radius));
+  sq.setFillColor(Color(0x242424FF));
+  sq.setOutlineThickness(input.background.getOutlineThickness());
+  sq.setOutlineColor(Color(0x242424FF));
+
+  FloatRect bgBounds = input.background.getGlobalBounds();
+
+  // clear the corners
+  sq.setPosition(bgBounds.left, bgBounds.top);
+  window.draw(sq);
+  sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
+  window.draw(sq);
+  sq.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
+  window.draw(sq);
+  sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
+                 bgBounds.top + bgBounds.height - 2 * radius);
+  window.draw(sq);
+
+  // round the edges
+  c.setPosition(bgBounds.left, bgBounds.top);
+  window.draw(c);
+  c.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
+  window.draw(c);
+  c.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
+  window.draw(c);
+  c.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
+                bgBounds.top + bgBounds.height - 2 * radius);
+  window.draw(c);
+
+  // fill the input
+  sq.setFillColor(input.inputStateColors[input.state].background);
+  sq.setOutlineThickness(input.background.getOutlineThickness());
+  sq.setOutlineColor(input.inputStateColors[input.state].background);
+
+  sq.setSize(Vector2f(bgBounds.width, bgBounds.height - 2 * radius));
+  sq.setPosition(Vector2f(bgBounds.left, bgBounds.top + radius));
+
+  window.draw(sq);
+
+  sq.setSize(Vector2f(bgBounds.width - 2 * radius, bgBounds.height));
+  sq.setPosition(Vector2f(bgBounds.left + radius, bgBounds.top));
+
+  window.draw(sq);
+
+  // draw the borders
+  sq.setFillColor(input.inputStateColors[input.state].primary);
+  sq.setOutlineThickness(0);
+
+  sq.setSize(Vector2f(input.background.getOutlineThickness(),
+                      bgBounds.height - 2 * radius + 2));
+  sq.setPosition(Vector2f(bgBounds.left - 1, bgBounds.top + radius - 1));
+  window.draw(sq);
+
+  sq.setPosition(
+      Vector2f(bgBounds.left + bgBounds.width, bgBounds.top + radius - 1));
+  window.draw(sq);
+
+  sq.setSize(Vector2f(bgBounds.width - 2 * radius + 2,
+                      input.background.getOutlineThickness()));
+  sq.setPosition(Vector2f(bgBounds.left + radius - 1, bgBounds.top - 1));
+  window.draw(sq);
+
+  sq.setPosition(
+      Vector2f(bgBounds.left + radius - 1, bgBounds.top + bgBounds.height));
+  window.draw(sq);
+
+  // initialize the text of the input
+  if (input.value == "") {
+    input.displayText.setString(input.placeholder);
+  } else {
+    input.displayText.setString(
+        input.value.substr(input.startPosition, input.displayLength));
+  }
+
+  while (input.displayText.getGlobalBounds().width < input.background.getGlobalBounds().width && input.startPosition + input.displayLength - 1 < input.value.size()) {
+    input.displayLength++;
+
+    input.displayText.setString(
+        input.value.substr(input.startPosition, input.displayLength));
+  }
+
+  while (input.displayText.getGlobalBounds().width > input.background.getGlobalBounds().width) {
+    input.displayLength--;
+    input.startPosition++;
+
+    input.displayText.setString(
+        input.value.substr(input.startPosition, input.displayLength));
+  }
+
+  cout << "Cursor: " << input.cursorLocation << " | ";
+  cout << "Size: " << input.value.size() << " | ";
+  cout << "Start pos: " << input.startPosition << " | ";
+  cout << "Display len: " << input.displayLength << "\n\n";
+
+  window.draw(input.displayText);
+
+  // temp
+  if (input.state == I_ACTIVE) {
+    int charSize = input.displayText.getCharacterSize();
+    Vector2f textPos = input.displayText.findCharacterPos(input.cursorLocation);
+    FloatRect inputBounds = input.background.getGlobalBounds();
+
+    RectangleShape r(Vector2f(1, 9 * charSize / 10));
+    r.setFillColor(Color(0x000000FF));
+    r.setPosition(Vector2f(textPos.x, inputBounds.top + inputBounds.height / 2 -
+                                          r.getGlobalBounds().height / 2));
+
+    window.draw(r);
+  }
 }

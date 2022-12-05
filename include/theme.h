@@ -6,6 +6,7 @@
 struct ColorTheme {
   Color text, background, border;
   ButtonStateColors buttonStateColors[B_MAX_STATES];
+  InputStateColors inputStateColors[I_MAX_STATES];
 };
 
 ColorTheme dark = {Color(0xEEEEEEFF),
@@ -14,5 +15,8 @@ ColorTheme dark = {Color(0xEEEEEEFF),
                    {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
                     {Color(0x7700ffFF), Color(0xEEEEEEFF)},
                     {Color(0x00d5ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x42f54bFF), Color(0xEEEEEEFF)}}};
+                    {Color(0x42f54bFF), Color(0xEEEEEEFF)}},
+                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
+                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
+                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)}}};
 #endif
