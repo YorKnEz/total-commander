@@ -3,13 +3,13 @@
 // sort nodes by extension
 bool byExt(node *a, node *b, sortOrder order) {
   // try to sort by extension
-  return order * (a->data.ext.compare(b->data.ext)) <= 0;
+  return order * (toLower(a->data.ext).compare(toLower(b->data.ext))) <= 0;
 }
 
 // sort nodes by name
 bool byName(node *a, node *b, sortOrder order) {
   // try to sort by filename
-  int comp = order * a->data.filename.compare(b->data.filename);
+  int comp = order * toLower(a->data.filename).compare(toLower(b->data.filename));
 
   if (comp) {
     return comp <= 0;

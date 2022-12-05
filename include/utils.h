@@ -9,6 +9,8 @@ int str2int(string numberString);
 
 string int2str(int a);
 
+string toLower(string s);
+
 string formatDate(string date);
 
 #endif
