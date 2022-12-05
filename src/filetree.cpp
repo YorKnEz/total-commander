@@ -61,47 +61,80 @@ bool byDate(node *a, node *b, sortOrder order) {
 
   return byName(a, b, order);
 }
-
 void getFilesFromPath(list &l, string path) {
-  // we call system("dir path >> buffer.txt");
-  string bufferFileName = "buffer.txt";
-  string command = "dir \"" + path + "\" > " + bufferFileName;
-
-  system(command.c_str());
-
-  FILE *bufferFile = freopen(bufferFileName.c_str(), "r", stdin);
-
-  if (!bufferFile) {
-    cout << "File not found";
-    return;
-  }
-
-  string currentBufferLine;
-
-  // first 6 lines are unnecessary
-  for (int i = 0; i < 6; i++) {
-    getline(cin, currentBufferLine);
-  }
-
   Filedata currentData;
-  int lastDir = 0;
-  // read the filedataStrings from the file while the first character is not a
-  // space if it is a space, it means we got to the last two lines
-  while ((getline(cin, currentBufferLine)) && currentBufferLine[0] != ' ') {
-    if (currentBufferLine[0] != ' ') {
-      currentData = parseFileDataString(currentBufferLine);
 
-      if (!currentData.size.compare("<DIR>")) {
-        add(l, currentData, lastDir);
-        lastDir++;
-      } else {
-        add(l, currentData, l.length);
-      }
+  // lastDir is used in order to separate files from directories in the list.
+  // The directories are inserted after the last directory or at the beginning
+  // of the list if there are none, and the files are always added at the end.
+  int lastDir = 0;
+
+  // adds the special ".." folder to the list
+  const auto fileTime = fs::last_write_time("path\\..");
+  const auto systemTime = chrono::file_clock::to_sys(fileTime);
+  const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
+  string date = asctime(gmtime(&time));
+
+  Filedata filedata;
+
+  // generates the filedata for the special folder
+  filedata.filename = "..";
+  filedata.size = "<DIR>";
+  filedata.date = formatDate(date);
+  filedata.ext = "";
+
+  add(l, filedata, lastDir);
+  lastDir++;
+
+  // goes through the content of the current path
+  for (const auto &entry : fs::directory_iterator(path)) {
+    // converts filename path to string
+    fs::path directoryPath = entry.path().filename();
+    string filename = directoryPath.generic_string();
+
+    // gets the date at which the current file was last modified
+    const auto fileTime = fs::last_write_time(entry.path());
+    // converts the result to system time
+    const auto systemTime = chrono::file_clock::to_sys(fileTime);
+    // converts the new result to time_t (seconds that have passed since epoch
+    // time - 1 January 1970 00:00:00) / to UNIX timestamp
+    const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
+
+    // checks whether the current entry is a file or a directory and sets the
+    // size accordingly (directory size = "<DIR>", file size is an integer
+    // value)
+    string size = is_regular_file(entry.path())
+                      ? int2str(file_size(entry.path()))
+                      : "<DIR>";
+    if (size == "") {
+      size = "0";
+    }
+
+    // generates a converted string from timestamp to GMT
+    string date = asctime(gmtime(&time));
+    Filedata filedata;
+
+    // generates the filedata with the previously obtained strings and adds them
+    // to the list
+    filedata.filename = filename;
+    filedata.size = size;
+    filedata.date = formatDate(date);
+    int lastDotPos = filedata.filename.find_last_of('.');
+
+    if (lastDotPos != string::npos && lastDotPos != 0 &&
+        filedata.size.compare("<DIR>")) {
+      filedata.ext = filedata.filename.substr(lastDotPos + 1);
+      filedata.filename.erase(filedata.filename.find_last_of('.'));
+    } else
+      filedata.ext = "";
+
+    if (!size.compare("<DIR>")) {
+      add(l, filedata, lastDir);
+      lastDir++;
+    } else {
+      add(l, filedata, l.length);
     }
   }
-
-  fclose(stdin);
-  remove(bufferFileName.c_str());
 }
 
 // sorting keeps the directories before any files and sorts them separately

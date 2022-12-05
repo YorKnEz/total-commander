@@ -84,6 +84,7 @@ void printList(list l) {
 
   while (p != NULL) {
     cout << "Name: " << p->data.filename << " | ";
+    cout << "Extension: " << p->data.ext << " | ";
     cout << "Size: " << p->data.size << " | ";
     cout << "Date: " << p->data.date << '\n';
 
