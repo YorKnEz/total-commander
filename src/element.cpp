@@ -10,8 +10,8 @@ bool isHovered(FloatRect box, int mouseX, int mouseY) {
   return false;
 }
 
-Button createButton(string text, Font &font, int x, int y, int width,
-                    int height,
+Button createButton(string text, Font &font, int charSize, int x, int y,
+                    int width, int height,
                     ButtonStateColors buttonStateColors[B_MAX_STATES],
                     unsigned int borderThickness) {
   Button button;
@@ -32,7 +32,7 @@ Button createButton(string text, Font &font, int x, int y, int width,
   button.background.setPosition(x, y);
 
   // initialize the text of the button
-  button.text = createText(text, font, 30, x, y,
+  button.text = createText(text, font, charSize, x, y,
                            button.background.getGlobalBounds().width -
                                2 * (borderThickness + 1),
                            buttonStateColors[B_INACTIVE].primary);

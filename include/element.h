@@ -49,7 +49,7 @@ struct File {
 bool isHovered(FloatRect box, int mouseX, int mouseY);
 
 // button functions
-Button createButton(string text, Font &font, int x, int y, int width,
+Button createButton(string text, Font &font, int charSize, int x, int y, int width,
                     int height, ButtonStateColors buttonStateColors[B_MAX_STATES],
                     unsigned int borderThickness);
 

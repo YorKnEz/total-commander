@@ -24,12 +24,13 @@ int main() {
   font.loadFromFile("assets/calibri.ttf");
 
   int btnw = 100;
+  int charSize = 20;
 
   Button buttons[11];
 
   for (int i = 1; i <= 10; i++) {
     buttons[i] =
-        createButton("test12312", font, WINDOW_W - i * (btnw + 20),
+        createButton("test12312", font, charSize, WINDOW_W - i * (btnw + 20),
                      WINDOW_H - 60, btnw, 40, theme.buttonStateColors, 1);
   }
 
