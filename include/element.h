@@ -39,8 +39,7 @@ struct File {
 };
 
 struct Input {
-  InputStateColors
-      inputStateColors[I_MAX_STATES]; 
+  InputStateColors inputStateColors[I_MAX_STATES];
   RectangleShape background;
   string placeholder, value;
   Text displayText;
@@ -50,18 +49,19 @@ struct Input {
   int displayLength; // max length that can be displayed at once
 };
 
-// union Element {
-//   Button button;
-//   Text text;
-//   File file;
-//   Input input;
-// };
+union Element {
+  Button button;
+  // Text text;
+  File file;
+  Input input;
+};
 
 bool isHovered(FloatRect box, int mouseX, int mouseY);
 
 // button functions
-Button createButton(string text, Font &font, int charSize, int x, int y, int width,
-                    int height, ButtonStateColors buttonStateColors[B_MAX_STATES],
+Button createButton(string text, Font &font, int charSize, int x, int y,
+                    int width, int height,
+                    ButtonStateColors buttonStateColors[B_MAX_STATES],
                     unsigned int borderThickness);
 
 void drawButton(RenderWindow &window, Button button);

@@ -1,5 +1,3 @@
-#include "dllist.h"
-#include "element.h"
 #include "filetree.h"
 #include "theme.h"
 #include <SFML/Graphics.hpp>
@@ -21,7 +19,7 @@ int main() {
   ColorTheme theme = dark;
 
   Font font;
-  font.loadFromFile("assets/calibri.ttf");
+  font.loadFromFile("assets/font.ttf");
 
   int btnw = 100;
   int charSize = 20;
@@ -45,11 +43,12 @@ int main() {
   FloatRect clickBounds; // the bounds of the last click
   Input *activeInput = nullptr;
   RectangleShape cursor; // cursor to display on inputs
-  //
+
   // list l;
   // init(l);
   //
-  // string path = "/home/yorknez/Projects/asii-ziar";
+  // // string path = "D:\\alex_\\Documents";
+  // string path = "/home/yorknez/Pictures";
   //
   // getFilesFromPath(l, path);
   //
@@ -73,6 +72,12 @@ int main() {
         if (activeInput) {
           // move the cursor of the input to the left
           if (event.key.code == Keyboard::Left) {
+            // cout << "--- cursor left --- \n";
+            // cout << "cursor: " << input.cursorLocation << " | ";
+            // cout << "size: " << input.value.size() << " | ";
+            // cout << "start: " << input.startPosition << " | ";
+            // cout << "length: " << input.displayLength << "\n";
+
             // try moving the cursor first
             if (activeInput->cursorLocation > 0) {
               activeInput->cursorLocation--;
@@ -81,20 +86,34 @@ int main() {
             else if (activeInput->startPosition > 0) {
               activeInput->startPosition--;
             }
+
+            // cout << "cursor: " << input.cursorLocation << " | ";
+            // cout << "size: " << input.value.size() << " | ";
+            // cout << "start: " << input.startPosition << " | ";
+            // cout << "length: " << input.displayLength << "\n\n";
           }
           // move the cursor of the input to the right
           else if (event.key.code == Keyboard::Right) {
+            // cout << "--- cursor right --- \n";
+            // cout << "cursor: " << input.cursorLocation << " | ";
+            // cout << "size: " << input.value.size() << " | ";
+            // cout << "start: " << input.startPosition << " | ";
+            // cout << "length: " << input.displayLength << "\n";
+
             // try moving the cursor first
             if (activeInput->cursorLocation < activeInput->displayLength) {
               activeInput->cursorLocation++;
             }
             // if the cursor is at the end of the input, increase start pos
-            else if (activeInput->startPosition > 0 &&
-                     activeInput->startPosition + activeInput->displayLength -
-                             1 <
+            else if (activeInput->startPosition + activeInput->displayLength <
                          activeInput->value.size()) {
               activeInput->startPosition++;
             }
+
+            // cout << "cursor: " << input.cursorLocation << " | ";
+            // cout << "size: " << input.value.size() << " | ";
+            // cout << "start: " << input.startPosition << " | ";
+            // cout << "length: " << input.displayLength << "\n\n";
           }
         }
         break;
@@ -242,13 +261,13 @@ int main() {
     }
     drawInput(window, input);
     drawInput(window, input2);
-    //
+
     // p = l.head;
     // fileY = 0;
     //
     // while (p) {
-    //   file = createFile(p->data, font, WINDOW_W / 2, 20, fileY, WINDOW_W / 2, 40,
-    //                     theme.text);
+    //   file = createFile(p->data, font, charSize, WINDOW_W / 2, fileY,
+    //                     WINDOW_W / 2, 40, theme.text);
     //
     //   drawFile(window, file);
     //

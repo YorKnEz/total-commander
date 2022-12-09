@@ -117,6 +117,7 @@ Text createText(string textString, Font &font, int charSize, int x, int y,
   text.setStyle(Text::Regular);
   text.setString(textString);
   text.setFillColor(textColor);
+
   // shrink the text that is shown on the screen to avoid overflow
   if (text.getGlobalBounds().width > width) {
     textString.append("..");

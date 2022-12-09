@@ -11,4 +11,5 @@ struct Explorer {
   list files;
   Element *elements;
 };
+
 #endif
