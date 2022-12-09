@@ -244,6 +244,56 @@ void updateInputState(Input &input, Event event, MouseEventType type,
   }
 }
 
+// expand the text to avoid the text being too small for the input
+void expandInput(Input &input) {
+  if (input.displayLength == input.value.size()) {
+    return;
+  }
+
+  while (input.displayText.getGlobalBounds().width <
+         input.background.getGlobalBounds().width - 20) {
+    // if there is text to the right of the displayed text, add it
+    if (input.startPosition + input.displayLength < input.value.size()) {
+      input.displayLength++;
+    }
+    // if there is no text to the right
+    else if (input.startPosition + input.displayLength ==
+             input.value.size()) {
+      // expand from the left if possible
+      if (input.startPosition > 0) {
+        input.cursorLocation++;
+        input.displayLength++;
+        input.startPosition--;
+      }
+    }
+
+    input.displayText.setString(
+        input.value.substr(input.startPosition,
+                           input.displayLength)); // update string
+  }
+}
+
+// shrink the text to avoid overflow
+void shrinkInput(Input &input) {
+  while (input.displayText.getGlobalBounds().width >
+         input.background.getGlobalBounds().width - 20) {
+    // if the cursor is at the end of the input
+    if (input.cursorLocation == input.displayLength) {
+      input.cursorLocation--; // move cursor back
+      input.displayLength--;  // shrink display length
+      input.startPosition++;  // advance start position
+    }
+    // if the cursor is anywhere before the end
+    else {
+      input.displayLength--; // shrink display length
+    }
+
+    input.displayText.setString(
+        input.value.substr(input.startPosition,
+                           input.displayLength)); // update string
+  }
+}
+
 void drawInput(RenderWindow &window, Input &input) {
   // update the color of the input depending on it's state
   input.displayText.setFillColor(input.inputStateColors[input.state].primary);
@@ -332,6 +382,9 @@ void drawInput(RenderWindow &window, Input &input) {
     input.displayText.setString(
         input.value.substr(input.startPosition, input.displayLength));
   }
+
+  // expandInput(input);
+  // shrinkInput(input);
 
   window.draw(input.displayText);
 
