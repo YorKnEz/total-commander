@@ -211,7 +211,12 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
         displayText.substr(input.startPosition, input.displayLength));
   }
 
-  input.displayText.setPosition(x, y);
+  int offsetY = input.background.getGlobalBounds().top +
+                input.background.getGlobalBounds().height / 2 -
+                input.displayText.getGlobalBounds().top -
+                input.displayText.getGlobalBounds().height / 2;
+
+  input.displayText.setPosition(x, y + offsetY);
 
   return input;
 }
