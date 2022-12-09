@@ -106,9 +106,41 @@ int main() {
               // delete the character before the cursor position
               if (activeInput->startPosition + activeInput->cursorLocation >
                   0) {
-                // activeInput->value.erase(activeInput->startPosition +
-                //                              activeInput->cursorLocation - 1,
-                //                          1);
+                activeInput->value.erase(activeInput->startPosition +
+                                             activeInput->cursorLocation - 1,
+                                         1);
+
+                // first case: text is smaller than the input or equal
+                if (activeInput->displayLength ==
+                    activeInput->value.size() + 1) {
+                  // a: the cursor is not at the beginning of the text
+                  if (activeInput->cursorLocation > 0) {
+                    activeInput->displayLength--; // shrink displayed text
+                    activeInput->cursorLocation--;
+                  }
+                }
+                // second case: text is larger than the input
+                else {
+                  // a: there is no text to the right of the displayed text
+                  //    so try to expand the text from the left
+                  //
+                  //    being at this case implies that startPosition > 0
+                  if (activeInput->startPosition + activeInput->displayLength ==
+                      activeInput->value.size() + 1) {
+                    activeInput->startPosition--;
+                  }
+                  // b: there is text to the right of the displayed text
+                  //    so try to expand the input from the right
+                  else {
+                    // move cursor to the left if possible
+                    if (activeInput->cursorLocation > 0) {
+                      activeInput->cursorLocation--;
+                    }
+                    // move start position to the left if cursor can't be moved
+                    else {
+                      activeInput->startPosition--;
+                    }
+                  }
               }
 
             }
@@ -118,21 +150,30 @@ int main() {
                                             activeInput->cursorLocation,
                                         1, char(event.text.unicode));
 
-              // cout << "Cursor: " << input.cursorLocation << " | ";
-              // cout << "Size: " << input.value.size() << " | ";
-              // cout << "Start pos: " << input.startPosition << " | ";
-              // cout << "Display len: " << input.displayLength << "\n\n";
+              // try to expand the displayed text if there is space in the input
+              if (activeInput->displayText.getGlobalBounds().width <
+                  activeInput->background.getGlobalBounds().width - charSize) {
+                activeInput->displayLength++;  // increse number of chars shown
+                activeInput->cursorLocation++; // advance cursor
 
-              // try to expand the displayed text
-              if (activeInput->displayText.getGlobalBounds().width < activeInput->background.getGlobalBounds().width - 20) {
-                activeInput->displayLength++;
-                activeInput->cursorLocation++;
-                activeInput->displayText.setString(activeInput->value.substr(activeInput->startPosition, activeInput->displayLength));
+                activeInput->displayText.setString(activeInput->value.substr(
+                    activeInput->startPosition,
+                    activeInput->displayLength)); // update string
               }
-              // we need to move the text
+              // if we can't expand the text, then we have to move it
               else {
+                // if the cursor is at the end we need to advance the start
+                // position
+                if (activeInput->cursorLocation == activeInput->displayLength) {
                 activeInput->startPosition++;
               }
+                // else advance only the cursor
+                else {
+                  activeInput->cursorLocation++;
+                }
+              }
+
+              shrinkInput(*activeInput);
             }
           }
         }
