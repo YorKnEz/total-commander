@@ -1,15 +1,31 @@
 #ifndef EXPLORER_H
 #define EXPLORER_H
+
+#include "dllist.h"
 #include "element.h"
 #include "filetree.h"
+#include "theme.h"
+#include <SFML/Graphics.hpp>
 #include <string>
 
+using namespace sf;
 using namespace std;
 
 struct Explorer {
   string path;
   list files;
-  Element *elements;
+  RectangleShape background;
+  Button button[4];
+  Input input;
+  TextBox textbox[2];
 };
+
+Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
+                        int width, int height, ColorTheme theme);
+
+void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
+                         FloatRect &clickBounds, Input *&activeInput);
+
+void drawExplorer(RenderWindow &window, Explorer explorer);
 
 #endif

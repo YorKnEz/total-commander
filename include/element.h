@@ -48,6 +48,7 @@ struct Filedata {
 struct File {
   RectangleShape background;
   Filedata data;
+  int filenameColumn, extColumn, sizeColumn, dateColumn;
   Text filename, ext, size, date;
 };
 
@@ -60,13 +61,6 @@ struct Input {
   int cursorLocation;
   int startPosition; // used if the displayText is larger than the box
   int displayLength; // max length that can be displayed at once
-};
-
-union Element {
-  Button button;
-  // Text text;
-  File file;
-  Input input;
 };
 
 bool isHovered(FloatRect box, int mouseX, int mouseY);

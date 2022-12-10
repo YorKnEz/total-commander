@@ -178,28 +178,35 @@ void drawText(RenderWindow &window, Text text) { window.draw(text); }
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 int width, int height, Color textColor) {
   File file;
+
+  // initialize background
   file.background.setSize(Vector2f(width, height));
   file.background.setFillColor(Color(0x123456FF));
   file.background.setPosition(x, y);
 
-  int dateColumn, extColumn, filenameColumn, sizeColumn;
+  // initialize data
+  file.data = data;
+
+  // initialize column sizes
   Text date("dd/mm/yyyy hh:mm xx", font, charSize);
 
-  dateColumn = date.getGlobalBounds().width;
-  extColumn = (width - dateColumn) / 4;
-  filenameColumn = (width - dateColumn) / 2;
-  sizeColumn = (width - dateColumn) / 4;
+  file.dateColumn = date.getGlobalBounds().width;
+  file.extColumn = (width - file.dateColumn) / 4;
+  file.filenameColumn = (width - file.dateColumn) / 2;
+  file.sizeColumn = (width - file.dateColumn) / 4;
 
-  file.filename = createText(data.filename, font, charSize, x, y,
-                             filenameColumn, textColor);
-  file.ext = createText(data.ext, font, charSize, x + filenameColumn, y,
-                        extColumn, textColor);
-  file.size =
-      createText(data.size, font, charSize, x + filenameColumn + extColumn, y,
-                 sizeColumn, textColor);
-  file.date = createText(data.date, font, charSize,
-                         x + filenameColumn + extColumn + sizeColumn, y,
-                         dateColumn, textColor);
+  // initialize text fields
+  int nameX = x, extX = nameX + file.filenameColumn,
+      sizeX = extX + file.extColumn, dateX = sizeX + file.sizeColumn;
+
+  file.filename = createText(data.filename, font, charSize, nameX, y,
+                             file.filenameColumn, textColor);
+  file.ext =
+      createText(data.ext, font, charSize, extX, y, file.extColumn, textColor);
+  file.size = createText(data.size, font, charSize, sizeX, y, file.sizeColumn,
+                         textColor);
+  file.date = createText(data.date, font, charSize, dateX, y, file.dateColumn,
+                         textColor);
 
   return file;
 }
@@ -259,7 +266,7 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
                 input.displayText.getGlobalBounds().top -
                 input.displayText.getGlobalBounds().height / 2;
 
-  input.displayText.setPosition(x, y + offsetY);
+  input.displayText.setPosition(x + 10, y + offsetY);
 
   return input;
 }
