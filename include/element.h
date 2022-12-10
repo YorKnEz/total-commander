@@ -24,6 +24,12 @@ struct InputStateColors {
   Color primary, background;
 };
 
+struct TextBox {
+  RectangleShape background;
+  string fullText;
+  Text text;
+};
+
 struct Button {
   ButtonStateColors buttonStateColors[B_MAX_STATES];
   RectangleShape background;
@@ -64,6 +70,13 @@ union Element {
 };
 
 bool isHovered(FloatRect box, int mouseX, int mouseY);
+// textbox functions
+TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
+                      int width, int height, Color textColor,
+                      Color backgroundColor, Color borderColor,
+                      int borderThickness);
+
+void drawTextBox(RenderWindow &window, TextBox textbox);
 
 // button functions
 Button createButton(string text, Font &font, int charSize, int x, int y,
