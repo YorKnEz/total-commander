@@ -32,6 +32,13 @@ struct Button {
   ButtonState state, oldState;
 };
 
+struct Filedata {
+  string filename;
+  string ext;
+  string size;
+  string date;
+};
+
 struct File {
   RectangleShape background;
   Filedata data;
