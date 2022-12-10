@@ -2,6 +2,7 @@
 #define FILE_TREE_H
 
 #include "dllist.h"
+#include "element.h"
 #include "utils.h"
 #include <chrono>
 #include <filesystem>
@@ -10,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-
 
 using namespace std;
 namespace fs = filesystem;

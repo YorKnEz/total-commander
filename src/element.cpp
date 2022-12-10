@@ -10,6 +10,32 @@ bool isHovered(FloatRect box, int mouseX, int mouseY) {
   return false;
 }
 
+Text createText(string textString, Font &font, int charSize, int x, int y,
+                int width, Color textColor) {
+  Text text;
+  text.setFont(font);
+  text.setPosition(x, y);
+  text.setCharacterSize(charSize);
+  text.setStyle(Text::Regular);
+  text.setString(textString);
+  text.setFillColor(textColor);
+
+  // shrink the text that is shown on the screen to avoid overflow
+  if (text.getGlobalBounds().width > width) {
+    textString.append("..");
+    text.setString(textString);
+  }
+
+  while (text.getGlobalBounds().width > width) {
+    textString.erase(textString.size() - 3, 1);
+    text.setString(textString);
+  }
+
+  return text;
+}
+
+void drawText(RenderWindow &window, Text text) { window.draw(text); }
+
 TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
                       int width, int height, Color textColor,
                       Color backgroundColor, Color borderColor,
@@ -124,6 +150,7 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
         isHovered(buttonBounds, event.mouseButton.x, event.mouseButton.y)
             ? B_CLICKED
             : B_INACTIVE;
+
     if (button.state == B_CLICKED) {
       clickBounds = buttonBounds;
     }
@@ -149,31 +176,6 @@ void drawButton(RenderWindow &window, Button button) {
   window.draw(button.background);
   window.draw(button.text);
 }
-
-Text createText(string textString, Font &font, int charSize, int x, int y,
-                int width, Color textColor) {
-  Text text;
-  text.setFont(font);
-  text.setPosition(x, y);
-  text.setCharacterSize(charSize);
-  text.setStyle(Text::Regular);
-  text.setString(textString);
-  text.setFillColor(textColor);
-
-  // shrink the text that is shown on the screen to avoid overflow
-  if (text.getGlobalBounds().width > width) {
-    textString.append("..");
-    text.setString(textString);
-  }
-
-  while (text.getGlobalBounds().width > width) {
-    textString.erase(textString.size() - 3, 1);
-    text.setString(textString);
-  }
-  return text;
-}
-
-void drawText(RenderWindow &window, Text text) { window.draw(text); }
 
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 int width, int height, Color textColor) {
@@ -307,8 +309,7 @@ void expandInput(Input &input) {
       input.displayLength++;
     }
     // if there is no text to the right
-    else if (input.startPosition + input.displayLength ==
-             input.value.size()) {
+    else if (input.startPosition + input.displayLength == input.value.size()) {
       // expand from the left if possible
       if (input.startPosition > 0) {
         input.cursorLocation++;

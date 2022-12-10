@@ -1,7 +1,8 @@
 #ifndef THEME_H
 #define THEME_H
+
 #include "element.h"
-#include "utils.h"
+#include <SFML/Graphics.hpp>
 
 struct ColorTheme {
   Color text, background, border;

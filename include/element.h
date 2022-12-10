@@ -1,7 +1,6 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
-#include "dllist.h"
-#include "utils.h"
+
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <string>
@@ -64,6 +63,13 @@ struct Input {
 };
 
 bool isHovered(FloatRect box, int mouseX, int mouseY);
+
+// // text functions
+Text createText(string textString, Font &font, int charSize, int x, int y,
+                int width, Color textColor);
+
+void drawText(RenderWindow &window, Text text);
+
 // textbox functions
 TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
                       int width, int height, Color textColor,
@@ -82,12 +88,6 @@ void drawButton(RenderWindow &window, Button button);
 
 void updateButtonState(Button &button, Event event, MouseEventType type,
                        FloatRect &clickBounds);
-
-// // text functions
-Text createText(string textString, Font &font, int charSize, int x, int y,
-                int width, Color textColor);
-
-void drawText(RenderWindow &window, Text text);
 
 // file functions
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
