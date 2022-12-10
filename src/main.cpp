@@ -16,6 +16,17 @@ using namespace std;
 int main() {
   RenderWindow window(VideoMode(WINDOW_W, WINDOW_H), TITLE);
 
+  ColorTheme dark = {Color(0xEEEEEEFF),
+                   Color(0x242424FF),
+                   Color(0xFFFFFFFF),
+                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
+                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
+                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)},
+                    {Color(0x42f54bFF), Color(0xEEEEEEFF)}},
+                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
+                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
+                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)}}};
+
   ColorTheme theme = dark;
 
   Font font;

@@ -9,14 +9,6 @@ struct ColorTheme {
   InputStateColors inputStateColors[I_MAX_STATES];
 };
 
-ColorTheme dark = {Color(0xEEEEEEFF),
-                   Color(0x242424FF),
-                   Color(0xFFFFFFFF),
-                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x42f54bFF), Color(0xEEEEEEFF)}},
-                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)}}};
+extern ColorTheme dark;
+
 #endif
