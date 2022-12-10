@@ -1,7 +1,6 @@
 #ifndef ELEMENT_H
 #define ELEMENT_H
-#include "dllist.h"
-#include "utils.h"
+
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <string>
@@ -24,6 +23,12 @@ struct InputStateColors {
   Color primary, background;
 };
 
+struct TextBox {
+  RectangleShape background;
+  string fullText;
+  Text text;
+};
+
 struct Button {
   ButtonStateColors buttonStateColors[B_MAX_STATES];
   RectangleShape background;
@@ -32,15 +37,22 @@ struct Button {
   ButtonState state, oldState;
 };
 
+struct Filedata {
+  string filename;
+  string ext;
+  string size;
+  string date;
+};
+
 struct File {
   RectangleShape background;
   Filedata data;
+  int filenameColumn, extColumn, sizeColumn, dateColumn;
   Text filename, ext, size, date;
 };
 
 struct Input {
-  InputStateColors
-      inputStateColors[I_MAX_STATES]; 
+  InputStateColors inputStateColors[I_MAX_STATES];
   RectangleShape background;
   string placeholder, value;
   Text displayText;
@@ -50,30 +62,32 @@ struct Input {
   int displayLength; // max length that can be displayed at once
 };
 
-// union Element {
-//   Button button;
-//   Text text;
-//   File file;
-//   Input input;
-// };
-
 bool isHovered(FloatRect box, int mouseX, int mouseY);
-
-// button functions
-Button createButton(string text, Font &font, int charSize, int x, int y, int width,
-                    int height, ButtonStateColors buttonStateColors[B_MAX_STATES],
-                    unsigned int borderThickness);
-
-void drawButton(RenderWindow &window, Button button);
-
-void updateButtonState(Button &button, Event event, MouseEventType type,
-                       FloatRect &clickBounds);
 
 // // text functions
 Text createText(string textString, Font &font, int charSize, int x, int y,
                 int width, Color textColor);
 
 void drawText(RenderWindow &window, Text text);
+
+// textbox functions
+TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
+                      int width, int height, Color textColor,
+                      Color backgroundColor, Color borderColor,
+                      int borderThickness);
+
+void drawTextBox(RenderWindow &window, TextBox textbox);
+
+// button functions
+Button createButton(string text, Font &font, int charSize, int x, int y,
+                    int width, int height,
+                    ButtonStateColors buttonStateColors[B_MAX_STATES],
+                    unsigned int borderThickness);
+
+void drawButton(RenderWindow &window, Button button);
+
+void updateButtonState(Button &button, Event event, MouseEventType type,
+                       FloatRect &clickBounds);
 
 // file functions
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
@@ -89,6 +103,10 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
 
 void updateInputState(Input &input, Event event, MouseEventType type,
                       Input *&activeInput);
+
+void expandInput(Input &input);
+
+void shrinkInput(Input &input);
 
 void drawInput(RenderWindow &window, Input &input);
 

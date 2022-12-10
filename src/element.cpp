@@ -10,6 +10,74 @@ bool isHovered(FloatRect box, int mouseX, int mouseY) {
   return false;
 }
 
+Text createText(string textString, Font &font, int charSize, int x, int y,
+                int width, Color textColor) {
+  Text text;
+  text.setFont(font);
+  text.setPosition(x, y);
+  text.setCharacterSize(charSize);
+  text.setStyle(Text::Regular);
+  text.setString(textString);
+  text.setFillColor(textColor);
+
+  // shrink the text that is shown on the screen to avoid overflow
+  if (text.getGlobalBounds().width > width) {
+    textString.append("..");
+    text.setString(textString);
+  }
+
+  while (text.getGlobalBounds().width > width) {
+    textString.erase(textString.size() - 3, 1);
+    text.setString(textString);
+  }
+
+  return text;
+}
+
+void drawText(RenderWindow &window, Text text) { window.draw(text); }
+
+TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
+                      int width, int height, Color textColor,
+                      Color backgroundColor, Color borderColor,
+                      int borderThickness) {
+  TextBox textbox;
+  textbox.fullText =
+      textString; // save the string that is supposed to be shown on the screen
+
+  // initialize the background of the textbox
+  textbox.background.setSize(Vector2f(width, height));
+  textbox.background.setFillColor(backgroundColor);
+  textbox.background.setOutlineColor(borderColor);
+  textbox.background.setOutlineThickness(borderThickness);
+  textbox.background.setPosition(x, y);
+
+  // initialize the text of the button
+  textbox.text = createText(textString, font, charSize, x, y,
+                            textbox.background.getGlobalBounds().width -
+                                2 * (borderThickness + 1),
+                            textColor);
+
+  // set the offset to the text relative to the button
+  int offsetX = textbox.background.getGlobalBounds().left +
+                textbox.background.getGlobalBounds().width / 2 -
+                textbox.text.getGlobalBounds().left -
+                textbox.text.getGlobalBounds().width / 2;
+
+  int offsetY = textbox.background.getGlobalBounds().top +
+                textbox.background.getGlobalBounds().height / 2 -
+                textbox.text.getGlobalBounds().top -
+                textbox.text.getGlobalBounds().height / 2;
+
+  textbox.text.setPosition(x + offsetX, y + offsetY);
+
+  return textbox;
+}
+
+void drawTextBox(RenderWindow &window, TextBox textbox) {
+  window.draw(textbox.background);
+  window.draw(textbox.text);
+}
+
 Button createButton(string text, Font &font, int charSize, int x, int y,
                     int width, int height,
                     ButtonStateColors buttonStateColors[B_MAX_STATES],
@@ -82,6 +150,7 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
         isHovered(buttonBounds, event.mouseButton.x, event.mouseButton.y)
             ? B_CLICKED
             : B_INACTIVE;
+
     if (button.state == B_CLICKED) {
       clickBounds = buttonBounds;
     }
@@ -108,55 +177,38 @@ void drawButton(RenderWindow &window, Button button) {
   window.draw(button.text);
 }
 
-Text createText(string textString, Font &font, int charSize, int x, int y,
-                int width, Color textColor) {
-  Text text;
-  text.setFont(font);
-  text.setPosition(x, y);
-  text.setCharacterSize(charSize);
-  text.setStyle(Text::Regular);
-  text.setString(textString);
-  text.setFillColor(textColor);
-  // shrink the text that is shown on the screen to avoid overflow
-  if (text.getGlobalBounds().width > width) {
-    textString.append("..");
-    text.setString(textString);
-  }
-
-  while (text.getGlobalBounds().width > width) {
-    textString.erase(textString.size() - 3, 1);
-    text.setString(textString);
-  }
-  return text;
-}
-
-void drawText(RenderWindow &window, Text text) { window.draw(text); }
-
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 int width, int height, Color textColor) {
   File file;
+
+  // initialize background
   file.background.setSize(Vector2f(width, height));
   file.background.setFillColor(Color(0x123456FF));
   file.background.setPosition(x, y);
 
-  int dateColumn, extColumn, filenameColumn, sizeColumn;
+  // initialize data
+  file.data = data;
+
+  // initialize column sizes
   Text date("dd/mm/yyyy hh:mm xx", font, charSize);
 
-  dateColumn = date.getGlobalBounds().width;
-  extColumn = (width - dateColumn) / 4;
-  filenameColumn = (width - dateColumn) / 2;
-  sizeColumn = (width - dateColumn) / 4;
+  file.dateColumn = date.getGlobalBounds().width;
+  file.extColumn = (width - file.dateColumn) / 4;
+  file.filenameColumn = (width - file.dateColumn) / 2;
+  file.sizeColumn = (width - file.dateColumn) / 4;
 
-  file.filename = createText(data.filename, font, charSize, x, y,
-                             filenameColumn, textColor);
-  file.ext = createText(data.ext, font, charSize, x + filenameColumn, y,
-                        extColumn, textColor);
-  file.size =
-      createText(data.size, font, charSize, x + filenameColumn + extColumn, y,
-                 sizeColumn, textColor);
-  file.date = createText(data.date, font, charSize,
-                         x + filenameColumn + extColumn + sizeColumn, y,
-                         dateColumn, textColor);
+  // initialize text fields
+  int nameX = x, extX = nameX + file.filenameColumn,
+      sizeX = extX + file.extColumn, dateX = sizeX + file.sizeColumn;
+
+  file.filename = createText(data.filename, font, charSize, nameX, y,
+                             file.filenameColumn, textColor);
+  file.ext =
+      createText(data.ext, font, charSize, extX, y, file.extColumn, textColor);
+  file.size = createText(data.size, font, charSize, sizeX, y, file.sizeColumn,
+                         textColor);
+  file.date = createText(data.date, font, charSize, dateX, y, file.dateColumn,
+                         textColor);
 
   return file;
 }
@@ -211,7 +263,12 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
         displayText.substr(input.startPosition, input.displayLength));
   }
 
-  input.displayText.setPosition(x, y);
+  int offsetY = input.background.getGlobalBounds().top +
+                input.background.getGlobalBounds().height / 2 -
+                input.displayText.getGlobalBounds().top -
+                input.displayText.getGlobalBounds().height / 2;
+
+  input.displayText.setPosition(x + 10, y + offsetY);
 
   return input;
 }
@@ -236,6 +293,55 @@ void updateInputState(Input &input, Event event, MouseEventType type,
                         : I_INACTIVE;
     }
     break;
+  }
+}
+
+// expand the text to avoid the text being too small for the input
+void expandInput(Input &input) {
+  if (input.displayLength == input.value.size()) {
+    return;
+  }
+
+  while (input.displayText.getGlobalBounds().width <
+         input.background.getGlobalBounds().width - 20) {
+    // if there is text to the right of the displayed text, add it
+    if (input.startPosition + input.displayLength < input.value.size()) {
+      input.displayLength++;
+    }
+    // if there is no text to the right
+    else if (input.startPosition + input.displayLength == input.value.size()) {
+      // expand from the left if possible
+      if (input.startPosition > 0) {
+        input.cursorLocation++;
+        input.displayLength++;
+        input.startPosition--;
+      }
+    }
+
+    input.displayText.setString(
+        input.value.substr(input.startPosition,
+                           input.displayLength)); // update string
+  }
+}
+
+// shrink the text to avoid overflow
+void shrinkInput(Input &input) {
+  while (input.displayText.getGlobalBounds().width >
+         input.background.getGlobalBounds().width - 20) {
+    // if the cursor is at the end of the input
+    if (input.cursorLocation == input.displayLength) {
+      input.cursorLocation--; // move cursor back
+      input.displayLength--;  // shrink display length
+      input.startPosition++;  // advance start position
+    }
+    // if the cursor is anywhere before the end
+    else {
+      input.displayLength--; // shrink display length
+    }
+
+    input.displayText.setString(
+        input.value.substr(input.startPosition,
+                           input.displayLength)); // update string
   }
 }
 
@@ -328,25 +434,8 @@ void drawInput(RenderWindow &window, Input &input) {
         input.value.substr(input.startPosition, input.displayLength));
   }
 
-  while (input.displayText.getGlobalBounds().width < input.background.getGlobalBounds().width && input.startPosition + input.displayLength - 1 < input.value.size()) {
-    input.displayLength++;
-
-    input.displayText.setString(
-        input.value.substr(input.startPosition, input.displayLength));
-  }
-
-  while (input.displayText.getGlobalBounds().width > input.background.getGlobalBounds().width) {
-    input.displayLength--;
-    input.startPosition++;
-
-    input.displayText.setString(
-        input.value.substr(input.startPosition, input.displayLength));
-  }
-
-  cout << "Cursor: " << input.cursorLocation << " | ";
-  cout << "Size: " << input.value.size() << " | ";
-  cout << "Start pos: " << input.startPosition << " | ";
-  cout << "Display len: " << input.displayLength << "\n\n";
+  // expandInput(input);
+  // shrinkInput(input);
 
   window.draw(input.displayText);
 

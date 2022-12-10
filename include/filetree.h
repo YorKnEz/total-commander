@@ -2,6 +2,7 @@
 #define FILE_TREE_H
 
 #include "dllist.h"
+#include "element.h"
 #include "utils.h"
 #include <chrono>
 #include <filesystem>
@@ -10,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-
 
 using namespace std;
 namespace fs = filesystem;
@@ -39,7 +39,8 @@ void deleteFolder(string path);
 // creates a new folder
 void createFolder(string path, string name);
 
-void getFilesFromPath(list &l, string path);
+void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
+                      int y, int width, int height, Color textColor);
 
 void sortFiletree(list &l, sortBy criteria, sortOrder order);
 
