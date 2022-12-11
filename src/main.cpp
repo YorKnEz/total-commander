@@ -18,15 +18,15 @@ int main() {
   RenderWindow window(VideoMode(WINDOW_W, WINDOW_H), TITLE);
 
   ColorTheme dark = {Color(0xEEEEEEFF),
-                   Color(0x242424FF),
-                   Color(0xFFFFFFFF),
-                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x42f54bFF), Color(0xEEEEEEFF)}},
-                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)}}};
+                     Color(0x242424FF),
+                     Color(0xFFFFFFFF),
+                     {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
+                      {Color(0x7700ffFF), Color(0xEEEEEEFF)},
+                      {Color(0x00d5ffFF), Color(0xEEEEEEFF)},
+                      {Color(0x42f54bFF), Color(0xEEEEEEFF)}},
+                     {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
+                      {Color(0x7700ffFF), Color(0xEEEEEEFF)},
+                      {Color(0x00d5ffFF), Color(0xEEEEEEFF)}}};
 
   ColorTheme theme = dark;
 
@@ -35,31 +35,17 @@ int main() {
 
   int charSize = 16;
 
+  int explorers = 2;
+  Explorer explorer[explorers];
 
-  Explorer explorer =
-      createExplorer("/home/yorknez/Pictures", font, charSize, 0, 0, WINDOW_W / 2, WINDOW_H, theme);
-
-  Explorer explorer2 =
-      createExplorer("/home/yorknez/Videos", font, charSize, WINDOW_W / 2, 0, WINDOW_W / 2, WINDOW_H, theme);
-
-  // Button buttons[11];
-  //
-  // for (int i = 1; i <= 10; i++) {
-  //   buttons[i] =
-  //       createButton("test12312", font, charSize, WINDOW_W - i * (btnw + 20),
-  //                    WINDOW_H - 60, btnw, 40, theme.buttonStateColors, 1);
-  // }
-  //
-  // Input input = createInput("Enter text here", "", font, charSize, 20, 20,
-  // 400,
-  //                           40, theme.inputStateColors, 1);
-  // Input input2 = createInput("Enter another text here", "", font, charSize,
-  // 20,
-  //                            80, 400, 40, theme.inputStateColors, 1);
+  for (int i = 0; i < explorers; i++) {
+    explorer[i] =
+        createExplorer("/home/yorknez/Pictures", font, charSize, i * WINDOW_W / explorers,
+                       0, WINDOW_W / explorers, WINDOW_H, theme);
+  }
 
   // useful for determining double clicks
   Clock clock;           // a timer that is set between two clicks
-  bool click = false;    // a flag which checks if we have a double click
   FloatRect clickBounds; // the bounds of the last click
   Input *activeInput = nullptr;
   RectangleShape cursor; // cursor to display on inputs
@@ -179,8 +165,11 @@ int main() {
         }
         break;
       case Event::MouseButtonReleased:
-        updateExplorerState(explorer, event, RELEASE, clickBounds, activeInput);
-        updateExplorerState(explorer2, event, RELEASE, clickBounds, activeInput);
+        for (int i = 0; i < explorers; i++) {
+          updateExplorerState(explorer[i], event, RELEASE, clickBounds,
+                              activeInput);
+        }
+
         break;
       case Event::MouseButtonPressed:
         // disable the last active input if user clicks outside it's box,
@@ -194,15 +183,17 @@ int main() {
 
         // double click
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
-          updateExplorerState(explorer, event, DCLICK, clickBounds,
-                              activeInput);
-          updateExplorerState(explorer2, event, DCLICK, clickBounds,
-                              activeInput);
+          for (int i = 0; i < explorers; i++) {
+            updateExplorerState(explorer[i], event, DCLICK, clickBounds,
+                                activeInput);
+          }
         }
         // simple click
         else {
-          updateExplorerState(explorer, event, CLICK, clickBounds, activeInput);
-          updateExplorerState(explorer2, event, CLICK, clickBounds, activeInput);
+          for (int i = 0; i < explorers; i++) {
+            updateExplorerState(explorer[i], event, CLICK, clickBounds,
+                                activeInput);
+          }
         }
 
         // reset timer if a click happened
@@ -210,15 +201,18 @@ int main() {
 
         break;
       case Event::MouseMoved:
-        updateExplorerState(explorer, event, MOVE, clickBounds, activeInput);
-        updateExplorerState(explorer2, event, MOVE, clickBounds, activeInput);
+        for (int i = 0; i < explorers; i++) {
+          updateExplorerState(explorer[i], event, MOVE, clickBounds,
+                              activeInput);
+        }
         break;
       }
     }
 
     window.clear(theme.background);
-    drawExplorer(window, explorer);
-    drawExplorer(window, explorer2);
+    for (int i = 0; i < explorers; i++) {
+      drawExplorer(window, explorer[i]);
+    }
     window.display();
   }
 
