@@ -72,9 +72,9 @@ void drawText(RenderWindow &window, Text text);
 
 // textbox functions
 TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
-                      int width, int height, Color textColor,
-                      Color backgroundColor, Color borderColor,
-                      int borderThickness);
+                      int width, int height, Color textColor = Color::Transparent,
+                      Color backgroundColor = Color::Transparent, Color borderColor = Color::Transparent,
+                      int borderThickness = 0);
 
 void drawTextBox(RenderWindow &window, TextBox textbox);
 
