@@ -1,19 +1,30 @@
 #include "explorer.h"
 
-void drawFiles(RenderWindow &window, list files, int y) {
+void centerFiles(list &files) {
   node *p = files.head;
+  int y = p->data.background.getPosition().y;
   int fileY = y;
+  int offsetY = p->data.background.getGlobalBounds().height / 2 - p->data.date.getGlobalBounds().height / 2;
 
   while (p) {
     p->data.background.setPosition(p->data.background.getPosition().x, fileY);
-    p->data.filename.setPosition(p->data.filename.getPosition().x, fileY);
+    p->data.filename.setPosition(p->data.filename.getPosition().x,
+                                 fileY + offsetY);
     p->data.ext.setPosition(p->data.ext.getPosition().x, fileY);
     p->data.size.setPosition(p->data.size.getPosition().x, fileY);
     p->data.date.setPosition(p->data.date.getPosition().x, fileY);
 
-    drawFile(window, p->data);
-
     fileY += p->data.background.getGlobalBounds().height + 4;
+
+    p = p->next;
+  }
+}
+
+void drawFiles(RenderWindow &window, list &files, int y) {
+  node *p = files.head;
+
+  while (p) {
+    drawFile(window, p->data);
 
     p = p->next;
   }
@@ -24,7 +35,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   Explorer explorer;
 
   int height1 = 40; // used for files and file sorting buttons
-  int height2 = 60; // used for anything else
+  int height2 = 40;  // used for anything else
 
   explorer.path = path; // set path
 
@@ -38,6 +49,8 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
                    y + 2 * height2 + height1, width - 20, height1, theme.text);
+
+  centerFiles(explorer.files);
 
   node *head = explorer.files.head; // head of the file list
 
