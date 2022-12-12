@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string>
 
-
 using namespace std;
 namespace fs = filesystem;
 using namespace chrono_literals;
@@ -31,7 +30,7 @@ void openFolder(string &path, string name);
 void editFileName(string path, string newName);
 
 // deletes a file from a specified path
-void deleteFile(string path, string fileToDelete);
+void deleteFile(string path);
 
 // deletes a folder (requires confirmation in terminal)
 void deleteFolder(string path);

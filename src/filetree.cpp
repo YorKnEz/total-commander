@@ -178,39 +178,73 @@ node *find(list l, string filename) {
 }
 
 void copyFile(string fromPath, string toPath) {
-  string command = "copy \"" + fromPath + "\" \"" + toPath + "\"";
-  system(command.c_str());
+  // initialize files and buffer
+  FILE *fromPtr, *toPtr;
+  char buffer[1024];
+  size_t bytes;
+
+  // checks if the file to be copied exists
+  fromPtr = fopen(fromPath.c_str(), "rb");
+  if (!fromPtr) {
+    perror("File not found.");
+    return;
+  }
+
+  // saves the extension of the file
+  string extension = fromPath;
+  extension = extension.erase(0, extension.find_last_of("."));
+
+  // checks if a file already exists with the same name and extension, in which
+  // case we add "(counter)" at the end
+  string doesExist = toPath;
+  int counter = 0;
+  while (fopen((toPath + extension).c_str(), "rb") != NULL) {
+    toPath = doesExist + " (" + int2str(++counter) + ")";
+  }
+
+  // opens the file from "toPath" in write binary mode
+  toPath = toPath + extension;
+  toPtr = fopen(toPath.c_str(), "wb");
+
+  // copies the file from "fromPath" byte by byte to the file from "toPath" and
+  // then closes the files
+  while (0 < (bytes = fread(buffer, 1, sizeof(buffer), fromPtr))) {
+    fwrite(buffer, 1, bytes, toPtr);
+  }
+  fclose(fromPtr);
+  fclose(toPtr);
 }
 
 void moveFile(string fromPath, string toPath) {
-  string command = "copy \"" + fromPath + "\" \"" + toPath + "\"";
-  system(command.c_str());
-  command = "del \"" + fromPath + "\"";
-  system(command.c_str());
-};
-
-void deleteFile(string path) {
-
-  string command = "del \"" + path + "\"";
-  system(command.c_str());
-}
-
-void deleteFolder(string path) {
-
-  string command = "erase \"" + path + "\"";
-  system(command.c_str());
-}
-
-void editFileName(string path, string newName) {
-  string command = "ren \"" + path + "\" \"" + newName + "\"";
-  system(command.c_str());
-}
-
-void createFolder(string path, string name) {
-  string command = "md \"" + path + "\\" + name + "\"";
-  system(command.c_str());
+  copyFile(fromPath, toPath);
+  deleteFile(fromPath);
 }
 
 void openFolder(string &path, string name) {
   path = "\"" + path + "\\" + name + "\"";
+}
+
+void deleteFile(string path) { fs::remove(path); }
+
+void deleteFolder(string path) {}
+
+void editFileName(string path, string newName) {
+  string folder = path;
+  folder = folder.erase(folder.find_last_of("\\") + 1);
+  cout << folder;
+  copyFile(path, folder + newName);
+  deleteFile(path);
+}
+
+void createFolder(string path, string name) {
+  // checks if the folder already exists, case in which we add "(counter)" at
+  // the end of the name
+  string folderName = name;
+  int counter = 0;
+  while (fs::exists(path + "\\" + name)) {
+    name = folderName + " (" + int2str(++counter) + ")";
+  }
+
+  // creates a folder with the specified name
+  fs::create_directory(path + "\\" + name);
 }
