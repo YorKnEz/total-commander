@@ -48,6 +48,7 @@ int main() {
   Clock clock;           // a timer that is set between two clicks
   FloatRect clickBounds; // the bounds of the last click
   Input *activeInput = nullptr;
+  Explorer *activeExplorer = nullptr;
   RectangleShape cursor; // cursor to display on inputs
 
   while (window.isOpen()) {
@@ -181,7 +182,7 @@ int main() {
         break;
       case Event::MouseButtonReleased:
         for (int i = 0; i < explorers; i++) {
-          updateExplorerState(explorer[i], event, RELEASE, clickBounds,
+          updateExplorerState(explorer[i], event, RELEASE, activeExplorer, clickBounds,
                               activeInput);
         }
 
@@ -196,17 +197,24 @@ int main() {
           activeInput = nullptr;
         }
 
+        if (activeExplorer &&
+            !isHovered(activeExplorer->background.getGlobalBounds(),
+                       event.mouseButton.x, event.mouseButton.y)) {
+          activeExplorer->state = E_INACTIVE;
+          activeExplorer = nullptr;
+        }
+
         // double click
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 0; i < explorers; i++) {
-            updateExplorerState(explorer[i], event, DCLICK, clickBounds,
+            updateExplorerState(explorer[i], event, DCLICK, activeExplorer, clickBounds,
                                 activeInput);
           }
         }
         // simple click
         else {
           for (int i = 0; i < explorers; i++) {
-            updateExplorerState(explorer[i], event, CLICK, clickBounds,
+            updateExplorerState(explorer[i], event, CLICK, activeExplorer, clickBounds,
                                 activeInput);
           }
         }
@@ -217,7 +225,7 @@ int main() {
         break;
       case Event::MouseMoved:
         for (int i = 0; i < explorers; i++) {
-          updateExplorerState(explorer[i], event, MOVE, clickBounds,
+          updateExplorerState(explorer[i], event, MOVE, activeExplorer, clickBounds,
                               activeInput);
         }
         break;

@@ -97,9 +97,18 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 }
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
-                         FloatRect &clickBounds, Input *&activeInput) {
+                         Explorer *&activeExplorer, FloatRect &clickBounds, Input *&activeInput) {
   for (int i = 0; i < 4; i++) {
     updateButtonState(explorer.button[i], event, type, clickBounds);
+
+    if (explorer.button[i].state == B_CLICKED) {
+      activeExplorer = &explorer; 
+      activeExplorer->state = E_ACTIVE;
+
+      sortFiletree(explorer.files, sortBy(i), ASC);
+      updateFilesY(explorer.files, explorer.background.getPosition().y +
+                                          40 + explorer.scrollOffset);
+    }
   }
 
   updateInputState(explorer.input, event, type, activeInput);
