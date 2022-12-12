@@ -34,7 +34,7 @@ struct Button {
   RectangleShape background;
   string fullText;
   Text text;
-  ButtonState state, oldState;
+  ButtonState state;
 };
 
 struct Filedata {

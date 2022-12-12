@@ -123,7 +123,6 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
 
 void updateButtonState(Button &button, Event event, MouseEventType type,
                        FloatRect &clickBounds) {
-  button.oldState = button.state; // update old state
   FloatRect buttonBounds =
       button.background.getGlobalBounds(); // get bounds of button
 
