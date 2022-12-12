@@ -39,9 +39,9 @@ int main() {
   Explorer explorer[explorers];
 
   for (int i = 0; i < explorers; i++) {
-    explorer[i] =
-        createExplorer("/home/yorknez/Pictures", font, charSize, i * WINDOW_W / explorers,
-                       0, WINDOW_W / explorers, WINDOW_H, theme);
+    explorer[i] = createExplorer(
+        "/home/yorknez/UAIC/IP/Sem1/lab5/SDL_bgi-2.6.0", font, charSize,
+        i * WINDOW_W / explorers, 0, WINDOW_W / explorers, WINDOW_H, theme);
   }
 
   // useful for determining double clicks
@@ -58,6 +58,21 @@ int main() {
         window.close();
         break;
       case Event::KeyPressed:
+        // used for scroll
+        if (event.key.code == Keyboard::Up) {
+          // updateExplorerState()
+          explorer[0].scrollOffset -= 50;
+          updateFilesY(explorer[0].files,
+                       explorer[0].background.getPosition().y + 40 +
+                           explorer[0].scrollOffset);
+        } else if (event.key.code == Keyboard::Down) {
+          explorer[0].scrollOffset += 50;
+          updateFilesY(explorer[0].files,
+                       explorer[0].background.getPosition().y + 40 +
+                           explorer[0].scrollOffset);
+        }
+
+        // input related keys
         if (activeInput) {
           // move the cursor of the input to the left
           if (event.key.code == Keyboard::Left) {

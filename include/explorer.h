@@ -14,6 +14,7 @@ using namespace std;
 struct Explorer {
   string path;
   list files;
+  int scrollOffset;
   RectangleShape background;
   Button button[4];
   Input input;

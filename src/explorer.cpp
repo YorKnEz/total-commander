@@ -39,6 +39,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   int height2 = 40;  // used for anything else
 
   explorer.path = path; // set path
+  explorer.scrollOffset = 0;
 
   // initialize the background
   explorer.background.setSize(Vector2f(width, height));
