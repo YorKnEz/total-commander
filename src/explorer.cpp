@@ -1,10 +1,11 @@
 #include "explorer.h"
 
-void centerFiles(list &files) {
+void updateFilesY(list &files, int y) {
   node *p = files.head;
-  int y = p->data.background.getPosition().y;
+  // int y = p->data.background.getPosition().y;
   int fileY = y;
-  int offsetY = p->data.background.getGlobalBounds().height / 2 - p->data.date.getGlobalBounds().height / 2;
+  int offsetY = p->data.background.getGlobalBounds().height / 2 -
+                p->data.date.getGlobalBounds().height / 2;
 
   while (p) {
     p->data.background.setPosition(p->data.background.getPosition().x, fileY);
@@ -20,7 +21,7 @@ void centerFiles(list &files) {
   }
 }
 
-void drawFiles(RenderWindow &window, list &files, int y) {
+void drawFiles(RenderWindow &window, list &files) {
   node *p = files.head;
 
   while (p) {
@@ -50,7 +51,8 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   getFilesFromPath(explorer.files, path, font, charSize, x,
                    y + 2 * height2 + height1, width - 20, height1, theme.text);
 
-  centerFiles(explorer.files);
+  updateFilesY(explorer.files,
+               y + 2 * height2 + height1 + explorer.scrollOffset);
 
   node *head = explorer.files.head; // head of the file list
 
@@ -105,8 +107,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
 void drawExplorer(RenderWindow &window, Explorer explorer) {
   window.draw(explorer.background);
 
-  drawFiles(window, explorer.files,
-            explorer.background.getGlobalBounds().top + 120 + 40 + 3);
+  drawFiles(window, explorer.files);
 
   for (int i = 0; i < 4; i++) {
     drawButton(window, explorer.button[i]);

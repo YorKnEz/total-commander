@@ -24,7 +24,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme);
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
-                         FloatRect &clickBounds, Input *&activeInput);
+void updateFilesY(list &files, int y);
 
 void drawExplorer(RenderWindow &window, Explorer explorer);
 
