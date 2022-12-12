@@ -36,15 +36,15 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   Explorer explorer;
 
   int height1 = 40; // used for files and file sorting buttons
-  int height2 = 40;  // used for anything else
+  int height2 = 40; // used for anything else
 
   explorer.path = path; // set path
   explorer.scrollOffset = 0;
 
   // initialize the background
-  explorer.background.setSize(Vector2f(width, height));
+  explorer.background.setSize(Vector2f(width, height - 3 * height2));
   explorer.background.setFillColor(theme.background);
-  explorer.background.setPosition(x, y);
+  explorer.background.setPosition(x, y + 2 * height2);
 
   // initialize the files list
   init(explorer.files);
