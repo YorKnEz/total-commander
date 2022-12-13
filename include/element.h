@@ -62,14 +62,16 @@ bool isHovered(FloatRect box, int mouseX, int mouseY);
 
 // // text functions
 Text createText(string textString, Font &font, int charSize, int x, int y,
-                int width, Color textColor);
+                int width, Color text);
 
 void drawText(RenderWindow &window, Text text);
 
 // textbox functions
 TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
-                      int width, int height, Color textColor = Color::Transparent,
-                      Color backgroundColor = Color::Transparent, Color borderColor = Color::Transparent,
+                      int width, int height,
+                      Color text = Color::Transparent,
+                      Color bg = Color::Transparent,
+                      Color border = Color::Transparent,
                       int borderThickness = 0);
 
 void drawTextBox(RenderWindow &window, TextBox textbox);
@@ -78,7 +80,7 @@ void drawTextBox(RenderWindow &window, TextBox textbox);
 Button createButton(string text, Font &font, int charSize, int x, int y,
                     int width, int height,
                     StateColors stateColors[B_MAX_STATES],
-                    unsigned int borderThickness);
+                    unsigned int borderThickness = 0);
 
 void drawButton(RenderWindow &window, Button button);
 
@@ -87,7 +89,12 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
 
 // file functions
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
-                int width, int height, Color textColor);
+                int width, int height,
+                Color textHighContrast = Color::Transparent,
+                Color textLowContrast = Color::Transparent,
+                Color bg = Color::Transparent,
+                Color border = Color::Transparent,
+                int borderThickness = 0);
 
 void drawFile(RenderWindow &window, File file);
 
@@ -95,7 +102,7 @@ void drawFile(RenderWindow &window, File file);
 Input createInput(string placeholder, string value, Font &font, int charSize,
                   int x, int y, int width, int height,
                   StateColors stateColors[I_MAX_STATES],
-                  unsigned int borderThickness);
+                  unsigned int borderThickness = 0);
 
 void updateInputState(Input &input, Event event, MouseEventType type,
                       Input *&activeInput);

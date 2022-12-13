@@ -11,34 +11,33 @@ bool isHovered(FloatRect box, int mouseX, int mouseY) {
 }
 
 Text createText(string textString, Font &font, int charSize, int x, int y,
-                int width, Color textColor) {
-  Text text;
-  text.setFont(font);
-  text.setPosition(x, y);
-  text.setCharacterSize(charSize);
-  text.setStyle(Text::Regular);
-  text.setString(textString);
-  text.setFillColor(textColor);
+                int width, Color text) {
+  Text textObj;
+  textObj.setFont(font);
+  textObj.setPosition(x, y);
+  textObj.setCharacterSize(charSize);
+  textObj.setStyle(Text::Regular);
+  textObj.setString(textString);
+  textObj.setFillColor(text);
 
   // shrink the text that is shown on the screen to avoid overflow
-  if (text.getGlobalBounds().width > width) {
+  if (textObj.getGlobalBounds().width > width) {
     textString.append("..");
-    text.setString(textString);
+    textObj.setString(textString);
   }
 
-  while (text.getGlobalBounds().width > width) {
+  while (textObj.getGlobalBounds().width > width) {
     textString.erase(textString.size() - 3, 1);
-    text.setString(textString);
+    textObj.setString(textString);
   }
 
-  return text;
+  return textObj;
 }
 
 void drawText(RenderWindow &window, Text text) { window.draw(text); }
 
 TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
-                      int width, int height, Color textColor,
-                      Color backgroundColor, Color borderColor,
+                      int width, int height, Color text, Color bg, Color border,
                       int borderThickness) {
   TextBox textbox;
   textbox.fullText =
@@ -46,8 +45,8 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
 
   // initialize the background of the textbox
   textbox.background.setSize(Vector2f(width, height));
-  textbox.background.setFillColor(backgroundColor);
-  textbox.background.setOutlineColor(borderColor);
+  textbox.background.setFillColor(bg);
+  textbox.background.setOutlineColor(border);
   textbox.background.setOutlineThickness(borderThickness);
   textbox.background.setPosition(x, y);
 
@@ -55,7 +54,7 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
   textbox.text = createText(textString, font, charSize, x, y,
                             textbox.background.getGlobalBounds().width -
                                 2 * (borderThickness + 1),
-                            textColor);
+                            text);
 
   // set the offset to the text relative to the button
   int offsetX = textbox.background.getGlobalBounds().left +
@@ -177,12 +176,16 @@ void drawButton(RenderWindow &window, Button button) {
 }
 
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
-                int width, int height, Color textColor) {
+                int width, int height, Color textHighContrast,
+                Color textLowContrast, Color bg, Color border,
+                int borderThickness) {
   File file;
 
   // initialize background
   file.background.setSize(Vector2f(width, height));
-  file.background.setFillColor(Color(0x123456FF));
+  file.background.setFillColor(bg);
+  file.background.setOutlineColor(border);
+  file.background.setOutlineThickness(borderThickness);
   file.background.setPosition(x, y);
 
   // initialize data
@@ -191,23 +194,23 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
   // initialize column sizes
   Text date("dd/mm/yyyy hh:mm xx", font, charSize);
 
-  file.dateColumn = date.getGlobalBounds().width;
+  file.dateColumn = date.getGlobalBounds().width + 10;
   file.extColumn = (width - file.dateColumn) / 4;
   file.filenameColumn = (width - file.dateColumn) / 2;
   file.sizeColumn = (width - file.dateColumn) / 4;
 
   // initialize text fields
-  int nameX = x, extX = nameX + file.filenameColumn,
+  int nameX = x + 10, extX = nameX + file.filenameColumn,
       sizeX = extX + file.extColumn, dateX = sizeX + file.sizeColumn;
 
   file.filename = createText(data.filename, font, charSize, nameX, y,
-                             file.filenameColumn, textColor);
-  file.ext =
-      createText(data.ext, font, charSize, extX, y, file.extColumn, textColor);
-  file.size = createText(data.size, font, charSize, sizeX, y, file.sizeColumn,
-                         textColor);
-  file.date = createText(data.date, font, charSize, dateX, y, file.dateColumn,
-                         textColor);
+                             file.filenameColumn - 10, textHighContrast);
+  file.ext = createText(data.ext, font, charSize, extX, y, file.extColumn - 10,
+                        textLowContrast);
+  file.size = createText(data.size, font, charSize, sizeX, y,
+                         file.sizeColumn - 10, textLowContrast);
+  file.date = createText(data.date, font, charSize, dateX, y,
+                         file.dateColumn - 10, textLowContrast);
 
   return file;
 }
@@ -243,9 +246,9 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
 
   // set the text to display on the screen
   string displayText = value == "" ? placeholder : value;
-  input.displayText = createText(displayText, font, charSize, x, y,
+  input.displayText = createText(displayText, font, charSize, x + 10, y,
                                  input.background.getGlobalBounds().width -
-                                     2 * (borderThickness + 1),
+                                     2 * (borderThickness + 1) - 10,
                                  stateColors[I_INACTIVE].text);
 
   // display only a segment of the text so it fits in the text box
@@ -353,78 +356,78 @@ void drawInput(RenderWindow &window, Input &input) {
   // draw the input on the window
   window.draw(input.background);
 
-  int radius = 10;
-
-  CircleShape c(radius);
-  c.setFillColor(input.inputStateColors[input.state].background);
-  c.setOutlineThickness(input.background.getOutlineThickness());
-  c.setOutlineColor(input.inputStateColors[input.state].primary);
-
-  RectangleShape sq(Vector2f(2 * radius, 2 * radius));
-  sq.setFillColor(Color(0x242424FF));
-  sq.setOutlineThickness(input.background.getOutlineThickness());
-  sq.setOutlineColor(Color(0x242424FF));
-
-  FloatRect bgBounds = input.background.getGlobalBounds();
-
-  // clear the corners
-  sq.setPosition(bgBounds.left, bgBounds.top);
-  window.draw(sq);
-  sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
-  window.draw(sq);
-  sq.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
-  window.draw(sq);
-  sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
-                 bgBounds.top + bgBounds.height - 2 * radius);
-  window.draw(sq);
-
-  // round the edges
-  c.setPosition(bgBounds.left, bgBounds.top);
-  window.draw(c);
-  c.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
-  window.draw(c);
-  c.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
-  window.draw(c);
-  c.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
-                bgBounds.top + bgBounds.height - 2 * radius);
-  window.draw(c);
-
-  // fill the input
-  sq.setFillColor(input.inputStateColors[input.state].background);
-  sq.setOutlineThickness(input.background.getOutlineThickness());
-  sq.setOutlineColor(input.inputStateColors[input.state].background);
-
-  sq.setSize(Vector2f(bgBounds.width, bgBounds.height - 2 * radius));
-  sq.setPosition(Vector2f(bgBounds.left, bgBounds.top + radius));
-
-  window.draw(sq);
-
-  sq.setSize(Vector2f(bgBounds.width - 2 * radius, bgBounds.height));
-  sq.setPosition(Vector2f(bgBounds.left + radius, bgBounds.top));
-
-  window.draw(sq);
-
-  // draw the borders
-  sq.setFillColor(input.inputStateColors[input.state].primary);
-  sq.setOutlineThickness(0);
-
-  sq.setSize(Vector2f(input.background.getOutlineThickness(),
-                      bgBounds.height - 2 * radius + 2));
-  sq.setPosition(Vector2f(bgBounds.left - 1, bgBounds.top + radius - 1));
-  window.draw(sq);
-
-  sq.setPosition(
-      Vector2f(bgBounds.left + bgBounds.width, bgBounds.top + radius - 1));
-  window.draw(sq);
-
-  sq.setSize(Vector2f(bgBounds.width - 2 * radius + 2,
-                      input.background.getOutlineThickness()));
-  sq.setPosition(Vector2f(bgBounds.left + radius - 1, bgBounds.top - 1));
-  window.draw(sq);
-
-  sq.setPosition(
-      Vector2f(bgBounds.left + radius - 1, bgBounds.top + bgBounds.height));
-  window.draw(sq);
+  // int radius = 10;
+  //
+  // CircleShape c(radius);
+  // c.setFillColor(input.inputStateColors[input.state].background);
+  // c.setOutlineThickness(input.background.getOutlineThickness());
+  // c.setOutlineColor(input.inputStateColors[input.state].primary);
+  //
+  // RectangleShape sq(Vector2f(2 * radius, 2 * radius));
+  // sq.setFillColor(Color(0x242424FF));
+  // sq.setOutlineThickness(input.background.getOutlineThickness());
+  // sq.setOutlineColor(Color(0x242424FF));
+  //
+  // FloatRect bgBounds = input.background.getGlobalBounds();
+  //
+  // // clear the corners
+  // sq.setPosition(bgBounds.left, bgBounds.top);
+  // window.draw(sq);
+  // sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
+  // window.draw(sq);
+  // sq.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
+  // window.draw(sq);
+  // sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
+  //                bgBounds.top + bgBounds.height - 2 * radius);
+  // window.draw(sq);
+  //
+  // // round the edges
+  // c.setPosition(bgBounds.left, bgBounds.top);
+  // window.draw(c);
+  // c.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
+  // window.draw(c);
+  // c.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
+  // window.draw(c);
+  // c.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
+  //               bgBounds.top + bgBounds.height - 2 * radius);
+  // window.draw(c);
+  //
+  // // fill the input
+  // sq.setFillColor(input.inputStateColors[input.state].background);
+  // sq.setOutlineThickness(input.background.getOutlineThickness());
+  // sq.setOutlineColor(input.inputStateColors[input.state].background);
+  //
+  // sq.setSize(Vector2f(bgBounds.width, bgBounds.height - 2 * radius));
+  // sq.setPosition(Vector2f(bgBounds.left, bgBounds.top + radius));
+  //
+  // window.draw(sq);
+  //
+  // sq.setSize(Vector2f(bgBounds.width - 2 * radius, bgBounds.height));
+  // sq.setPosition(Vector2f(bgBounds.left + radius, bgBounds.top));
+  //
+  // window.draw(sq);
+  //
+  // // draw the borders
+  // sq.setFillColor(input.inputStateColors[input.state].primary);
+  // sq.setOutlineThickness(0);
+  //
+  // sq.setSize(Vector2f(input.background.getOutlineThickness(),
+  //                     bgBounds.height - 2 * radius + 2));
+  // sq.setPosition(Vector2f(bgBounds.left - 1, bgBounds.top + radius - 1));
+  // window.draw(sq);
+  //
+  // sq.setPosition(
+  //     Vector2f(bgBounds.left + bgBounds.width, bgBounds.top + radius - 1));
+  // window.draw(sq);
+  //
+  // sq.setSize(Vector2f(bgBounds.width - 2 * radius + 2,
+  //                     input.background.getOutlineThickness()));
+  // sq.setPosition(Vector2f(bgBounds.left + radius - 1, bgBounds.top - 1));
+  // window.draw(sq);
+  //
+  // sq.setPosition(
+  //     Vector2f(bgBounds.left + radius - 1, bgBounds.top + bgBounds.height));
+  // window.draw(sq);
 
   // initialize the text of the input
   if (input.value == "") {

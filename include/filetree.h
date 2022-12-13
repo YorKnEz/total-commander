@@ -40,7 +40,8 @@ void deleteFolder(string path);
 void createFolder(string path, string name);
 
 void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
-                      int y, int width, int height, Color textColor);
+                      int y, int width, int height, Color textHighContrast,
+                      Color textLowContrast, Color bg, Color border);
 
 void sortFiletree(list &l, sortBy criteria, sortOrder order);
 

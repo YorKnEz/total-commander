@@ -16,19 +16,40 @@ using namespace std;
 
 int main() {
   RenderWindow window(VideoMode(WINDOW_W, WINDOW_H), TITLE);
+  window.setPosition(
+      Vector2i(VideoMode::getDesktopMode().width / 2 - WINDOW_W / 2,
+               VideoMode::getDesktopMode().height / 2 - WINDOW_H / 2));
 
-  ColorTheme dark = {Color(0xEEEEEEFF),
-                     Color(0x242424FF),
-                     Color(0xFFFFFFFF),
-                     {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                      {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                      {Color(0x00d5ffFF), Color(0xEEEEEEFF)},
-                      {Color(0x42f54bFF), Color(0xEEEEEEFF)}},
-                     {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                      {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                      {Color(0x00d5ffFF), Color(0xEEEEEEFF)}}};
+  ColorTheme dark1 = {Color(0xEEEEEEFF), // text with high contrast
+                      Color(0x7A7A7AFF), // text with medium contrast
+                      Color(0x8B8774FF), // text with low contrast
+                      Color(0x32332bFF), // background of body
+                      Color(0x303030FF), // background with low contrast
+                      Color(0x242422FF), // border
+                      {{Color(0x7A7A7AFF), Color(0x363731FF)},
+                       {Color(0x7700ffFF), Color(0x363731FF)},
+                       {Color(0x00d5ffFF), Color(0x363731FF)},
+                       {Color(0x42f54bFF), Color(0x363731FF)}},
+                      {{Color(0x7A7A7AFF), Color(0x303030FF)},
+                       {Color(0x7700ffFF), Color(0x303030FF)},
+                       {Color(0x00d5ffFF), Color(0x303030FF)}}};
 
-  ColorTheme theme = dark;
+  ColorTheme dark2 = {
+      Color(0xFFFFFFFF), // text with high contrast
+      Color(0x999995FF), // text with medium contrast
+      Color(0x474740FF), // text with low contrast
+      Color(0x32332BFF), // background of body
+      Color(0x191A16FF), // background with low contrast
+      Color(0x0A0A09FF), // border
+      {{Color(0x848580ff), Color(0x282922FF), Color(0x0A0A09FF)},
+       {Color(0xc2c2bfff), Color(0x282922FF), Color(0x191A16FF)},
+       {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)},
+       {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)}},
+      {{Color(0x848580FF), Color(0x191A16FF), Color(0x0A0A09FF)},
+       {Color(0xC2C2BFFF), Color(0x191A16FF), Color(0x191A16FF)},
+       {Color(0xFFFFFFFF), Color(0x191A16FF), Color(0x0A0A09FF)}}};
+
+  ColorTheme theme = dark2;
 
   Font font;
   font.loadFromFile("assets/calibri.ttf");
@@ -78,13 +99,13 @@ int main() {
       case Event::KeyPressed:
         // used for scroll
         if (activeExplorer) {
-        if (event.key.code == Keyboard::Up) {
-          // updateExplorerState()
+          if (event.key.code == Keyboard::Up) {
+            // updateExplorerState()
             activeExplorer->scrollOffset -= 50;
             updateFilesY(activeExplorer->files,
                          activeExplorer->background.getPosition().y + 32 +
                              activeExplorer->scrollOffset);
-        } else if (event.key.code == Keyboard::Down) {
+          } else if (event.key.code == Keyboard::Down) {
             activeExplorer->scrollOffset += 50;
             updateFilesY(activeExplorer->files,
                          activeExplorer->background.getPosition().y + 32 +
@@ -244,7 +265,7 @@ int main() {
       }
     }
 
-    window.clear(theme.background);
+    window.clear(theme.bgBody);
     for (int i = 0; i < explorers; i++) {
       drawExplorer(window, explorer[i]);
     }

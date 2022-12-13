@@ -2,18 +2,19 @@
 
 void updateFilesY(list &files, int y) {
   node *p = files.head;
-  // int y = p->data.background.getPosition().y;
   int fileY = y;
-  int offsetY = p->data.background.getGlobalBounds().height / 2 -
+  int offsetY = p->data.background.getGlobalBounds().top +
+                p->data.background.getGlobalBounds().height / 2 -
+                p->data.date.getGlobalBounds().top -
                 p->data.date.getGlobalBounds().height / 2;
 
   while (p) {
     p->data.background.setPosition(p->data.background.getPosition().x, fileY);
     p->data.filename.setPosition(p->data.filename.getPosition().x,
                                  fileY + offsetY);
-    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY);
-    p->data.size.setPosition(p->data.size.getPosition().x, fileY);
-    p->data.date.setPosition(p->data.date.getPosition().x, fileY);
+    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetY);
+    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
+    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
 
     fileY += p->data.background.getGlobalBounds().height + 4;
 
@@ -35,7 +36,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme) {
   Explorer explorer;
 
-  int height1 = 40; // used for files and file sorting buttons
+  int height1 = 32; // used for files and file sorting buttons
   int height2 = 40; // used for anything else
 
   explorer.path = path; // set path
@@ -43,55 +44,58 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
   // initialize the background
   explorer.background.setSize(Vector2f(width, height - 3 * height2));
-  explorer.background.setFillColor(theme.background);
+  explorer.background.setFillColor(theme.bgBody);
   explorer.background.setPosition(x, y + 2 * height2);
 
   // initialize the files list
   init(explorer.files);
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
-                   y + 2 * height2 + height1, width - 20, height1, theme.text);
+                   y + 2 * height2 + height1, width - 20, height1,
+                   theme.textHighContrast, theme.textLowContrast, theme.border,
+                   theme.border);
 
   updateFilesY(explorer.files,
                y + 2 * height2 + height1 + explorer.scrollOffset);
 
   node *head = explorer.files.head; // head of the file list
 
-  int nameX = x, extX = nameX + head->data.filenameColumn,
+  int nameX = x + 1, extX = nameX + head->data.filenameColumn,
       sizeX = extX + head->data.extColumn,
       dateX =
           sizeX +
-          head->data.sizeColumn; // used for setting the x of the file columns
-  int btnY = y + 2 * height2;    // used for setting the y of the file columns
+          head->data.sizeColumn;  // used for setting the x of the file columns
+  int btnY = y + 2 * height2 + 1; // used for setting the y of the file columns
 
   // set the drive size text box
-  explorer.textbox[0] =
-      createTextBox("Size of drive", font, charSize, x + 1, y + 1, width - 2,
-                    height2 - 2, theme.text, theme.background, theme.border, 1);
+  explorer.textbox[0] = createTextBox(
+      "Size of drive", font, charSize, x + 1, y + 1, width - 2, height2 - 2,
+      theme.textMediumContrast, theme.bgLowContrast, theme.border, 1);
 
   // set the input
-  explorer.input = createInput("Enter path here", path, font, charSize, x + 10,
-                               y + height2 + 10, width - 20, height2 - 20,
-                               theme.inputStateColors, 0);
+  explorer.input = createInput("Enter path here", path, font, charSize, x + 1,
+                               y + height2 + 1, width - 2, height2 - 2,
+                               theme.inputStateColors, 1);
 
   // set the sorting buttons
   explorer.button[0] = createButton("Name", font, charSize, nameX, btnY,
-                                    head->data.filenameColumn, height1,
-                                    theme.buttonStateColors, 0);
+                                    head->data.filenameColumn - 2, height1 - 2,
+                                    theme.buttonStateColors, 1);
   explorer.button[1] =
-      createButton("Ext", font, charSize, extX, btnY, head->data.extColumn,
-                   height1, theme.buttonStateColors, 0);
-  explorer.button[2] =
-      createButton("Size", font, charSize, sizeX, btnY, head->data.sizeColumn,
-                   height1, theme.buttonStateColors, 0);
-  explorer.button[3] =
-      createButton("Date", font, charSize, dateX, btnY, head->data.dateColumn,
-                   height1, theme.buttonStateColors, 0);
+      createButton("Ext", font, charSize, extX, btnY, head->data.extColumn - 2,
+                   height1 - 2, theme.buttonStateColors, 1);
+  explorer.button[2] = createButton("Size", font, charSize, sizeX, btnY,
+                                    head->data.sizeColumn - 2, height1 - 2,
+                                    theme.buttonStateColors, 1);
+  explorer.button[3] = createButton("Date", font, charSize, dateX, btnY,
+                                    head->data.dateColumn - 1, height1 - 2,
+                                    theme.buttonStateColors, 1);
 
   // set the current folder text box
-  explorer.textbox[1] = createTextBox(
-      "Current folder", font, charSize, x + 1, y + height - height2 + 1,
-      width - 2, height2 - 2, theme.text, theme.background, theme.border, 1);
+  explorer.textbox[1] = createTextBox("Current folder", font, charSize, x + 1,
+                                      y + height - height2 + 1, width - 2,
+                                      height2 - 2, theme.textMediumContrast,
+                                      theme.bgLowContrast, theme.border, 1);
 
   return explorer;
 }
@@ -133,12 +137,9 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
     updateButtonState(explorer.button[i], event, type, clickBounds);
 
     if (explorer.button[i].state == B_CLICKED) {
-      activeExplorer = &explorer; 
-      activeExplorer->state = E_ACTIVE;
-
       sortFiletree(explorer.files, sortBy(i), ASC);
-      updateFilesY(explorer.files, explorer.background.getPosition().y +
-                                          40 + explorer.scrollOffset);
+      updateFilesY(explorer.files, explorer.background.getPosition().y + 32 +
+                                       explorer.scrollOffset);
     }
   }
 
