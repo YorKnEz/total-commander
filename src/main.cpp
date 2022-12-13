@@ -48,7 +48,8 @@ int main() {
   Clock clock;           // a timer that is set between two clicks
   FloatRect clickBounds; // the bounds of the last click
   Input *activeInput = nullptr;
-  Explorer *activeExplorer = nullptr;
+  Explorer *activeExplorer =
+      nullptr; // current active explorer will be the first one by default
   RectangleShape cursor; // cursor to display on inputs
 
   while (window.isOpen()) {
@@ -58,19 +59,37 @@ int main() {
       case Event::Closed:
         window.close();
         break;
+      case Event::MouseWheelScrolled:
+        if (activeExplorer) {
+          if (event.mouseWheelScroll.delta < 0) {
+            // updateExplorerState()
+            activeExplorer->scrollOffset -= 50;
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y + 32 +
+                             activeExplorer->scrollOffset);
+          } else if (event.mouseWheelScroll.delta > 0) {
+            activeExplorer->scrollOffset += 50;
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y + 32 +
+                             activeExplorer->scrollOffset);
+          }
+        }
+        break;
       case Event::KeyPressed:
         // used for scroll
+        if (activeExplorer) {
         if (event.key.code == Keyboard::Up) {
           // updateExplorerState()
-          explorer[0].scrollOffset -= 50;
-          updateFilesY(explorer[0].files,
-                       explorer[0].background.getPosition().y + 40 +
-                           explorer[0].scrollOffset);
+            activeExplorer->scrollOffset -= 50;
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y + 32 +
+                             activeExplorer->scrollOffset);
         } else if (event.key.code == Keyboard::Down) {
-          explorer[0].scrollOffset += 50;
-          updateFilesY(explorer[0].files,
-                       explorer[0].background.getPosition().y + 40 +
-                           explorer[0].scrollOffset);
+            activeExplorer->scrollOffset += 50;
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y + 32 +
+                             activeExplorer->scrollOffset);
+          }
         }
 
         // input related keys
@@ -182,8 +201,8 @@ int main() {
         break;
       case Event::MouseButtonReleased:
         for (int i = 0; i < explorers; i++) {
-          updateExplorerState(explorer[i], event, RELEASE, activeExplorer, clickBounds,
-                              activeInput);
+          updateExplorerState(explorer[i], event, RELEASE, activeExplorer,
+                              clickBounds, activeInput);
         }
 
         break;
@@ -197,25 +216,18 @@ int main() {
           activeInput = nullptr;
         }
 
-        if (activeExplorer &&
-            !isHovered(activeExplorer->background.getGlobalBounds(),
-                       event.mouseButton.x, event.mouseButton.y)) {
-          activeExplorer->state = E_INACTIVE;
-          activeExplorer = nullptr;
-        }
-
         // double click
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 0; i < explorers; i++) {
-            updateExplorerState(explorer[i], event, DCLICK, activeExplorer, clickBounds,
-                                activeInput);
+            updateExplorerState(explorer[i], event, DCLICK, activeExplorer,
+                                clickBounds, activeInput);
           }
         }
         // simple click
         else {
           for (int i = 0; i < explorers; i++) {
-            updateExplorerState(explorer[i], event, CLICK, activeExplorer, clickBounds,
-                                activeInput);
+            updateExplorerState(explorer[i], event, CLICK, activeExplorer,
+                                clickBounds, activeInput);
           }
         }
 
@@ -225,8 +237,8 @@ int main() {
         break;
       case Event::MouseMoved:
         for (int i = 0; i < explorers; i++) {
-          updateExplorerState(explorer[i], event, MOVE, activeExplorer, clickBounds,
-                              activeInput);
+          updateExplorerState(explorer[i], event, MOVE, activeExplorer,
+                              clickBounds, activeInput);
         }
         break;
       }
