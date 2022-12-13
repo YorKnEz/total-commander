@@ -15,12 +15,8 @@ enum MouseEventType { MOVE, RELEASE, CLICK, DCLICK };
 enum ButtonState { B_INACTIVE, B_HOVERED, B_CLICKED, B_DCLICKED };
 enum InputState { I_INACTIVE, I_HOVERED, I_ACTIVE };
 
-struct ButtonStateColors {
-  Color primary, background;
-};
-
-struct InputStateColors {
-  Color primary, background;
+struct StateColors {
+  Color text, background, border;
 };
 
 struct TextBox {
@@ -30,7 +26,7 @@ struct TextBox {
 };
 
 struct Button {
-  ButtonStateColors buttonStateColors[B_MAX_STATES];
+  StateColors stateColors[B_MAX_STATES];
   RectangleShape background;
   string fullText;
   Text text;
@@ -52,7 +48,7 @@ struct File {
 };
 
 struct Input {
-  InputStateColors inputStateColors[I_MAX_STATES];
+  StateColors stateColors[I_MAX_STATES];
   RectangleShape background;
   string placeholder, value;
   Text displayText;
@@ -81,7 +77,7 @@ void drawTextBox(RenderWindow &window, TextBox textbox);
 // button functions
 Button createButton(string text, Font &font, int charSize, int x, int y,
                     int width, int height,
-                    ButtonStateColors buttonStateColors[B_MAX_STATES],
+                    StateColors stateColors[B_MAX_STATES],
                     unsigned int borderThickness);
 
 void drawButton(RenderWindow &window, Button button);
@@ -98,7 +94,7 @@ void drawFile(RenderWindow &window, File file);
 // input functions
 Input createInput(string placeholder, string value, Font &font, int charSize,
                   int x, int y, int width, int height,
-                  InputStateColors inputStateColors[I_MAX_STATES],
+                  StateColors stateColors[I_MAX_STATES],
                   unsigned int borderThickness);
 
 void updateInputState(Input &input, Event event, MouseEventType type,

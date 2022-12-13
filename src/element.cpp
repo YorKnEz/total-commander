@@ -80,7 +80,7 @@ void drawTextBox(RenderWindow &window, TextBox textbox) {
 
 Button createButton(string text, Font &font, int charSize, int x, int y,
                     int width, int height,
-                    ButtonStateColors buttonStateColors[B_MAX_STATES],
+                    StateColors stateColors[B_MAX_STATES],
                     unsigned int borderThickness) {
   Button button;
   button.state = B_INACTIVE; // set the state of the button
@@ -89,13 +89,13 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
 
   // copy the state colors
   for (int i = 0; i < B_MAX_STATES; i++) {
-    button.buttonStateColors[i] = buttonStateColors[i];
+    button.stateColors[i] = stateColors[i];
   }
 
   // initialize the background of the button
   button.background.setSize(Vector2f(width, height));
-  button.background.setFillColor(buttonStateColors[B_INACTIVE].background);
-  button.background.setOutlineColor(buttonStateColors[B_INACTIVE].primary);
+  button.background.setFillColor(stateColors[B_INACTIVE].background);
+  button.background.setOutlineColor(stateColors[B_INACTIVE].border);
   button.background.setOutlineThickness(borderThickness);
   button.background.setPosition(x, y);
 
@@ -103,7 +103,7 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
   button.text = createText(text, font, charSize, x, y,
                            button.background.getGlobalBounds().width -
                                2 * (borderThickness + 1),
-                           buttonStateColors[B_INACTIVE].primary);
+                           stateColors[B_INACTIVE].text);
 
   // set the offset to the text relative to the button
   int offsetX = button.background.getGlobalBounds().left +
@@ -167,9 +167,9 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
 
 void drawButton(RenderWindow &window, Button button) {
   // update the color of the button depending on it's state
-  button.text.setFillColor(button.buttonStateColors[button.state].primary);
-  button.background.setOutlineColor(
-      button.buttonStateColors[button.state].primary);
+  button.text.setFillColor(button.stateColors[button.state].text);
+  button.background.setFillColor(button.stateColors[button.state].background);
+  button.background.setOutlineColor(button.stateColors[button.state].border);
 
   // draw the button on the window passed by reference
   window.draw(button.background);
@@ -222,7 +222,7 @@ void drawFile(RenderWindow &window, File file) {
 
 Input createInput(string placeholder, string value, Font &font, int charSize,
                   int x, int y, int width, int height,
-                  InputStateColors inputStateColors[I_MAX_STATES],
+                  StateColors stateColors[I_MAX_STATES],
                   unsigned int borderThickness) {
   Input input;
   input.state = I_INACTIVE;        // set the state of the input
@@ -231,13 +231,13 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
   input.cursorLocation = 0;
   // copy the state colors
   for (int i = 0; i < I_MAX_STATES; i++) {
-    input.inputStateColors[i] = inputStateColors[i];
+    input.stateColors[i] = stateColors[i];
   }
 
   // initialize the background of the input
   input.background.setSize(Vector2f(width, height));
-  input.background.setFillColor(inputStateColors[I_INACTIVE].background);
-  input.background.setOutlineColor(inputStateColors[I_INACTIVE].primary);
+  input.background.setFillColor(stateColors[I_INACTIVE].background);
+  input.background.setOutlineColor(stateColors[I_INACTIVE].border);
   input.background.setOutlineThickness(borderThickness);
   input.background.setPosition(x, y);
 
@@ -246,7 +246,7 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
   input.displayText = createText(displayText, font, charSize, x, y,
                                  input.background.getGlobalBounds().width -
                                      2 * (borderThickness + 1),
-                                 inputStateColors[I_INACTIVE].primary);
+                                 stateColors[I_INACTIVE].text);
 
   // display only a segment of the text so it fits in the text box
   input.startPosition = 0;
@@ -346,8 +346,9 @@ void shrinkInput(Input &input) {
 
 void drawInput(RenderWindow &window, Input &input) {
   // update the color of the input depending on it's state
-  input.displayText.setFillColor(input.inputStateColors[input.state].primary);
-  input.background.setOutlineColor(input.inputStateColors[input.state].primary);
+  input.displayText.setFillColor(input.stateColors[input.state].text);
+  input.background.setFillColor(input.stateColors[input.state].background);
+  input.background.setOutlineColor(input.stateColors[input.state].border);
 
   // draw the input on the window
   window.draw(input.background);

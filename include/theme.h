@@ -5,9 +5,8 @@
 #include <SFML/Graphics.hpp>
 
 struct ColorTheme {
-  Color text, background, border;
-  ButtonStateColors buttonStateColors[B_MAX_STATES];
-  InputStateColors inputStateColors[I_MAX_STATES];
+  StateColors buttonStateColors[B_MAX_STATES];
+  StateColors inputStateColors[I_MAX_STATES];
 };
 
 extern ColorTheme dark;
