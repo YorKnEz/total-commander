@@ -97,7 +97,38 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 }
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
-                         Explorer *&activeExplorer, FloatRect &clickBounds, Input *&activeInput) {
+                         Explorer *&activeExplorer, FloatRect &clickBounds,
+                         Input *&activeInput) {
+  switch (type) {
+  case CLICK:
+    // if the user clicks inside the explorer, move the focus to the explorer
+    if (isHovered(explorer.background.getGlobalBounds(), event.mouseButton.x,
+                  event.mouseButton.y)) {
+      if (activeExplorer) {
+        activeExplorer->state = E_INACTIVE; // set old explorer as inactive
+
+        // remove the focused explorer indicator
+        activeExplorer->textbox[1].fullText.erase(0, 2);
+        activeExplorer->textbox[1].fullText.erase(
+            activeExplorer->textbox[1].fullText.size() - 2, 2);
+
+        activeExplorer->textbox[1].text.setString(
+            activeExplorer->textbox[1].fullText);
+      }
+
+      activeExplorer = &explorer;
+      activeExplorer->state = E_ACTIVE; // set current explorer as active
+
+      // add the focused explorer indicator
+      activeExplorer->textbox[1].fullText.insert(0, "> ");
+      activeExplorer->textbox[1].fullText.append(" <");
+
+      activeExplorer->textbox[1].text.setString(
+          activeExplorer->textbox[1].fullText);
+    }
+    break;
+  }
+
   for (int i = 0; i < 4; i++) {
     updateButtonState(explorer.button[i], event, type, clickBounds);
 
