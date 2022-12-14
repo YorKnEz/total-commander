@@ -3,10 +3,15 @@
 void updateFilesY(list &files, int y) {
   node *p = files.head;
   int fileY = y;
-  int offsetY = p->data.background.getGlobalBounds().top +
-                p->data.background.getGlobalBounds().height / 2 -
-                p->data.date.getGlobalBounds().top -
-                p->data.date.getGlobalBounds().height / 2;
+  // int offsetY = p->data.background.getGlobalBounds().top +
+  //               p->data.background.getGlobalBounds().height / 2 -
+  //               p->data.date.getGlobalBounds().top -
+  //               p->data.date.getGlobalBounds().height / 2;
+
+  int offsetY = p->data.background.getGlobalBounds().height / 2 -
+                p->data.date.getGlobalBounds().height / 2 +
+                p->data.date.getPosition().y -
+                p->data.date.getGlobalBounds().top;
 
   while (p) {
     p->data.background.setPosition(p->data.background.getPosition().x, fileY);
