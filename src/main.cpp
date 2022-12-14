@@ -37,12 +37,12 @@ int main() {
   ColorTheme dark2 = {
       Color(0xFFFFFFFF), // text with high contrast
       Color(0x999995FF), // text with medium contrast
-      Color(0x474740FF), // text with low contrast
+      Color(0x5B5C55FF), // text with low contrast
       Color(0x32332BFF), // background of body
       Color(0x191A16FF), // background with low contrast
       Color(0x0A0A09FF), // border
-      {{Color(0x848580ff), Color(0x282922FF), Color(0x0A0A09FF)},
-       {Color(0xc2c2bfff), Color(0x282922FF), Color(0x191A16FF)},
+      {{Color(0x848580FF), Color(0x282922FF), Color(0x0A0A09FF)},
+       {Color(0xC2C2BFFF), Color(0x282922FF), Color(0x191A16FF)},
        {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)},
        {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)}},
       {{Color(0x848580FF), Color(0x191A16FF), Color(0x0A0A09FF)},

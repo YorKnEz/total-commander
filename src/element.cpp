@@ -449,7 +449,7 @@ void drawInput(RenderWindow &window, Input &input) {
     FloatRect inputBounds = input.background.getGlobalBounds();
 
     RectangleShape r(Vector2f(1, 9 * charSize / 10));
-    r.setFillColor(Color(0x000000FF));
+    r.setFillColor(input.stateColors[input.state].text);
     r.setPosition(Vector2f(textPos.x, inputBounds.top + inputBounds.height / 2 -
                                           r.getGlobalBounds().height / 2));
 

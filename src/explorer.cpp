@@ -57,7 +57,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
                    y + 2 * height2 + height1, width - 20, height1,
-                   theme.textHighContrast, theme.textLowContrast, theme.border,
+                   theme.textHighContrast, theme.textLowContrast, theme.bgBody,
                    theme.border);
 
   updateFilesY(explorer.files,
