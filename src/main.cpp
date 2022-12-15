@@ -16,6 +16,7 @@ using namespace std;
 
 int main() {
   RenderWindow window(VideoMode(WINDOW_W, WINDOW_H), TITLE);
+  // center window on the screen
   window.setPosition(
       Vector2i(VideoMode::getDesktopMode().width / 2 - WINDOW_W / 2,
                VideoMode::getDesktopMode().height / 2 - WINDOW_H / 2));
@@ -80,14 +81,16 @@ int main() {
           if (event.mouseWheelScroll.delta < 0) {
             // updateExplorerState()
             activeExplorer->scrollOffset -= 50;
-            updateFilesY(activeExplorer->files,
-                         activeExplorer->background.getPosition().y + 32 +
-                             activeExplorer->scrollOffset);
+            updateFilesY(activeExplorer->files, activeExplorer->background.getPosition().y +
+                                             activeExplorer->heightFile +
+                                             2 * activeExplorer->heightComp +
+                                             activeExplorer->scrollOffset);
           } else if (event.mouseWheelScroll.delta > 0) {
             activeExplorer->scrollOffset += 50;
-            updateFilesY(activeExplorer->files,
-                         activeExplorer->background.getPosition().y + 32 +
-                             activeExplorer->scrollOffset);
+            updateFilesY(activeExplorer->files, activeExplorer->background.getPosition().y +
+                                             activeExplorer->heightFile +
+                                             2 * activeExplorer->heightComp +
+                                             activeExplorer->scrollOffset);
           }
         }
         break;
@@ -97,14 +100,16 @@ int main() {
           if (event.key.code == Keyboard::Up) {
             // updateExplorerState()
             activeExplorer->scrollOffset -= 50;
-            updateFilesY(activeExplorer->files,
-                         activeExplorer->background.getPosition().y + 32 +
-                             activeExplorer->scrollOffset);
+            updateFilesY(activeExplorer->files, activeExplorer->background.getPosition().y +
+                                             activeExplorer->heightFile +
+                                             2 * activeExplorer->heightComp +
+                                             activeExplorer->scrollOffset);
           } else if (event.key.code == Keyboard::Down) {
             activeExplorer->scrollOffset += 50;
-            updateFilesY(activeExplorer->files,
-                         activeExplorer->background.getPosition().y + 32 +
-                             activeExplorer->scrollOffset);
+            updateFilesY(activeExplorer->files, activeExplorer->background.getPosition().y +
+                                             activeExplorer->heightFile +
+                                             2 * activeExplorer->heightComp +
+                                             activeExplorer->scrollOffset);
           }
         }
 

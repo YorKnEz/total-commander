@@ -19,6 +19,8 @@ struct Explorer {
   string path;
   list files;
   int scrollOffset;
+  int heightFile; // height of the files on the screen
+  int heightComp; // height of the other components
   RectangleShape background;
   Button button[4];
   Input input;
