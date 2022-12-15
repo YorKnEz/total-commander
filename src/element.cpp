@@ -176,15 +176,20 @@ void drawButton(RenderWindow &window, Button button) {
 }
 
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
-                int width, int height, Color textHighContrast,
-                Color textLowContrast, Color bg, Color border,
+                int width, int height,
+                FileStateColors stateColors[B_MAX_STATES],
                 int borderThickness) {
   File file;
+  file.state = B_INACTIVE; // set the state of the button
+  // copy the state colors
+  for (int i = 0; i < B_MAX_STATES; i++) {
+    file.stateColors[i] = stateColors[i];
+  }
 
   // initialize background
   file.background.setSize(Vector2f(width, height));
-  file.background.setFillColor(bg);
-  file.background.setOutlineColor(border);
+  file.background.setFillColor(file.stateColors[file.state].background);
+  file.background.setOutlineColor(file.stateColors[file.state].border);
   file.background.setOutlineThickness(borderThickness);
   file.background.setPosition(x, y);
 
@@ -204,18 +209,76 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
       sizeX = extX + file.extColumn, dateX = sizeX + file.sizeColumn;
 
   file.filename = createText(data.filename, font, charSize, nameX, y,
-                             file.filenameColumn - 10, textHighContrast);
+                             file.filenameColumn - 10,
+                             file.stateColors[file.state].textHighContrast);
   file.ext = createText(data.ext, font, charSize, extX, y, file.extColumn - 10,
-                        textLowContrast);
-  file.size = createText(data.size, font, charSize, sizeX, y,
-                         file.sizeColumn - 10, textLowContrast);
-  file.date = createText(data.date, font, charSize, dateX, y,
-                         file.dateColumn - 10, textLowContrast);
+                        file.stateColors[file.state].textLowContrast);
+  file.size =
+      createText(data.size, font, charSize, sizeX, y, file.sizeColumn - 10,
+                 file.stateColors[file.state].textLowContrast);
+  file.date =
+      createText(data.date, font, charSize, dateX, y, file.dateColumn - 10,
+                 file.stateColors[file.state].textLowContrast);
 
   return file;
 }
 
+void updateFileState(File &file, Event event, MouseEventType type,
+                     File *&activeFile) {
+  FloatRect fileBounds =
+      file.background.getGlobalBounds(); // get bounds of button
+
+  cout << &file << " " << activeFile << '\n';
+
+  switch (type) {
+  // case RELEASE:
+  //   if (file.state == B_CLICKED || file.state == B_DCLICKED) {
+  //     file.state =
+  //         isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y)
+  //             ? B_HOVERED
+  //             : B_INACTIVE;
+  //   }
+  //   break;
+  case DCLICK:
+    // if a double click happens, then we execute the if, else we jump to the
+    // simple click case, which is guarenteed to handle the event
+    if (isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y) &&
+        isHovered(activeFile->background.getGlobalBounds(), event.mouseButton.x,
+                  event.mouseButton.y)) {
+      activeFile->state = B_DCLICKED;
+      break;
+    }
+  case CLICK:
+    if (isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y)) {
+      if (activeFile) {
+        activeFile->state = B_INACTIVE;
+      }
+
+      activeFile = &file;
+      activeFile->state = B_CLICKED;
+    }
+    break;
+    // case MOVE:
+    //   if (file.state != B_CLICKED && file.state != B_DCLICKED) {
+    //     file.state = isHovered(fileBounds, event.mouseMove.x,
+    //     event.mouseMove.y)
+    //                      ? B_HOVERED
+    //                      : B_INACTIVE;
+    //   }
+    //   break;
+  }
+}
+
 void drawFile(RenderWindow &window, File file) {
+  // update the color of the file depending on it's state
+  file.filename.setFillColor(file.stateColors[file.state].textHighContrast);
+  file.ext.setFillColor(file.stateColors[file.state].textLowContrast);
+  file.size.setFillColor(file.stateColors[file.state].textLowContrast);
+  file.date.setFillColor(file.stateColors[file.state].textLowContrast);
+
+  file.background.setFillColor(file.stateColors[file.state].background);
+  file.background.setOutlineColor(file.stateColors[file.state].border);
+
   window.draw(file.background);
   drawText(window, file.filename);
   drawText(window, file.ext);

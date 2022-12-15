@@ -57,8 +57,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
                    y + 2 * height2 + height1, width - 20, height1,
-                   theme.textHighContrast, theme.textLowContrast, theme.bgBody,
-                   theme.border);
+                   theme.fileStateColors);
 
   updateFilesY(explorer.files,
                y + 2 * height2 + height1 + explorer.scrollOffset);
@@ -107,7 +106,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, FloatRect &clickBounds,
-                         Input *&activeInput) {
+                         File *&activeFile, Input *&activeInput) {
   switch (type) {
   case CLICK:
     // if the user clicks inside the explorer, move the focus to the explorer
@@ -145,6 +144,14 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
       sortFiletree(explorer.files, sortBy(i), ASC);
       updateFilesY(explorer.files, explorer.background.getPosition().y + 32 +
                                        explorer.scrollOffset);
+    }
+
+    node *p = explorer.files.head;
+
+    while (p) {
+      updateFileState(p->data, event, type, activeFile);
+
+      p = p->next;
     }
   }
 
