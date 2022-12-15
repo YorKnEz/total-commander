@@ -221,30 +221,80 @@ void moveFile(string fromPath, string toPath) {
 }
 
 void openFolder(string &path, string name) {
-  path = "\"" + path + "\\" + name + "\"";
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+  path = "\"" + path + separator + name + "\"";
 }
 
 void deleteFile(string path) { fs::remove(path); }
 
-void deleteFolder(string path) {}
+void deleteFolder(string path) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+  for (const auto &entry : fs::directory_iterator(path)) {
+    fs::path directoryPath = entry.path().filename();
+    string filename = directoryPath.generic_string();
+    if (entry.is_directory())
+      deleteFolder(path + separator + filename);
+    deleteFile(path + separator + filename);
+  }
+  deleteFile(path);
+}
+
+void copyFolder(string fromPath, string toPath) {
+  // the separator is different between linux and windows
+  string separator = fromPath.find_last_of("\\") ? "\\" : "/";
+
+  // creates the folder in the path stored in toPath, but checks if it already
+  // exists, case in which it generates with the format "name (x)", where x is
+  // counting how many copies there are already with the same format
+  string name = toPath;
+  name = name.erase(0, name.find_last_of(separator) + 1);
+  toPath = toPath.erase(toPath.find_last_of(separator), toPath.npos);
+  string folderName = name;
+  int counter = 0;
+  while (fs::exists(toPath + separator + name)) {
+    name = folderName + " (" + int2str(++counter) + ")";
+  }
+  createFolder(toPath, name);
+  toPath += separator + name;
+
+  // iterates in the current directory and if the entry is a directory we recall
+  // the function recursively and when the entry is a file we copy it
+  for (const auto &entry : fs::directory_iterator(fromPath)) {
+    fs::path directoryPath = entry.path().filename();
+    string filename = directoryPath.generic_string();
+    if (entry.is_directory()) {
+      copyFolder(fromPath + separator + filename,
+                 toPath + separator + filename);
+    } else
+      copyFile(fromPath + separator + filename, toPath + separator + filename);
+  }
+}
 
 void editFileName(string path, string newName) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+
   string folder = path;
-  folder = folder.erase(folder.find_last_of("\\") + 1);
+  folder = folder.erase(folder.find_last_of(separator) + 1);
   cout << folder;
   copyFile(path, folder + newName);
   deleteFile(path);
 }
 
 void createFolder(string path, string name) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+
   // checks if the folder already exists, case in which we add "(counter)" at
   // the end of the name
   string folderName = name;
   int counter = 0;
-  while (fs::exists(path + "\\" + name)) {
+  while (fs::exists(path + separator + name)) {
     name = folderName + " (" + int2str(++counter) + ")";
   }
 
   // creates a folder with the specified name
-  fs::create_directory(path + "\\" + name);
+  fs::create_directory(path + separator + name);
 }
