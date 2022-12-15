@@ -48,8 +48,18 @@ int main() {
 
   list l;
   init(l);
-
-  string path = "D:\\alex_\\Documents";
+#ifdef _WIN32
+  string path = "x:\\";
+  for (int i = 0; i < 26; i++) {
+    path[0] = char(i + 'A');
+    if (fs::exists(path))
+      break;
+  }
+  path += "Proiect";
+#endif
+#ifdef linux
+  string path = "home/Proiect/";
+#endif
 
   getFilesFromPath(l, path);
 
