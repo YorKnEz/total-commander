@@ -9,6 +9,7 @@ struct ColorTheme {
   Color bgBody, bgLowContrast;
   Color border;
   StateColors buttonStateColors[B_MAX_STATES];
+  FileStateColors fileStateColors[B_MAX_STATES];
   StateColors inputStateColors[I_MAX_STATES];
 };
 

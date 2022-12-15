@@ -40,11 +40,17 @@ struct Filedata {
   string date;
 };
 
+struct FileStateColors {
+  Color textHighContrast, textLowContrast, background, border;
+};
+
 struct File {
+  FileStateColors stateColors[B_MAX_STATES];
   RectangleShape background;
   Filedata data;
   int filenameColumn, extColumn, sizeColumn, dateColumn;
   Text filename, ext, size, date;
+  ButtonState state;
 };
 
 struct Input {
@@ -68,8 +74,7 @@ void drawText(RenderWindow &window, Text text);
 
 // textbox functions
 TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
-                      int width, int height,
-                      Color text = Color::Transparent,
+                      int width, int height, Color text = Color::Transparent,
                       Color bg = Color::Transparent,
                       Color border = Color::Transparent,
                       int borderThickness = 0);
@@ -90,11 +95,10 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
 // file functions
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 int width, int height,
-                Color textHighContrast = Color::Transparent,
-                Color textLowContrast = Color::Transparent,
-                Color bg = Color::Transparent,
-                Color border = Color::Transparent,
-                int borderThickness = 0);
+                FileStateColors stateColors[B_MAX_STATES], int borderThickness = 0);
+
+void updateFileState(File &file, Event event, MouseEventType type,
+                     File *&activeFile);
 
 void drawFile(RenderWindow &window, File file);
 

@@ -32,6 +32,14 @@ int main() {
        {Color(0xC2C2BFFF), Color(0x282922FF), Color(0x191A16FF)},
        {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)},
        {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)}},
+      {{Color(0x999995FF), Color(0x5B5C55FF), Color(0x32332BFF),
+        Color(0x0A0A09FF)},
+       {Color(0x999995FF), Color(0x5B5C55FF), Color(0xFF000032),
+        Color(0x0A0A09FF)},
+       {Color(0x999995FF), Color(0x5B5C55FF), Color(0x00FF0032),
+        Color(0x0A0A09FF)},
+       {Color(0x999995FF), Color(0x5B5C55FF), Color(0x0000FF32),
+        Color(0x0A0A09FF)}},
       {{Color(0x848580FF), Color(0x191A16FF), Color(0x0A0A09FF)},
        {Color(0xC2C2BFFF), Color(0x191A16FF), Color(0x191A16FF)},
        {Color(0xFFFFFFFF), Color(0x191A16FF), Color(0x0A0A09FF)}}};
@@ -58,6 +66,7 @@ int main() {
   Input *activeInput = nullptr;
   Explorer *activeExplorer =
       nullptr; // current active explorer will be the first one by default
+  File *activeFile = nullptr;
   RectangleShape cursor; // cursor to display on inputs
 
   while (window.isOpen()) {
@@ -214,7 +223,7 @@ int main() {
       case Event::MouseButtonReleased:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, RELEASE, activeExplorer,
-                              clickBounds, activeInput);
+                              clickBounds, activeFile, activeInput);
         }
 
         break;
@@ -232,14 +241,14 @@ int main() {
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, DCLICK, activeExplorer,
-                                clickBounds, activeInput);
+                                clickBounds, activeFile, activeInput);
           }
         }
         // simple click
         else {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, CLICK, activeExplorer,
-                                clickBounds, activeInput);
+                                clickBounds, activeFile, activeInput);
           }
         }
 
@@ -250,7 +259,7 @@ int main() {
       case Event::MouseMoved:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, MOVE, activeExplorer,
-                              clickBounds, activeInput);
+                              clickBounds, activeFile, activeInput);
         }
         break;
       }
