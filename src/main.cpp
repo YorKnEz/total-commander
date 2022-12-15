@@ -34,8 +34,6 @@ int main() {
        {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)}},
       {{Color(0x999995FF), Color(0x5B5C55FF), Color(0x32332BFF),
         Color(0x0A0A09FF)},
-       {Color(0x999995FF), Color(0x5B5C55FF), Color(0xFF000032),
-        Color(0x0A0A09FF)},
        {Color(0x999995FF), Color(0x5B5C55FF), Color(0x00FF0032),
         Color(0x0A0A09FF)},
        {Color(0x999995FF), Color(0x5B5C55FF), Color(0x0000FF32),
@@ -56,7 +54,7 @@ int main() {
 
   for (int i = 0; i < explorers; i++) {
     explorer[i] = createExplorer(
-        "/home/yorknez/UAIC/IP/Sem1/lab5/SDL_bgi-2.6.0", font, charSize,
+        "/home/yorknez/UAIC/IP", font, charSize,
         i * WINDOW_W / explorers, 0, WINDOW_W / explorers, WINDOW_H, theme);
   }
 
@@ -81,16 +79,18 @@ int main() {
           if (event.mouseWheelScroll.delta < 0) {
             // updateExplorerState()
             activeExplorer->scrollOffset -= 50;
-            updateFilesY(activeExplorer->files, activeExplorer->background.getPosition().y +
-                                             activeExplorer->heightFile +
-                                             2 * activeExplorer->heightComp +
-                                             activeExplorer->scrollOffset);
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y +
+                             activeExplorer->heightFile +
+                             2 * activeExplorer->heightComp +
+                             activeExplorer->scrollOffset);
           } else if (event.mouseWheelScroll.delta > 0) {
             activeExplorer->scrollOffset += 50;
-            updateFilesY(activeExplorer->files, activeExplorer->background.getPosition().y +
-                                             activeExplorer->heightFile +
-                                             2 * activeExplorer->heightComp +
-                                             activeExplorer->scrollOffset);
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y +
+                             activeExplorer->heightFile +
+                             2 * activeExplorer->heightComp +
+                             activeExplorer->scrollOffset);
           }
         }
         break;
@@ -100,16 +100,18 @@ int main() {
           if (event.key.code == Keyboard::Up) {
             // updateExplorerState()
             activeExplorer->scrollOffset -= 50;
-            updateFilesY(activeExplorer->files, activeExplorer->background.getPosition().y +
-                                             activeExplorer->heightFile +
-                                             2 * activeExplorer->heightComp +
-                                             activeExplorer->scrollOffset);
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y +
+                             activeExplorer->heightFile +
+                             2 * activeExplorer->heightComp +
+                             activeExplorer->scrollOffset);
           } else if (event.key.code == Keyboard::Down) {
             activeExplorer->scrollOffset += 50;
-            updateFilesY(activeExplorer->files, activeExplorer->background.getPosition().y +
-                                             activeExplorer->heightFile +
-                                             2 * activeExplorer->heightComp +
-                                             activeExplorer->scrollOffset);
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y +
+                             activeExplorer->heightFile +
+                             2 * activeExplorer->heightComp +
+                             activeExplorer->scrollOffset);
           }
         }
 

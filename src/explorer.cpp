@@ -18,7 +18,7 @@ void updateFilesY(list &files, int y) {
       p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
       p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
 
-      fileY += p->data.background.getGlobalBounds().height + 4;
+      fileY += p->data.background.getGlobalBounds().height;
 
       p = p->next;
     }

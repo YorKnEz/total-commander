@@ -177,12 +177,12 @@ void drawButton(RenderWindow &window, Button button) {
 
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 int width, int height,
-                FileStateColors stateColors[B_MAX_STATES],
+                FileStateColors stateColors[F_MAX_STATES],
                 int borderThickness) {
   File file;
-  file.state = B_INACTIVE; // set the state of the button
+  file.state = F_INACTIVE; // set the state of the button
   // copy the state colors
-  for (int i = 0; i < B_MAX_STATES; i++) {
+  for (int i = 0; i < F_MAX_STATES; i++) {
     file.stateColors[i] = stateColors[i];
   }
 
@@ -228,44 +228,29 @@ void updateFileState(File &file, Event event, MouseEventType type,
   FloatRect fileBounds =
       file.background.getGlobalBounds(); // get bounds of button
 
-  cout << &file << " " << activeFile << '\n';
-
   switch (type) {
-  // case RELEASE:
-  //   if (file.state == B_CLICKED || file.state == B_DCLICKED) {
-  //     file.state =
-  //         isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y)
-  //             ? B_HOVERED
-  //             : B_INACTIVE;
-  //   }
-  //   break;
   case DCLICK:
-    // if a double click happens, then we execute the if, else we jump to the
-    // simple click case, which is guarenteed to handle the event
-    if (isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y) &&
-        isHovered(activeFile->background.getGlobalBounds(), event.mouseButton.x,
-                  event.mouseButton.y)) {
-      activeFile->state = B_DCLICKED;
-      break;
+    if (isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y)) {
+      if (activeFile == &file) {
+        file.state = F_DCLICKED;
+        break;
+      } else {
+        if (activeFile) {
+          activeFile->state = F_INACTIVE;
+        }
+        activeFile = &file;
+        activeFile->state = F_SELECTED;
+      }
     }
   case CLICK:
     if (isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y)) {
       if (activeFile) {
-        activeFile->state = B_INACTIVE;
+        activeFile->state = F_INACTIVE;
       }
-
       activeFile = &file;
-      activeFile->state = B_CLICKED;
+      activeFile->state = F_SELECTED;
     }
     break;
-    // case MOVE:
-    //   if (file.state != B_CLICKED && file.state != B_DCLICKED) {
-    //     file.state = isHovered(fileBounds, event.mouseMove.x,
-    //     event.mouseMove.y)
-    //                      ? B_HOVERED
-    //                      : B_INACTIVE;
-    //   }
-    //   break;
   }
 }
 
@@ -436,10 +421,9 @@ void drawInput(RenderWindow &window, Input &input) {
   // // clear the corners
   // sq.setPosition(bgBounds.left, bgBounds.top);
   // window.draw(sq);
-  // sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
-  // window.draw(sq);
-  // sq.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
-  // window.draw(sq);
+  // sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
+  // bgBounds.top); window.draw(sq); sq.setPosition(bgBounds.left,
+  // bgBounds.top + bgBounds.height - 2 * radius); window.draw(sq);
   // sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
   //                bgBounds.top + bgBounds.height - 2 * radius);
   // window.draw(sq);
@@ -449,9 +433,9 @@ void drawInput(RenderWindow &window, Input &input) {
   // window.draw(c);
   // c.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
   // window.draw(c);
-  // c.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
-  // window.draw(c);
-  // c.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
+  // c.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 *
+  // radius); window.draw(c); c.setPosition(bgBounds.left + bgBounds.width - 2
+  // * radius,
   //               bgBounds.top + bgBounds.height - 2 * radius);
   // window.draw(c);
   //
@@ -489,7 +473,8 @@ void drawInput(RenderWindow &window, Input &input) {
   // window.draw(sq);
   //
   // sq.setPosition(
-  //     Vector2f(bgBounds.left + radius - 1, bgBounds.top + bgBounds.height));
+  //     Vector2f(bgBounds.left + radius - 1, bgBounds.top +
+  //     bgBounds.height));
   // window.draw(sq);
 
   // initialize the text of the input

@@ -10,10 +10,12 @@ using namespace std;
 
 #define B_MAX_STATES 4
 #define I_MAX_STATES 3
+#define F_MAX_STATES 3
 
 enum MouseEventType { MOVE, RELEASE, CLICK, DCLICK };
 enum ButtonState { B_INACTIVE, B_HOVERED, B_CLICKED, B_DCLICKED };
 enum InputState { I_INACTIVE, I_HOVERED, I_ACTIVE };
+enum FileState { F_INACTIVE, F_SELECTED, F_DCLICKED };
 
 struct StateColors {
   Color text, background, border;
@@ -45,12 +47,12 @@ struct FileStateColors {
 };
 
 struct File {
-  FileStateColors stateColors[B_MAX_STATES];
+  FileStateColors stateColors[F_MAX_STATES];
   RectangleShape background;
   Filedata data;
   int filenameColumn, extColumn, sizeColumn, dateColumn;
   Text filename, ext, size, date;
-  ButtonState state;
+  FileState state;
 };
 
 struct Input {
@@ -95,7 +97,7 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
 // file functions
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 int width, int height,
-                FileStateColors stateColors[B_MAX_STATES], int borderThickness = 0);
+                FileStateColors stateColors[F_MAX_STATES], int borderThickness = 0);
 
 void updateFileState(File &file, Event event, MouseEventType type,
                      File *&activeFile);
