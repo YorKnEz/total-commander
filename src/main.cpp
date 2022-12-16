@@ -42,6 +42,48 @@ int main() {
        {Color(0xC2C2BFFF), Color(0x191A16FF), Color(0x191A16FF)},
        {Color(0xFFFFFFFF), Color(0x191A16FF), Color(0x0A0A09FF)}}};
 
+  ColorTheme yellow = {
+      Color(0xffffffff), // text with high contrast
+      Color(0xfedd81ff), // text with medium contrast
+      Color(0xfdc835ff), // text with low contrast
+      Color(0xfcba03ff), // background of body
+      Color(0x7e5d02ff), // background with low contrast
+      Color(0x322501ff), // border
+      {{Color(0xfdd668ff), Color(0xca9502ff), Color(0x322501ff)},
+       {Color(0x4c3801ff), Color(0xca9502ff), Color(0x7e5d02ff)},
+       {Color(0xffffffff), Color(0xca9502ff), Color(0x322501ff)},
+       {Color(0xffffffff), Color(0xca9502ff), Color(0x322501ff)}},
+      {{Color(0xfedd81ff), Color(0xca9502ff), Color(0xfcba03),
+        Color(0x322501ff)},
+       {Color(0xfedd81ff), Color(0xca9502ff), Color(0x00FF0032),
+        Color(0x322501ff)},
+       {Color(0xfedd81ff), Color(0xca9502ff), Color(0x0000FF32),
+        Color(0x322501ff)}},
+      {{Color(0xfdd668ff), Color(0x7e5d02ff), Color(0x322501ff)},
+       {Color(0x4c3801ff), Color(0x7e5d02ff), Color(0x7e5d02ff)},
+       {Color(0xffffffff), Color(0x7e5d02ff), Color(0x322501ff)}}};
+
+  ColorTheme green = {
+     Color(0xffffffff), // text with high contrast
+      Color(0x8dbd96ff), // text with medium contrast
+      Color(0x499556ff), // text with low contrast
+      Color(0x1b7a2cff), // background of body
+      Color(0x0e3d16ff), // background with low contrast
+      Color(0x051809ff), // border
+      {{Color(0x76af80ff), Color(0x166223ff), Color(0x051809ff)},
+       {Color(0xbbd7c0ff), Color(0x166223ff), Color(0x0e3d16ff)},
+       {Color(0xffffffff), Color(0x166223ff), Color(0x051809ff)},
+       {Color(0xffffffff), Color(0x166223ff), Color(0x051809ff)}},
+      {{Color(0x8dbd96ff), Color(0x499556ff), Color(0x1b7a2cff),
+        Color(0x051809ff)},
+       {Color(0x8dbd96ff), Color(0x499556ff), Color(0xFF000032),
+        Color(0x051809ff)},
+       {Color(0x8dbd96ff), Color(0x499556ff), Color(0x0000FF32),
+        Color(0x051809ff)}},
+      {{Color(0x76af80ff), Color(0x0e3d16ff), Color(0x051809ff)},
+       {Color(0xbbd7c0ff), Color(0x0e3d16ff), Color(0x0e3d16ff)},
+       {Color(0xffffffff), Color(0x0e3d16ff), Color(0x051809ff)}}};
+
   ColorTheme theme = dark;
 
   Font font;
