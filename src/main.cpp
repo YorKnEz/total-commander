@@ -48,18 +48,7 @@ int main() {
 
   list l;
   init(l);
-#ifdef _WIN32
-  string path = "x:\\";
-  for (int i = 0; i < 26; i++) {
-    path[0] = char(i + 'A');
-    if (fs::exists(path))
-      break;
-  }
-  path += "Proiect";
-#endif
-#ifdef linux
-  string path = "home/Proiect/";
-#endif
+  string path = getDefaultPath();
 
   getFilesFromPath(l, path);
 
@@ -164,7 +153,7 @@ int main() {
 
             // we reset the click flag only if a double click happened
             if (buttons[i].state == B_DCLICKED) {
-          click = false;
+              click = false;
             }
             // we reset the click timer only if a click happened
             else if (buttons[i].state == B_CLICKED) {
