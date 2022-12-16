@@ -154,21 +154,36 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
   filelistBounds.height -= (3 * explorer.heightComp + explorer.heightFile);
 
   if (isHovered(filelistBounds, event.mouseButton.x, event.mouseButton.y)) {
-
     // update the state of the files
     node *p = explorer.files.head;
-    node *start = nullptr, *end = nullptr, *aux;
+    node *start = nullptr, *end = nullptr;
+    bool dclick = false;
+
+    if (type == DCLICK && explorer.activeFile[0] &&
+        isHovered(explorer.activeFile[0]->background.getGlobalBounds(),
+                  event.mouseButton.x, event.mouseButton.y)) {
+      explorer.activeFile[0]->state = F_DCLICKED;
+
+      if (explorer.activeFile[1]) {
+        explorer.activeFile[1]->state = F_INACTIVE;
+      }
+      explorer.activeFile[1] = nullptr;
+
+      // handle dclick for this file
+      dclick = true;
+    }
 
     while (p) {
       updateFileState(p->data, event, type, explorer.activeFile);
 
       // if first file has been selected, save the node that has it
       if (explorer.activeFile[0] == &p->data) {
-        start = p;
-
-        if (end) {
+        // reset end pointer if start pointer has been changed
+        if (end && start) {
           end = nullptr;
         }
+
+        start = p;
       }
 
       // if second file has been selected, save the node that has it
@@ -176,6 +191,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
         end = p;
       }
 
+      // unmark anything besides first and second selected
       if (explorer.activeFile[0] != &p->data &&
           explorer.activeFile[1] != &p->data) {
         p->data.state = F_INACTIVE;
@@ -184,12 +200,14 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
       p = p->next;
     }
 
-    if (type == CLICK || type == DCLICK) {
-      cout << start << " " << end << "\n\n";
-    }
-
     // select all files between start and end if they exist
     if (start && end) {
+      if (start->data.background.getPosition().y >
+          end->data.background.getPosition().y) {
+        swap(start, end);
+        // swap(explorer.activeFile[0], explorer.activeFile[1]);
+      }
+
       while (start != end) {
         start->data.state = F_SELECTED;
         start = start->next;

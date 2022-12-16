@@ -231,10 +231,8 @@ void updateFileState(File &file, Event event, MouseEventType type,
 
   switch (type) {
   case DCLICK:
-    if (activeFile[0] &&
-        isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y) &&
-        file.state == F_SELECTED) {
-      activeFile[0]->state = F_DCLICKED;
+    // if a dclick happens, let the explorer handle it
+    if (activeFile[0] == &file) {
       break;
     }
   case CLICK:
