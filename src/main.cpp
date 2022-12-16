@@ -1,3 +1,4 @@
+#include "element.h"
 #include "explorer.h"
 #include "filetree.h"
 #include "theme.h"
@@ -91,13 +92,26 @@ int main() {
 
   int charSize = 16;
 
-  int explorers = 1;
+  int buttons = 6;
+  int btnWidth = WINDOW_W / buttons, btnHeight = 32;
+  Button button[buttons];
+  string buttonString[buttons] = {"Rename", "Edit",  "Copy",
+                                  "Move",   "Mkdir", "Delete"};
+
+  for (int i = 0; i < buttons; i++) {
+    button[i] = createButton(buttonString[i], font, charSize, i * btnWidth + 2,
+                             WINDOW_H - btnHeight + 1, btnWidth - 2,
+                             btnHeight - 2, theme.buttonStateColors, 1);
+  }
+
+  int explorers = 2;
   Explorer explorer[explorers];
 
   for (int i = 0; i < explorers; i++) {
-    explorer[i] = createExplorer("/home/yorknez/UAIC/IP/Sem1/lab5/SDL_bgi-2.6.0/", font, charSize,
-                                 i * WINDOW_W / explorers, 0,
-                                 WINDOW_W / explorers, WINDOW_H, theme);
+    explorer[i] =
+        createExplorer("/home/yorknez/UAIC/IP/Sem1/lab5/SDL_bgi-2.6.0/", font,
+                       charSize, i * WINDOW_W / explorers, 0,
+                       WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
   }
 
   // useful for determining double clicks
@@ -269,6 +283,10 @@ int main() {
                               clickBounds, activeInput);
         }
 
+        for (int i = 0; i < buttons; i++) {
+          updateButtonState(button[i], event, RELEASE, clickBounds);
+        }
+
         break;
       case Event::MouseButtonPressed:
         // disable the last active input if user clicks outside it's box,
@@ -286,12 +304,20 @@ int main() {
             updateExplorerState(explorer[i], event, DCLICK, activeExplorer,
                                 clickBounds, activeInput);
           }
+
+          for (int i = 0; i < buttons; i++) {
+            updateButtonState(button[i], event, DCLICK, clickBounds);
+          }
         }
         // simple click
         else {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, CLICK, activeExplorer,
                                 clickBounds, activeInput);
+          }
+
+          for (int i = 0; i < buttons; i++) {
+            updateButtonState(button[i], event, CLICK, clickBounds);
           }
         }
 
@@ -304,6 +330,10 @@ int main() {
           updateExplorerState(explorer[i], event, MOVE, activeExplorer,
                               clickBounds, activeInput);
         }
+
+        for (int i = 0; i < buttons; i++) {
+          updateButtonState(button[i], event, MOVE, clickBounds);
+        }
         break;
       }
     }
@@ -311,6 +341,10 @@ int main() {
     window.clear(theme.bgBody);
     for (int i = 0; i < explorers; i++) {
       drawExplorer(window, explorer[i]);
+    }
+
+    for (int i = 0; i < buttons; i++) {
+      drawButton(window, button[i]);
     }
     window.display();
   }
