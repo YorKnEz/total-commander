@@ -104,7 +104,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, FloatRect &clickBounds,
-                         File *&activeFile, Input *&activeInput) {
+                         Input *&activeInput) {
   switch (type) {
   case CLICK:
     // if the user clicks inside the explorer, move the focus to the explorer
@@ -144,16 +144,57 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                    explorer.background.getPosition().y + explorer.heightFile +
                        2 * explorer.heightComp + explorer.scrollOffset);
     }
+  }
 
+  FloatRect filelistBounds = explorer.background.getGlobalBounds();
+  filelistBounds.top += 2 * explorer.heightComp + explorer.heightFile;
+  filelistBounds.height -= (3 * explorer.heightComp + explorer.heightFile);
+
+  if (isHovered(filelistBounds, event.mouseButton.x, event.mouseButton.y)) {
+
+    // update the state of the files
     node *p = explorer.files.head;
+    node *start = nullptr, *end = nullptr, *aux;
 
     while (p) {
-      updateFileState(p->data, event, type, activeFile);
+      updateFileState(p->data, event, type, explorer.activeFile);
+
+      // if first file has been selected, save the node that has it
+      if (explorer.activeFile[0] == &p->data) {
+        start = p;
+
+        if (end) {
+          end = nullptr;
+        }
+      }
+
+      // if second file has been selected, save the node that has it
+      if (explorer.activeFile[1] == &p->data) {
+        end = p;
+      }
+
+      if (explorer.activeFile[0] != &p->data &&
+          explorer.activeFile[1] != &p->data) {
+        p->data.state = F_INACTIVE;
+      }
 
       p = p->next;
     }
+
+    if (type == CLICK || type == DCLICK) {
+      cout << start << " " << end << "\n\n";
   }
 
+    // select all files between start and end if they exist
+    if (start && end) {
+      while (start != end) {
+        start->data.state = F_SELECTED;
+        start = start->next;
+      }
+    }
+  }
+
+  // update the state of the input
   updateInputState(explorer.input, event, type, activeInput);
 }
 

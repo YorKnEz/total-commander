@@ -225,7 +225,7 @@ int main() {
       case Event::MouseButtonReleased:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, RELEASE, activeExplorer,
-                              clickBounds, activeFile, activeInput);
+                              clickBounds, activeInput);
         }
 
         break;
@@ -243,14 +243,14 @@ int main() {
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, DCLICK, activeExplorer,
-                                clickBounds, activeFile, activeInput);
+                                clickBounds, activeInput);
           }
         }
         // simple click
         else {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, CLICK, activeExplorer,
-                                clickBounds, activeFile, activeInput);
+                                clickBounds, activeInput);
           }
         }
 
@@ -261,7 +261,7 @@ int main() {
       case Event::MouseMoved:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, MOVE, activeExplorer,
-                              clickBounds, activeFile, activeInput);
+                              clickBounds, activeInput);
         }
         break;
       }

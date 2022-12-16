@@ -100,7 +100,7 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 FileStateColors stateColors[F_MAX_STATES], int borderThickness = 0);
 
 void updateFileState(File &file, Event event, MouseEventType type,
-                     File *&activeFile);
+                     File *activeFile[2]);
 
 void drawFile(RenderWindow &window, File file);
 
