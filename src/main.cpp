@@ -1,3 +1,4 @@
+#include "element.h"
 #include "explorer.h"
 #include "filetree.h"
 #include "theme.h"
@@ -16,52 +17,109 @@ using namespace std;
 
 int main() {
   RenderWindow window(VideoMode(WINDOW_W, WINDOW_H), TITLE);
+  // center window on the screen
+  window.setPosition(
+      Vector2i(VideoMode::getDesktopMode().width / 2 - WINDOW_W / 2,
+               VideoMode::getDesktopMode().height / 2 - WINDOW_H / 2));
 
-  ColorTheme dark = {Color(0xEEEEEEFF),
-                   Color(0x242424FF),
-                   Color(0xFFFFFFFF),
-                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x42f54bFF), Color(0xEEEEEEFF)}},
-                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)}}};
+  ColorTheme dark = {
+      Color(0xFFFFFFFF), // text with high contrast
+      Color(0x999995FF), // text with medium contrast
+      Color(0x5B5C55FF), // text with low contrast
+      Color(0x32332BFF), // background of body
+      Color(0x191A16FF), // background with low contrast
+      Color(0x0A0A09FF), // border
+      {{Color(0x848580FF), Color(0x282922FF), Color(0x0A0A09FF)},
+       {Color(0xC2C2BFFF), Color(0x282922FF), Color(0x191A16FF)},
+       {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)},
+       {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)}},
+      {{Color(0x999995FF), Color(0x5B5C55FF), Color(0x32332BFF),
+        Color(0x0A0A09FF)},
+       {Color(0x999995FF), Color(0x5B5C55FF), Color(0x00FF0032),
+        Color(0x0A0A09FF)},
+       {Color(0x999995FF), Color(0x5B5C55FF), Color(0x0000FF32),
+        Color(0x0A0A09FF)}},
+      {{Color(0x848580FF), Color(0x191A16FF), Color(0x0A0A09FF)},
+       {Color(0xC2C2BFFF), Color(0x191A16FF), Color(0x191A16FF)},
+       {Color(0xFFFFFFFF), Color(0x191A16FF), Color(0x0A0A09FF)}}};
+
+  ColorTheme yellow = {
+      Color(0xffffffff), // text with high contrast
+      Color(0xfedd81ff), // text with medium contrast
+      Color(0xfdc835ff), // text with low contrast
+      Color(0xfcba03ff), // background of body
+      Color(0x7e5d02ff), // background with low contrast
+      Color(0x322501ff), // border
+      {{Color(0xfdd668ff), Color(0xca9502ff), Color(0x322501ff)},
+       {Color(0x4c3801ff), Color(0xca9502ff), Color(0x7e5d02ff)},
+       {Color(0xffffffff), Color(0xca9502ff), Color(0x322501ff)},
+       {Color(0xffffffff), Color(0xca9502ff), Color(0x322501ff)}},
+      {{Color(0xfedd81ff), Color(0xca9502ff), Color(0xfcba03),
+        Color(0x322501ff)},
+       {Color(0xfedd81ff), Color(0xca9502ff), Color(0x00FF0032),
+        Color(0x322501ff)},
+       {Color(0xfedd81ff), Color(0xca9502ff), Color(0x0000FF32),
+        Color(0x322501ff)}},
+      {{Color(0xfdd668ff), Color(0x7e5d02ff), Color(0x322501ff)},
+       {Color(0x4c3801ff), Color(0x7e5d02ff), Color(0x7e5d02ff)},
+       {Color(0xffffffff), Color(0x7e5d02ff), Color(0x322501ff)}}};
+
+  ColorTheme green = {
+     Color(0xffffffff), // text with high contrast
+      Color(0x8dbd96ff), // text with medium contrast
+      Color(0x499556ff), // text with low contrast
+      Color(0x1b7a2cff), // background of body
+      Color(0x0e3d16ff), // background with low contrast
+      Color(0x051809ff), // border
+      {{Color(0x76af80ff), Color(0x166223ff), Color(0x051809ff)},
+       {Color(0xbbd7c0ff), Color(0x166223ff), Color(0x0e3d16ff)},
+       {Color(0xffffffff), Color(0x166223ff), Color(0x051809ff)},
+       {Color(0xffffffff), Color(0x166223ff), Color(0x051809ff)}},
+      {{Color(0x8dbd96ff), Color(0x499556ff), Color(0x1b7a2cff),
+        Color(0x051809ff)},
+       {Color(0x8dbd96ff), Color(0x499556ff), Color(0xFF000032),
+        Color(0x051809ff)},
+       {Color(0x8dbd96ff), Color(0x499556ff), Color(0x0000FF32),
+        Color(0x051809ff)}},
+      {{Color(0x76af80ff), Color(0x0e3d16ff), Color(0x051809ff)},
+       {Color(0xbbd7c0ff), Color(0x0e3d16ff), Color(0x0e3d16ff)},
+       {Color(0xffffffff), Color(0x0e3d16ff), Color(0x051809ff)}}};
 
   ColorTheme theme = dark;
 
   Font font;
-  font.loadFromFile("assets/calibri.ttf");
+  font.loadFromFile("assets/font.ttf");
 
   int charSize = 16;
 
+  int buttons = 6;
+  int btnWidth = WINDOW_W / buttons, btnHeight = 32;
+  Button button[buttons];
+  string buttonString[buttons] = {"Rename", "Edit",  "Copy",
+                                  "Move",   "Mkdir", "Delete"};
 
-  Explorer explorer =
-      createExplorer("/home/yorknez/Pictures", font, charSize, 0, 0, WINDOW_W / 2, WINDOW_H, theme);
+  for (int i = 0; i < buttons; i++) {
+    button[i] = createButton(buttonString[i], font, charSize, i * btnWidth + 2,
+                             WINDOW_H - btnHeight + 1, btnWidth - 2,
+                             btnHeight - 2, theme.buttonStateColors, 1);
+  }
 
-  Explorer explorer2 =
-      createExplorer("/home/yorknez/Videos", font, charSize, WINDOW_W / 2, 0, WINDOW_W / 2, WINDOW_H, theme);
+  int explorers = 2;
+  Explorer explorer[explorers];
 
-  // Button buttons[11];
-  //
-  // for (int i = 1; i <= 10; i++) {
-  //   buttons[i] =
-  //       createButton("test12312", font, charSize, WINDOW_W - i * (btnw + 20),
-  //                    WINDOW_H - 60, btnw, 40, theme.buttonStateColors, 1);
-  // }
-  //
-  // Input input = createInput("Enter text here", "", font, charSize, 20, 20,
-  // 400,
-  //                           40, theme.inputStateColors, 1);
-  // Input input2 = createInput("Enter another text here", "", font, charSize,
-  // 20,
-  //                            80, 400, 40, theme.inputStateColors, 1);
+  for (int i = 0; i < explorers; i++) {
+    explorer[i] =
+        createExplorer("/home/yorknez/UAIC/IP/Sem1/lab5/SDL_bgi-2.6.0/", font,
+                       charSize, i * WINDOW_W / explorers, 0,
+                       WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
+  }
 
   // useful for determining double clicks
   Clock clock;           // a timer that is set between two clicks
-  bool click = false;    // a flag which checks if we have a double click
   FloatRect clickBounds; // the bounds of the last click
   Input *activeInput = nullptr;
+  Explorer *activeExplorer =
+      nullptr; // current active explorer will be the first one by default
   RectangleShape cursor; // cursor to display on inputs
 
   while (window.isOpen()) {
@@ -71,7 +129,48 @@ int main() {
       case Event::Closed:
         window.close();
         break;
+      case Event::MouseWheelScrolled:
+        if (activeExplorer) {
+          if (event.mouseWheelScroll.delta < 0) {
+            // updateExplorerState()
+            activeExplorer->scrollOffset -= 50;
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y +
+                             activeExplorer->heightFile +
+                             2 * activeExplorer->heightComp +
+                             activeExplorer->scrollOffset);
+          } else if (event.mouseWheelScroll.delta > 0) {
+            activeExplorer->scrollOffset += 50;
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y +
+                             activeExplorer->heightFile +
+                             2 * activeExplorer->heightComp +
+                             activeExplorer->scrollOffset);
+          }
+        }
+        break;
       case Event::KeyPressed:
+        // used for scroll
+        if (activeExplorer) {
+          if (event.key.code == Keyboard::Up) {
+            // updateExplorerState()
+            activeExplorer->scrollOffset -= 50;
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y +
+                             activeExplorer->heightFile +
+                             2 * activeExplorer->heightComp +
+                             activeExplorer->scrollOffset);
+          } else if (event.key.code == Keyboard::Down) {
+            activeExplorer->scrollOffset += 50;
+            updateFilesY(activeExplorer->files,
+                         activeExplorer->background.getPosition().y +
+                             activeExplorer->heightFile +
+                             2 * activeExplorer->heightComp +
+                             activeExplorer->scrollOffset);
+          }
+        }
+
+        // input related keys
         if (activeInput) {
           // move the cursor of the input to the left
           if (event.key.code == Keyboard::Left) {
@@ -179,8 +278,15 @@ int main() {
         }
         break;
       case Event::MouseButtonReleased:
-        updateExplorerState(explorer, event, RELEASE, clickBounds, activeInput);
-        updateExplorerState(explorer2, event, RELEASE, clickBounds, activeInput);
+        for (int i = 0; i < explorers; i++) {
+          updateExplorerState(explorer[i], event, RELEASE, activeExplorer,
+                              clickBounds, activeInput);
+        }
+
+        for (int i = 0; i < buttons; i++) {
+          updateButtonState(button[i], event, RELEASE, clickBounds);
+        }
+
         break;
       case Event::MouseButtonPressed:
         // disable the last active input if user clicks outside it's box,
@@ -194,15 +300,25 @@ int main() {
 
         // double click
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
-          updateExplorerState(explorer, event, DCLICK, clickBounds,
-                              activeInput);
-          updateExplorerState(explorer2, event, DCLICK, clickBounds,
-                              activeInput);
+          for (int i = 0; i < explorers; i++) {
+            updateExplorerState(explorer[i], event, DCLICK, activeExplorer,
+                                clickBounds, activeInput);
+          }
+
+          for (int i = 0; i < buttons; i++) {
+            updateButtonState(button[i], event, DCLICK, clickBounds);
+          }
         }
         // simple click
         else {
-          updateExplorerState(explorer, event, CLICK, clickBounds, activeInput);
-          updateExplorerState(explorer2, event, CLICK, clickBounds, activeInput);
+          for (int i = 0; i < explorers; i++) {
+            updateExplorerState(explorer[i], event, CLICK, activeExplorer,
+                                clickBounds, activeInput);
+          }
+
+          for (int i = 0; i < buttons; i++) {
+            updateButtonState(button[i], event, CLICK, clickBounds);
+          }
         }
 
         // reset timer if a click happened
@@ -210,15 +326,26 @@ int main() {
 
         break;
       case Event::MouseMoved:
-        updateExplorerState(explorer, event, MOVE, clickBounds, activeInput);
-        updateExplorerState(explorer2, event, MOVE, clickBounds, activeInput);
+        for (int i = 0; i < explorers; i++) {
+          updateExplorerState(explorer[i], event, MOVE, activeExplorer,
+                              clickBounds, activeInput);
+        }
+
+        for (int i = 0; i < buttons; i++) {
+          updateButtonState(button[i], event, MOVE, clickBounds);
+        }
         break;
       }
     }
 
-    window.clear(theme.background);
-    drawExplorer(window, explorer);
-    drawExplorer(window, explorer2);
+    window.clear(theme.bgBody);
+    for (int i = 0; i < explorers; i++) {
+      drawExplorer(window, explorer[i]);
+    }
+
+    for (int i = 0; i < buttons; i++) {
+      drawButton(window, button[i]);
+    }
     window.display();
   }
 

@@ -10,17 +10,15 @@ using namespace std;
 
 #define B_MAX_STATES 4
 #define I_MAX_STATES 3
+#define F_MAX_STATES 3
 
 enum MouseEventType { MOVE, RELEASE, CLICK, DCLICK };
 enum ButtonState { B_INACTIVE, B_HOVERED, B_CLICKED, B_DCLICKED };
 enum InputState { I_INACTIVE, I_HOVERED, I_ACTIVE };
+enum FileState { F_INACTIVE, F_SELECTED, F_DCLICKED };
 
-struct ButtonStateColors {
-  Color primary, background;
-};
-
-struct InputStateColors {
-  Color primary, background;
+struct StateColors {
+  Color text, background, border;
 };
 
 struct TextBox {
@@ -30,11 +28,11 @@ struct TextBox {
 };
 
 struct Button {
-  ButtonStateColors buttonStateColors[B_MAX_STATES];
+  StateColors stateColors[B_MAX_STATES];
   RectangleShape background;
   string fullText;
   Text text;
-  ButtonState state, oldState;
+  ButtonState state;
 };
 
 struct Filedata {
@@ -44,15 +42,21 @@ struct Filedata {
   string date;
 };
 
+struct FileStateColors {
+  Color textHighContrast, textLowContrast, background, border;
+};
+
 struct File {
+  FileStateColors stateColors[F_MAX_STATES];
   RectangleShape background;
   Filedata data;
   int filenameColumn, extColumn, sizeColumn, dateColumn;
   Text filename, ext, size, date;
+  FileState state;
 };
 
 struct Input {
-  InputStateColors inputStateColors[I_MAX_STATES];
+  StateColors stateColors[I_MAX_STATES];
   RectangleShape background;
   string placeholder, value;
   Text displayText;
@@ -66,23 +70,24 @@ bool isHovered(FloatRect box, int mouseX, int mouseY);
 
 // // text functions
 Text createText(string textString, Font &font, int charSize, int x, int y,
-                int width, Color textColor);
+                int width, Color text);
 
 void drawText(RenderWindow &window, Text text);
 
 // textbox functions
 TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
-                      int width, int height, Color textColor,
-                      Color backgroundColor, Color borderColor,
-                      int borderThickness);
+                      int width, int height, Color text = Color::Transparent,
+                      Color bg = Color::Transparent,
+                      Color border = Color::Transparent,
+                      int borderThickness = 0);
 
 void drawTextBox(RenderWindow &window, TextBox textbox);
 
 // button functions
 Button createButton(string text, Font &font, int charSize, int x, int y,
                     int width, int height,
-                    ButtonStateColors buttonStateColors[B_MAX_STATES],
-                    unsigned int borderThickness);
+                    StateColors stateColors[B_MAX_STATES],
+                    unsigned int borderThickness = 0);
 
 void drawButton(RenderWindow &window, Button button);
 
@@ -91,15 +96,20 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
 
 // file functions
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
-                int width, int height, Color textColor);
+                int width, int height,
+                FileStateColors stateColors[F_MAX_STATES],
+                int borderThickness = 0);
+
+void updateFileState(File &file, Event event, MouseEventType type,
+                     File *activeFile[2]);
 
 void drawFile(RenderWindow &window, File file);
 
 // input functions
 Input createInput(string placeholder, string value, Font &font, int charSize,
                   int x, int y, int width, int height,
-                  InputStateColors inputStateColors[I_MAX_STATES],
-                  unsigned int borderThickness);
+                  StateColors stateColors[I_MAX_STATES],
+                  unsigned int borderThickness = 0);
 
 void updateInputState(Input &input, Event event, MouseEventType type,
                       Input *&activeInput);

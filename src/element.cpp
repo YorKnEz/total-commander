@@ -11,34 +11,33 @@ bool isHovered(FloatRect box, int mouseX, int mouseY) {
 }
 
 Text createText(string textString, Font &font, int charSize, int x, int y,
-                int width, Color textColor) {
-  Text text;
-  text.setFont(font);
-  text.setPosition(x, y);
-  text.setCharacterSize(charSize);
-  text.setStyle(Text::Regular);
-  text.setString(textString);
-  text.setFillColor(textColor);
+                int width, Color text) {
+  Text textObj;
+  textObj.setFont(font);
+  textObj.setPosition(x, y);
+  textObj.setCharacterSize(charSize);
+  textObj.setStyle(Text::Regular);
+  textObj.setString(textString);
+  textObj.setFillColor(text);
 
   // shrink the text that is shown on the screen to avoid overflow
-  if (text.getGlobalBounds().width > width) {
+  if (textObj.getGlobalBounds().width > width) {
     textString.append("..");
-    text.setString(textString);
+    textObj.setString(textString);
   }
 
-  while (text.getGlobalBounds().width > width) {
+  while (textObj.getGlobalBounds().width > width) {
     textString.erase(textString.size() - 3, 1);
-    text.setString(textString);
+    textObj.setString(textString);
   }
 
-  return text;
+  return textObj;
 }
 
 void drawText(RenderWindow &window, Text text) { window.draw(text); }
 
 TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
-                      int width, int height, Color textColor,
-                      Color backgroundColor, Color borderColor,
+                      int width, int height, Color text, Color bg, Color border,
                       int borderThickness) {
   TextBox textbox;
   textbox.fullText =
@@ -46,8 +45,8 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
 
   // initialize the background of the textbox
   textbox.background.setSize(Vector2f(width, height));
-  textbox.background.setFillColor(backgroundColor);
-  textbox.background.setOutlineColor(borderColor);
+  textbox.background.setFillColor(bg);
+  textbox.background.setOutlineColor(border);
   textbox.background.setOutlineThickness(borderThickness);
   textbox.background.setPosition(x, y);
 
@@ -55,7 +54,7 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
   textbox.text = createText(textString, font, charSize, x, y,
                             textbox.background.getGlobalBounds().width -
                                 2 * (borderThickness + 1),
-                            textColor);
+                            text);
 
   // set the offset to the text relative to the button
   int offsetX = textbox.background.getGlobalBounds().left +
@@ -80,7 +79,7 @@ void drawTextBox(RenderWindow &window, TextBox textbox) {
 
 Button createButton(string text, Font &font, int charSize, int x, int y,
                     int width, int height,
-                    ButtonStateColors buttonStateColors[B_MAX_STATES],
+                    StateColors stateColors[B_MAX_STATES],
                     unsigned int borderThickness) {
   Button button;
   button.state = B_INACTIVE; // set the state of the button
@@ -89,13 +88,13 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
 
   // copy the state colors
   for (int i = 0; i < B_MAX_STATES; i++) {
-    button.buttonStateColors[i] = buttonStateColors[i];
+    button.stateColors[i] = stateColors[i];
   }
 
   // initialize the background of the button
   button.background.setSize(Vector2f(width, height));
-  button.background.setFillColor(buttonStateColors[B_INACTIVE].background);
-  button.background.setOutlineColor(buttonStateColors[B_INACTIVE].primary);
+  button.background.setFillColor(stateColors[B_INACTIVE].background);
+  button.background.setOutlineColor(stateColors[B_INACTIVE].border);
   button.background.setOutlineThickness(borderThickness);
   button.background.setPosition(x, y);
 
@@ -103,7 +102,7 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
   button.text = createText(text, font, charSize, x, y,
                            button.background.getGlobalBounds().width -
                                2 * (borderThickness + 1),
-                           buttonStateColors[B_INACTIVE].primary);
+                           stateColors[B_INACTIVE].text);
 
   // set the offset to the text relative to the button
   int offsetX = button.background.getGlobalBounds().left +
@@ -123,7 +122,6 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
 
 void updateButtonState(Button &button, Event event, MouseEventType type,
                        FloatRect &clickBounds) {
-  button.oldState = button.state; // update old state
   FloatRect buttonBounds =
       button.background.getGlobalBounds(); // get bounds of button
 
@@ -168,9 +166,9 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
 
 void drawButton(RenderWindow &window, Button button) {
   // update the color of the button depending on it's state
-  button.text.setFillColor(button.buttonStateColors[button.state].primary);
-  button.background.setOutlineColor(
-      button.buttonStateColors[button.state].primary);
+  button.text.setFillColor(button.stateColors[button.state].text);
+  button.background.setFillColor(button.stateColors[button.state].background);
+  button.background.setOutlineColor(button.stateColors[button.state].border);
 
   // draw the button on the window passed by reference
   window.draw(button.background);
@@ -178,12 +176,21 @@ void drawButton(RenderWindow &window, Button button) {
 }
 
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
-                int width, int height, Color textColor) {
+                int width, int height,
+                FileStateColors stateColors[F_MAX_STATES],
+                int borderThickness) {
   File file;
+  file.state = F_INACTIVE; // set the state of the button
+  // copy the state colors
+  for (int i = 0; i < F_MAX_STATES; i++) {
+    file.stateColors[i] = stateColors[i];
+  }
 
   // initialize background
   file.background.setSize(Vector2f(width, height));
-  file.background.setFillColor(Color(0x123456FF));
+  file.background.setFillColor(file.stateColors[file.state].background);
+  file.background.setOutlineColor(file.stateColors[file.state].border);
+  file.background.setOutlineThickness(borderThickness);
   file.background.setPosition(x, y);
 
   // initialize data
@@ -192,28 +199,97 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
   // initialize column sizes
   Text date("dd/mm/yyyy hh:mm xx", font, charSize);
 
-  file.dateColumn = date.getGlobalBounds().width;
+  file.dateColumn = date.getGlobalBounds().width + 10;
   file.extColumn = (width - file.dateColumn) / 4;
   file.filenameColumn = (width - file.dateColumn) / 2;
   file.sizeColumn = (width - file.dateColumn) / 4;
 
   // initialize text fields
-  int nameX = x, extX = nameX + file.filenameColumn,
+  int nameX = x + 10, extX = nameX + file.filenameColumn,
       sizeX = extX + file.extColumn, dateX = sizeX + file.sizeColumn;
 
   file.filename = createText(data.filename, font, charSize, nameX, y,
-                             file.filenameColumn, textColor);
-  file.ext =
-      createText(data.ext, font, charSize, extX, y, file.extColumn, textColor);
-  file.size = createText(data.size, font, charSize, sizeX, y, file.sizeColumn,
-                         textColor);
-  file.date = createText(data.date, font, charSize, dateX, y, file.dateColumn,
-                         textColor);
+                             file.filenameColumn - 10,
+                             file.stateColors[file.state].textHighContrast);
+  file.ext = createText(data.ext, font, charSize, extX, y, file.extColumn - 10,
+                        file.stateColors[file.state].textLowContrast);
+  file.size =
+      createText(data.size, font, charSize, sizeX, y, file.sizeColumn - 10,
+                 file.stateColors[file.state].textLowContrast);
+  file.date =
+      createText(data.date, font, charSize, dateX, y, file.dateColumn - 10,
+                 file.stateColors[file.state].textLowContrast);
 
   return file;
 }
 
+void updateFileState(File &file, Event event, MouseEventType type,
+                     File *activeFile[2]) {
+  FloatRect fileBounds =
+      file.background.getGlobalBounds(); // get bounds of button
+  Keyboard kbd;                          // used for checking combos
+
+  switch (type) {
+  case DCLICK:
+    // if a dclick happens, let the explorer handle it
+    if (activeFile[0] == &file) {
+      break;
+    }
+  case CLICK:
+    // if there is a click on a file
+    if (isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y)) {
+      // if no file has been selected, set first file as crt file
+      if (!activeFile[0]) {
+        activeFile[0] = &file;
+        activeFile[0]->state = F_SELECTED;
+      }
+      // if the first file has been selected, select the second
+      else if (!activeFile[1]) {
+        // select the second if shift key is also pressed
+        if (kbd.isKeyPressed(Keyboard::LShift) && activeFile[0] != &file) {
+          activeFile[1] = &file;
+          activeFile[1]->state = F_SELECTED;
+        }
+        // select the first if the user just clicked
+        else {
+          activeFile[0]->state = F_INACTIVE;
+          activeFile[0] = &file;
+          activeFile[0]->state = F_SELECTED;
+        }
+      }
+      // if both have been selected, reset them
+      else {
+        // select the second if shift key is pressed
+        if (kbd.isKeyPressed(Keyboard::LShift) && activeFile[0] != &file) {
+          activeFile[1]->state = F_INACTIVE;
+          activeFile[1] = &file;
+          activeFile[1]->state = F_SELECTED;
+        }
+        // reset both if not
+        else {
+          activeFile[0]->state = F_INACTIVE;
+          activeFile[0] = &file;
+          activeFile[0]->state = F_SELECTED;
+
+          activeFile[1]->state = F_INACTIVE;
+          activeFile[1] = nullptr;
+        }
+      }
+    }
+    break;
+  }
+}
+
 void drawFile(RenderWindow &window, File file) {
+  // update the color of the file depending on it's state
+  file.filename.setFillColor(file.stateColors[file.state].textHighContrast);
+  file.ext.setFillColor(file.stateColors[file.state].textLowContrast);
+  file.size.setFillColor(file.stateColors[file.state].textLowContrast);
+  file.date.setFillColor(file.stateColors[file.state].textLowContrast);
+
+  file.background.setFillColor(file.stateColors[file.state].background);
+  file.background.setOutlineColor(file.stateColors[file.state].border);
+
   window.draw(file.background);
   drawText(window, file.filename);
   drawText(window, file.ext);
@@ -223,7 +299,7 @@ void drawFile(RenderWindow &window, File file) {
 
 Input createInput(string placeholder, string value, Font &font, int charSize,
                   int x, int y, int width, int height,
-                  InputStateColors inputStateColors[I_MAX_STATES],
+                  StateColors stateColors[I_MAX_STATES],
                   unsigned int borderThickness) {
   Input input;
   input.state = I_INACTIVE;        // set the state of the input
@@ -232,22 +308,22 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
   input.cursorLocation = 0;
   // copy the state colors
   for (int i = 0; i < I_MAX_STATES; i++) {
-    input.inputStateColors[i] = inputStateColors[i];
+    input.stateColors[i] = stateColors[i];
   }
 
   // initialize the background of the input
   input.background.setSize(Vector2f(width, height));
-  input.background.setFillColor(inputStateColors[I_INACTIVE].background);
-  input.background.setOutlineColor(inputStateColors[I_INACTIVE].primary);
+  input.background.setFillColor(stateColors[I_INACTIVE].background);
+  input.background.setOutlineColor(stateColors[I_INACTIVE].border);
   input.background.setOutlineThickness(borderThickness);
   input.background.setPosition(x, y);
 
   // set the text to display on the screen
   string displayText = value == "" ? placeholder : value;
-  input.displayText = createText(displayText, font, charSize, x, y,
+  input.displayText = createText(displayText, font, charSize, x + 10, y,
                                  input.background.getGlobalBounds().width -
-                                     2 * (borderThickness + 1),
-                                 inputStateColors[I_INACTIVE].primary);
+                                     2 * (borderThickness + 1) - 10,
+                                 stateColors[I_INACTIVE].text);
 
   // display only a segment of the text so it fits in the text box
   input.startPosition = 0;
@@ -347,84 +423,85 @@ void shrinkInput(Input &input) {
 
 void drawInput(RenderWindow &window, Input &input) {
   // update the color of the input depending on it's state
-  input.displayText.setFillColor(input.inputStateColors[input.state].primary);
-  input.background.setOutlineColor(input.inputStateColors[input.state].primary);
+  input.displayText.setFillColor(input.stateColors[input.state].text);
+  input.background.setFillColor(input.stateColors[input.state].background);
+  input.background.setOutlineColor(input.stateColors[input.state].border);
 
   // draw the input on the window
   window.draw(input.background);
 
-  int radius = 10;
-
-  CircleShape c(radius);
-  c.setFillColor(input.inputStateColors[input.state].background);
-  c.setOutlineThickness(input.background.getOutlineThickness());
-  c.setOutlineColor(input.inputStateColors[input.state].primary);
-
-  RectangleShape sq(Vector2f(2 * radius, 2 * radius));
-  sq.setFillColor(Color(0x242424FF));
-  sq.setOutlineThickness(input.background.getOutlineThickness());
-  sq.setOutlineColor(Color(0x242424FF));
-
-  FloatRect bgBounds = input.background.getGlobalBounds();
-
-  // clear the corners
-  sq.setPosition(bgBounds.left, bgBounds.top);
-  window.draw(sq);
-  sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
-  window.draw(sq);
-  sq.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
-  window.draw(sq);
-  sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
-                 bgBounds.top + bgBounds.height - 2 * radius);
-  window.draw(sq);
-
-  // round the edges
-  c.setPosition(bgBounds.left, bgBounds.top);
-  window.draw(c);
-  c.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
-  window.draw(c);
-  c.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 * radius);
-  window.draw(c);
-  c.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
-                bgBounds.top + bgBounds.height - 2 * radius);
-  window.draw(c);
-
-  // fill the input
-  sq.setFillColor(input.inputStateColors[input.state].background);
-  sq.setOutlineThickness(input.background.getOutlineThickness());
-  sq.setOutlineColor(input.inputStateColors[input.state].background);
-
-  sq.setSize(Vector2f(bgBounds.width, bgBounds.height - 2 * radius));
-  sq.setPosition(Vector2f(bgBounds.left, bgBounds.top + radius));
-
-  window.draw(sq);
-
-  sq.setSize(Vector2f(bgBounds.width - 2 * radius, bgBounds.height));
-  sq.setPosition(Vector2f(bgBounds.left + radius, bgBounds.top));
-
-  window.draw(sq);
-
-  // draw the borders
-  sq.setFillColor(input.inputStateColors[input.state].primary);
-  sq.setOutlineThickness(0);
-
-  sq.setSize(Vector2f(input.background.getOutlineThickness(),
-                      bgBounds.height - 2 * radius + 2));
-  sq.setPosition(Vector2f(bgBounds.left - 1, bgBounds.top + radius - 1));
-  window.draw(sq);
-
-  sq.setPosition(
-      Vector2f(bgBounds.left + bgBounds.width, bgBounds.top + radius - 1));
-  window.draw(sq);
-
-  sq.setSize(Vector2f(bgBounds.width - 2 * radius + 2,
-                      input.background.getOutlineThickness()));
-  sq.setPosition(Vector2f(bgBounds.left + radius - 1, bgBounds.top - 1));
-  window.draw(sq);
-
-  sq.setPosition(
-      Vector2f(bgBounds.left + radius - 1, bgBounds.top + bgBounds.height));
-  window.draw(sq);
+  // int radius = 10;
+  //
+  // CircleShape c(radius);
+  // c.setFillColor(input.inputStateColors[input.state].background);
+  // c.setOutlineThickness(input.background.getOutlineThickness());
+  // c.setOutlineColor(input.inputStateColors[input.state].primary);
+  //
+  // RectangleShape sq(Vector2f(2 * radius, 2 * radius));
+  // sq.setFillColor(Color(0x242424FF));
+  // sq.setOutlineThickness(input.background.getOutlineThickness());
+  // sq.setOutlineColor(Color(0x242424FF));
+  //
+  // FloatRect bgBounds = input.background.getGlobalBounds();
+  //
+  // // clear the corners
+  // sq.setPosition(bgBounds.left, bgBounds.top);
+  // window.draw(sq);
+  // sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
+  // bgBounds.top); window.draw(sq); sq.setPosition(bgBounds.left,
+  // bgBounds.top + bgBounds.height - 2 * radius); window.draw(sq);
+  // sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
+  //                bgBounds.top + bgBounds.height - 2 * radius);
+  // window.draw(sq);
+  //
+  // // round the edges
+  // c.setPosition(bgBounds.left, bgBounds.top);
+  // window.draw(c);
+  // c.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
+  // window.draw(c);
+  // c.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 *
+  // radius); window.draw(c); c.setPosition(bgBounds.left + bgBounds.width - 2
+  // * radius,
+  //               bgBounds.top + bgBounds.height - 2 * radius);
+  // window.draw(c);
+  //
+  // // fill the input
+  // sq.setFillColor(input.inputStateColors[input.state].background);
+  // sq.setOutlineThickness(input.background.getOutlineThickness());
+  // sq.setOutlineColor(input.inputStateColors[input.state].background);
+  //
+  // sq.setSize(Vector2f(bgBounds.width, bgBounds.height - 2 * radius));
+  // sq.setPosition(Vector2f(bgBounds.left, bgBounds.top + radius));
+  //
+  // window.draw(sq);
+  //
+  // sq.setSize(Vector2f(bgBounds.width - 2 * radius, bgBounds.height));
+  // sq.setPosition(Vector2f(bgBounds.left + radius, bgBounds.top));
+  //
+  // window.draw(sq);
+  //
+  // // draw the borders
+  // sq.setFillColor(input.inputStateColors[input.state].primary);
+  // sq.setOutlineThickness(0);
+  //
+  // sq.setSize(Vector2f(input.background.getOutlineThickness(),
+  //                     bgBounds.height - 2 * radius + 2));
+  // sq.setPosition(Vector2f(bgBounds.left - 1, bgBounds.top + radius - 1));
+  // window.draw(sq);
+  //
+  // sq.setPosition(
+  //     Vector2f(bgBounds.left + bgBounds.width, bgBounds.top + radius - 1));
+  // window.draw(sq);
+  //
+  // sq.setSize(Vector2f(bgBounds.width - 2 * radius + 2,
+  //                     input.background.getOutlineThickness()));
+  // sq.setPosition(Vector2f(bgBounds.left + radius - 1, bgBounds.top - 1));
+  // window.draw(sq);
+  //
+  // sq.setPosition(
+  //     Vector2f(bgBounds.left + radius - 1, bgBounds.top +
+  //     bgBounds.height));
+  // window.draw(sq);
 
   // initialize the text of the input
   if (input.value == "") {
@@ -446,7 +523,7 @@ void drawInput(RenderWindow &window, Input &input) {
     FloatRect inputBounds = input.background.getGlobalBounds();
 
     RectangleShape r(Vector2f(1, 9 * charSize / 10));
-    r.setFillColor(Color(0x000000FF));
+    r.setFillColor(input.stateColors[input.state].text);
     r.setPosition(Vector2f(textPos.x, inputBounds.top + inputBounds.height / 2 -
                                           r.getGlobalBounds().height / 2));
 
