@@ -109,7 +109,7 @@ int main() {
 
   for (int i = 0; i < explorers; i++) {
     explorer[i] =
-        createExplorer("/home/yorknez/UAIC/IP/Sem1/lab5/SDL_bgi-2.6.0/", font,
+        createExplorer(getDefaultPath(), font,
                        charSize, i * WINDOW_W / explorers, 0,
                        WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
   }

@@ -72,6 +72,24 @@ bool byDate(node *a, node *b, sortOrder order) {
   return byName(a, b, order);
 }
 
+// returns a string with the default path depending on the OS
+string getDefaultPath() {
+  string path;
+#ifdef _WIN32
+  path = "x:\\";
+  for (int i = 0; i < 26; i++) {
+    path[0] = char(i + 'A');
+    if (fs::exists(path))
+      break;
+  }
+#endif
+#ifdef linux
+  path = "home";
+#endif
+  return path;
+}
+
+// generates a list of files containing data about the path's content
 void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
                       int y, int width, int height,
                       FileStateColors stateColors[B_MAX_STATES]) {
@@ -191,40 +209,152 @@ node *find(list l, string filename) {
   return NULL;
 }
 
-void copyFile(string fromPath, string toPath) {
-  string command = "copy \"" + fromPath + "\" \"" + toPath + "\"";
-  system(command.c_str());
-}
-
-void moveFile(string fromPath, string toPath) {
-  string command = "copy \"" + fromPath + "\" \"" + toPath + "\"";
-  system(command.c_str());
-  command = "del \"" + fromPath + "\"";
-  system(command.c_str());
-};
-
-void deleteFile(string path) {
-
-  string command = "del \"" + path + "\"";
-  system(command.c_str());
-}
-
-void deleteFolder(string path) {
-
-  string command = "erase \"" + path + "\"";
-  system(command.c_str());
-}
-
-void editFileName(string path, string newName) {
-  string command = "ren \"" + path + "\" \"" + newName + "\"";
-  system(command.c_str());
-}
-
-void createFolder(string path, string name) {
-  string command = "md \"" + path + "\\" + name + "\"";
-  system(command.c_str());
-}
-
+// goes into the next folder
 void openFolder(string &path, string name) {
-  path = "\"" + path + "\\" + name + "\"";
+  // the separator is different between linux and windows
+  if (!fs::exists(path))
+    return;
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+  if (!fs::is_directory("\"" + path + separator + name + "\""))
+    return;
+  path = "\"" + path + separator + name + "\"";
+}
+
+// creates a new folder
+void createFolder(string path, string name) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+
+  // checks if the folder already exists, case in which we add "(counter)" at
+  // the end of the name
+  string folderName = name;
+  int counter = 0;
+  while (fs::exists(path + separator + name)) {
+    name = folderName + " (" + int2str(++counter) + ")";
+  }
+
+  // creates a folder with the specified name
+  fs::create_directory(path + separator + name);
+}
+
+// copies a file from a path to another path
+void copyFile(string fromPath, string toPath) {
+  // initialize files and buffer
+  FILE *fromPtr, *toPtr;
+  char buffer[1024];
+  size_t bytes;
+
+  // checks if the file to be copied exists
+  fromPtr = fopen(fromPath.c_str(), "rb");
+  if (!fromPtr) {
+    perror("File not found.");
+    return;
+  }
+
+  // saves the extension of the file
+  string extension = fromPath;
+  extension = extension.erase(0, extension.find_last_of("."));
+
+  // checks if a file already exists with the same name and extension, in which
+  // case we add "(counter)" at the end
+  string doesExist = toPath;
+  int counter = 0;
+  while (fopen((toPath + extension).c_str(), "rb") != NULL) {
+    toPath = doesExist + " (" + int2str(++counter) + ")";
+  }
+
+  // opens the file from "toPath" in write binary mode
+  toPath = toPath + extension;
+  toPtr = fopen(toPath.c_str(), "wb");
+
+  // copies the file from "fromPath" byte by byte to the file from "toPath" and
+  // then closes the files
+  while (0 < (bytes = fread(buffer, 1, sizeof(buffer), fromPtr))) {
+    fwrite(buffer, 1, bytes, toPtr);
+  }
+  fclose(fromPtr);
+  fclose(toPtr);
+}
+
+// copies a folder and its components from a path to another path
+void copyFolder(string fromPath, string toPath) {
+  // the separator is different between linux and windows
+  string separator = fromPath.find_last_of("\\") ? "\\" : "/";
+
+  // creates the folder in the path stored in toPath, but checks if it already
+  // exists, case in which it generates with the format "name (x)", where x is
+  // counting how many copies there are already with the same format
+  string name = toPath;
+  name = name.erase(0, name.find_last_of(separator) + 1);
+  toPath = toPath.erase(toPath.find_last_of(separator), toPath.npos);
+  string folderName = name;
+  int counter = 0;
+  while (fs::exists(toPath + separator + name)) {
+    name = folderName + " (" + int2str(++counter) + ")";
+  }
+  createFolder(toPath, name);
+  toPath += separator + name;
+
+  // iterates in the current directory and if the entry is a directory we recall
+  // the function recursively and when the entry is a file we copy it
+  for (const auto &entry : fs::directory_iterator(fromPath)) {
+    fs::path directoryPath = entry.path().filename();
+    string filename = directoryPath.generic_string();
+    if (entry.is_directory()) {
+      copyFolder(fromPath + separator + filename,
+                 toPath + separator + filename);
+    } else
+      copyFile(fromPath + separator + filename, toPath + separator + filename);
+  }
+}
+
+// deletes a file from a specified path
+void deleteFile(string path) { fs::remove(path); }
+
+// deletes a folder from a specified path and its components
+void deleteFolder(string path) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+  for (const auto &entry : fs::directory_iterator(path)) {
+    fs::path directoryPath = entry.path().filename();
+    string filename = directoryPath.generic_string();
+    if (entry.is_directory())
+      deleteFolder(path + separator + filename);
+    deleteFile(path + separator + filename);
+  }
+  deleteFile(path);
+}
+
+// moves a file from a path to another path
+void moveFile(string fromPath, string toPath) {
+  copyFile(fromPath, toPath);
+  deleteFile(fromPath);
+}
+
+// moves a folder from a path to another path
+void moveFolder(string fromPath, string toPath) {
+  copyFolder(fromPath, toPath);
+  deleteFolder(fromPath);
+}
+
+// renames a file
+void editFileName(string path, string newName) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+
+  string folder = path;
+  folder = folder.erase(folder.find_last_of(separator) + 1);
+  copyFile(path, folder + newName);
+  deleteFile(path);
+}
+
+// renames a folder
+void editFolderName(string path, string newName) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+
+  string folder = path;
+  folder = folder.erase(folder.find_last_of(separator) + 1);
+  copyFolder(path, folder + newName);
+  deleteFolder(path);
 }
