@@ -45,17 +45,17 @@ int main() {
   ColorTheme theme = dark;
 
   Font font;
-  font.loadFromFile("assets/calibri.ttf");
+  font.loadFromFile("assets/font.ttf");
 
   int charSize = 16;
 
-  int explorers = 2;
+  int explorers = 1;
   Explorer explorer[explorers];
 
   for (int i = 0; i < explorers; i++) {
-    explorer[i] = createExplorer(
-        "/home/yorknez/UAIC/IP", font, charSize,
-        i * WINDOW_W / explorers, 0, WINDOW_W / explorers, WINDOW_H, theme);
+    explorer[i] = createExplorer("/home/yorknez/UAIC/IP/Sem1/lab5/SDL_bgi-2.6.0/", font, charSize,
+                                 i * WINDOW_W / explorers, 0,
+                                 WINDOW_W / explorers, WINDOW_H, theme);
   }
 
   // useful for determining double clicks
@@ -64,7 +64,6 @@ int main() {
   Input *activeInput = nullptr;
   Explorer *activeExplorer =
       nullptr; // current active explorer will be the first one by default
-  File *activeFile = nullptr;
   RectangleShape cursor; // cursor to display on inputs
 
   while (window.isOpen()) {

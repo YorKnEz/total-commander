@@ -18,7 +18,7 @@ void updateFilesY(list &files, int y) {
       p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
       p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
 
-      fileY += p->data.background.getGlobalBounds().height;
+      fileY += p->data.background.getGlobalBounds().height + 1;
 
       p = p->next;
     }
@@ -53,11 +53,11 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   init(explorer.files);
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
-                   y + 2 * explorer.heightComp + explorer.heightFile, width - 20, explorer.heightFile,
-                   theme.fileStateColors);
+                   y + 2 * explorer.heightComp + explorer.heightFile,
+                   width - 20, explorer.heightFile, theme.fileStateColors);
 
-  updateFilesY(explorer.files,
-               y + 2 * explorer.heightComp + explorer.heightFile + explorer.scrollOffset);
+  updateFilesY(explorer.files, y + 2 * explorer.heightComp +
+                                   explorer.heightFile + explorer.scrollOffset);
 
   node *head = explorer.files.head; // head of the file list
 
@@ -66,38 +66,40 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
       dateX =
           sizeX +
           head->data.sizeColumn; // used for setting the x of the file columns
-  int btnY =
-      y + 2 * explorer.heightComp + 1; // used for setting the y of the file columns
+  int btnY = y + 2 * explorer.heightComp +
+             1; // used for setting the y of the file columns
 
   // set the drive size text box
-  explorer.textbox[0] = createTextBox(
-      "Size of drive", font, charSize, x + 1, y + 1, width - 2, explorer.heightComp - 2,
-      theme.textMediumContrast, theme.bgLowContrast, theme.border, 1);
+  explorer.textbox[0] =
+      createTextBox("Size of drive", font, charSize, x + 1, y + 1, width - 2,
+                    explorer.heightComp - 2, theme.textMediumContrast,
+                    theme.bgLowContrast, theme.border, 1);
 
   // set the input
-  explorer.input = createInput("Enter path here", path, font, charSize, x + 1,
-                               y + explorer.heightComp + 1, width - 2, explorer.heightComp - 2,
-                               theme.inputStateColors, 1);
+  explorer.input =
+      createInput("Enter path here", path, font, charSize, x + 1,
+                  y + explorer.heightComp + 1, width - 2,
+                  explorer.heightComp - 2, theme.inputStateColors, 1);
 
   // set the sorting buttons
-  explorer.button[0] = createButton("Name", font, charSize, nameX, btnY,
-                                    head->data.filenameColumn - 2,
-                                    explorer.heightFile - 2, theme.buttonStateColors, 1);
+  explorer.button[0] = createButton(
+      "Name", font, charSize, nameX, btnY, head->data.filenameColumn - 2,
+      explorer.heightFile - 2, theme.buttonStateColors, 1);
   explorer.button[1] =
       createButton("Ext", font, charSize, extX, btnY, head->data.extColumn - 2,
                    explorer.heightFile - 2, theme.buttonStateColors, 1);
-  explorer.button[2] = createButton("Size", font, charSize, sizeX, btnY,
-                                    head->data.sizeColumn - 2, explorer.heightFile - 2,
-                                    theme.buttonStateColors, 1);
-  explorer.button[3] = createButton("Date", font, charSize, dateX, btnY,
-                                    head->data.dateColumn - 1, explorer.heightFile - 2,
-                                    theme.buttonStateColors, 1);
+  explorer.button[2] = createButton(
+      "Size", font, charSize, sizeX, btnY, head->data.sizeColumn - 2,
+      explorer.heightFile - 2, theme.buttonStateColors, 1);
+  explorer.button[3] = createButton(
+      "Date", font, charSize, dateX, btnY, head->data.dateColumn - 1,
+      explorer.heightFile - 2, theme.buttonStateColors, 1);
 
   // set the current folder text box
-  explorer.textbox[1] = createTextBox("Current folder", font, charSize, x + 1,
-                                      y + height - explorer.heightComp + 1, width - 2,
-                                      explorer.heightComp - 2, theme.textMediumContrast,
-                                      theme.bgLowContrast, theme.border, 1);
+  explorer.textbox[1] = createTextBox(
+      "Current folder", font, charSize, x + 1,
+      y + height - explorer.heightComp + 1, width - 2, explorer.heightComp - 2,
+      theme.textMediumContrast, theme.bgLowContrast, theme.border, 1);
 
   return explorer;
 }
@@ -135,6 +137,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
     break;
   }
 
+  // update the state of the buttons
   for (int i = 0; i < 4; i++) {
     updateButtonState(explorer.button[i], event, type, clickBounds);
 
@@ -183,7 +186,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
 
     if (type == CLICK || type == DCLICK) {
       cout << start << " " << end << "\n\n";
-  }
+    }
 
     // select all files between start and end if they exist
     if (start && end) {

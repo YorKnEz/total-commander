@@ -6,7 +6,7 @@ void init(list &l) {
   l.head = l.tail = NULL;
 }
 
-// adds an element of type Filedata at index
+// adds an element of type File at index
 void add(list &l, File data, unsigned int index) {
   if (index > l.length)
     return;
@@ -121,9 +121,7 @@ void sort(list &l, sortOrder order,
 
     while (q && !q->data.data.size.compare("<DIR>")) {
       if (sortCriteria(q, p, order)) {
-        aux = p->data;
-        p->data = q->data;
-        q->data = aux;
+        swap(p->data, q->data);
       }
 
       q = q->next;
@@ -137,9 +135,7 @@ void sort(list &l, sortOrder order,
 
     while (q) {
       if (sortCriteria(q, p, order)) {
-        aux = p->data;
-        p->data = q->data;
-        q->data = aux;
+        swap(p->data, q->data);
       }
 
       q = q->next;
