@@ -3,13 +3,17 @@
 // sort nodes by extension
 bool byExt(node *a, node *b, sortOrder order) {
   // try to sort by extension
-  return order * (a->data.ext.compare(b->data.ext)) <= 0;
+  return order *
+             (toLower(a->data.data.ext).compare(toLower(b->data.data.ext))) <=
+         0;
 }
 
 // sort nodes by name
 bool byName(node *a, node *b, sortOrder order) {
   // try to sort by filename
-  int comp = order * a->data.filename.compare(b->data.filename);
+  int comp =
+      order *
+      toLower(a->data.data.filename).compare(toLower(b->data.data.filename));
 
   if (comp) {
     return comp <= 0;
@@ -22,14 +26,14 @@ bool byName(node *a, node *b, sortOrder order) {
 // sort nodes by size
 bool bySize(node *a, node *b, sortOrder order) {
   // try to sort by length of sizes
-  if (a->data.size.size() > b->data.size.size()) {
+  if (a->data.data.size.size() > b->data.data.size.size()) {
     return order != ASC;
-  } else if (a->data.size.size() < b->data.size.size()) {
+  } else if (a->data.data.size.size() < b->data.data.size.size()) {
     return order == ASC;
   }
 
   // try to sort by comparing the numbers
-  int comp = order * (a->data.size.compare(b->data.size));
+  int comp = order * (a->data.data.size.compare(b->data.data.size));
 
   if (comp) {
     return comp <= 0;
@@ -53,10 +57,10 @@ bool byDate(node *a, node *b, sortOrder order) {
   string substrA, substrB; // for storing the year, month etc. when comparing
 
   for (int i = 0; i < 6; i++) {
-    substrA =
-        a->data.date.substr(substrPositions[i].start, substrPositions[i].len);
-    substrB =
-        b->data.date.substr(substrPositions[i].start, substrPositions[i].len);
+    substrA = a->data.data.date.substr(substrPositions[i].start,
+                                       substrPositions[i].len);
+    substrB = b->data.data.date.substr(substrPositions[i].start,
+                                       substrPositions[i].len);
 
     comp = order * substrA.compare(substrB);
 
@@ -86,21 +90,21 @@ string getDefaultPath() {
 }
 
 // generates a list of files containing data about the path's content
-void getFilesFromPath(list &l, string path) {
-  Filedata currentData;
-
+void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
+                      int y, int width, int height,
+                      FileStateColors stateColors[B_MAX_STATES]) {
   // lastDir is used in order to separate files from directories in the list.
   // The directories are inserted after the last directory or at the beginning
   // of the list if there are none, and the files are always added at the end.
   int lastDir = 0;
 
+  Filedata filedata;
+
   // adds the special ".." folder to the list
-  const auto fileTime = fs::last_write_time("path\\..");
+  const auto fileTime = fs::last_write_time("..");
   const auto systemTime = chrono::file_clock::to_sys(fileTime);
   const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
   string date = asctime(gmtime(&time));
-
-  Filedata filedata;
 
   // generates the filedata for the special folder
   filedata.filename = "..";
@@ -108,7 +112,10 @@ void getFilesFromPath(list &l, string path) {
   filedata.date = formatDate(date);
   filedata.ext = "";
 
-  add(l, filedata, lastDir);
+  File element =
+      createFile(filedata, font, charSize, x, y, width, height, stateColors);
+
+  add(l, element, lastDir);
   lastDir++;
 
   // goes through the content of the current path
@@ -153,11 +160,15 @@ void getFilesFromPath(list &l, string path) {
     } else
       filedata.ext = "";
 
+    element =
+        createFile(filedata, font, charSize, x, y, width, height, stateColors);
+
     if (!size.compare("<DIR>")) {
-      add(l, filedata, lastDir);
+      add(l, element, lastDir);
+
       lastDir++;
     } else {
-      add(l, filedata, l.length);
+      add(l, element, l.length);
     }
   }
 }
@@ -168,6 +179,9 @@ void sortFiletree(list &l, sortBy criteria, sortOrder order) {
   switch (criteria) {
   case FILE_NAME:
     sort(l, order, byName);
+    break;
+  case FILE_EXT:
+    sort(l, order, byExt);
     break;
   case FILE_SIZE:
     sort(l, order, bySize);
@@ -185,7 +199,7 @@ node *find(list l, string filename) {
   node *p = l.head;
 
   while (p) {
-    if (!p->data.filename.compare(filename)) {
+    if (!p->data.data.filename.compare(filename)) {
       return p;
     }
 

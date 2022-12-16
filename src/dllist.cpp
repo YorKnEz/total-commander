@@ -6,8 +6,8 @@ void init(list &l) {
   l.head = l.tail = NULL;
 }
 
-// adds an element of type Filedata at index
-void add(list &l, Filedata data, unsigned int index) {
+// adds an element of type File at index
+void add(list &l, File data, unsigned int index) {
   if (index > l.length)
     return;
 
@@ -83,10 +83,10 @@ void printList(list l) {
   unsigned int index = 0;
 
   while (p != NULL) {
-    cout << "Name: " << p->data.filename << " | ";
-    cout << "Extension: " << p->data.ext << " | ";
-    cout << "Size: " << p->data.size << " | ";
-    cout << "Date: " << p->data.date << '\n';
+    cout << "Name: " << p->data.data.filename << " | ";
+    cout << "Extension: " << p->data.data.ext << " | ";
+    cout << "Size: " << p->data.data.size << " | ";
+    cout << "Date: " << p->data.data.date << '\n';
 
     p = p->next;
   }
@@ -112,18 +112,16 @@ void free(list l) {
 
 void sort(list &l, sortOrder order,
           bool (*sortCriteria)(node *a, node *b, sortOrder order)) {
-  node *p = l.head->data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
+  node *p = l.head->data.data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
   node *q;
-  Filedata aux;
+  File aux;
 
-  while (p->next && !p->data.size.compare("<DIR>")) {
+  while (p->next && !p->data.data.size.compare("<DIR>")) {
     q = p->next;
 
-    while (q && !q->data.size.compare("<DIR>")) {
+    while (q && !q->data.data.size.compare("<DIR>")) {
       if (sortCriteria(q, p, order)) {
-        aux = p->data;
-        p->data = q->data;
-        q->data = aux;
+        swap(p->data, q->data);
       }
 
       q = q->next;
@@ -137,9 +135,7 @@ void sort(list &l, sortOrder order,
 
     while (q) {
       if (sortCriteria(q, p, order)) {
-        aux = p->data;
-        p->data = q->data;
-        q->data = aux;
+        swap(p->data, q->data);
       }
 
       q = q->next;

@@ -1,22 +1,18 @@
 #ifndef THEME_H
 #define THEME_H
+
 #include "element.h"
-#include "utils.h"
+#include <SFML/Graphics.hpp>
 
 struct ColorTheme {
-  Color text, background, border;
-  ButtonStateColors buttonStateColors[B_MAX_STATES];
-  InputStateColors inputStateColors[I_MAX_STATES];
+  Color textHighContrast, textMediumContrast, textLowContrast;
+  Color bgBody, bgLowContrast;
+  Color border;
+  StateColors buttonStateColors[B_MAX_STATES];
+  FileStateColors fileStateColors[F_MAX_STATES];
+  StateColors inputStateColors[I_MAX_STATES];
 };
 
-ColorTheme dark = {Color(0xEEEEEEFF),
-                   Color(0x242424FF),
-                   Color(0xFFFFFFFF),
-                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x42f54bFF), Color(0xEEEEEEFF)}},
-                   {{Color(0xEB4034FF), Color(0xEEEEEEFF)},
-                    {Color(0x7700ffFF), Color(0xEEEEEEFF)},
-                    {Color(0x00d5ffFF), Color(0xEEEEEEFF)}}};
+extern ColorTheme dark;
+
 #endif

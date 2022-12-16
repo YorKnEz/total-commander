@@ -35,6 +35,16 @@ string int2str(int a) {
   return stringNumber;
 }
 
+string toLower(string s) {
+  for (int i = 0; i < s.size(); i++) {
+    if ('A' <= s[i] && s[i] <= 'Z') {
+      s[i] = s[i] - 'A' + 'a';
+    }
+  }
+
+  return s;
+}
+
 // this function will convert strings that of format "Sun Nov 17 13:01:15 2022"
 // to "17/11/2022 01:01 PM"
 string formatDate(string date) {
