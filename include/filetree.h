@@ -17,35 +17,32 @@ using namespace chrono_literals;
 
 enum sortBy { FILE_NAME, FILE_EXT, FILE_SIZE, FILE_DATE };
 
-// copies a file from a path to another path
-void copyFile(string fromPath, string toPath);
+string getDefaultPath();
 
-// moves a file from a path to another path
-void moveFile(string fromPath, string toPath);
-
-// goes into the next folder
-void openFolder(string &path, string name);
-
-// renames a file
-void editFileName(string path, string newName);
-
-// deletes a file from a specified path
-void deleteFile(string path);
-
-// deletes a folder from a specified path and its components
-void deleteFolder(string path);
-
-// copies a folder and its components from a path to another path
-void copyFolder(string fromPath, string toPath);
-
-// creates a new folder
-void createFolder(string path, string name);
-
-// generates a list of files containing data about the path's content
 void getFilesFromPath(list &l, string path);
 
 void sortFiletree(list &l, sortBy criteria, sortOrder order);
 
 node *find(list l, string filename);
+
+void openFolder(string &path);
+
+void createFolder(string path, string name);
+
+void copyFile(string fromPath, string toPath);
+
+void copyFolder(string fromPath, string toPath);
+
+void deleteFile(string path);
+
+void deleteFolder(string path);
+
+void moveFile(string fromPath, string toPath);
+
+void moveFolder(string fromPath, string toPath);
+
+void editFileName(string path, string newName);
+
+void editFolderName(string path, string newName);
 
 #endif

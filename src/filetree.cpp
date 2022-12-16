@@ -68,6 +68,24 @@ bool byDate(node *a, node *b, sortOrder order) {
   return byName(a, b, order);
 }
 
+// returns a string with the default path depending on the OS
+string getDefaultPath() {
+  string path;
+#ifdef _WIN32
+  path = "x:\\";
+  for (int i = 0; i < 26; i++) {
+    path[0] = char(i + 'A');
+    if (fs::exists(path))
+      break;
+  }
+#endif
+#ifdef linux
+  path = "home";
+#endif
+  return path;
+}
+
+// generates a list of files containing data about the path's content
 void getFilesFromPath(list &l, string path) {
   Filedata currentData;
 
@@ -177,6 +195,35 @@ node *find(list l, string filename) {
   return NULL;
 }
 
+// goes into the next folder
+void openFolder(string &path, string name) {
+  // the separator is different between linux and windows
+  if (!fs::exists(path))
+    return;
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+  if (!fs::is_directory("\"" + path + separator + name + "\""))
+    return;
+  path = "\"" + path + separator + name + "\"";
+}
+
+// creates a new folder
+void createFolder(string path, string name) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+
+  // checks if the folder already exists, case in which we add "(counter)" at
+  // the end of the name
+  string folderName = name;
+  int counter = 0;
+  while (fs::exists(path + separator + name)) {
+    name = folderName + " (" + int2str(++counter) + ")";
+  }
+
+  // creates a folder with the specified name
+  fs::create_directory(path + separator + name);
+}
+
+// copies a file from a path to another path
 void copyFile(string fromPath, string toPath) {
   // initialize files and buffer
   FILE *fromPtr, *toPtr;
@@ -215,32 +262,7 @@ void copyFile(string fromPath, string toPath) {
   fclose(toPtr);
 }
 
-void moveFile(string fromPath, string toPath) {
-  copyFile(fromPath, toPath);
-  deleteFile(fromPath);
-}
-
-void openFolder(string &path, string name) {
-  // the separator is different between linux and windows
-  string separator = path.find_last_of("\\") ? "\\" : "/";
-  path = "\"" + path + separator + name + "\"";
-}
-
-void deleteFile(string path) { fs::remove(path); }
-
-void deleteFolder(string path) {
-  // the separator is different between linux and windows
-  string separator = path.find_last_of("\\") ? "\\" : "/";
-  for (const auto &entry : fs::directory_iterator(path)) {
-    fs::path directoryPath = entry.path().filename();
-    string filename = directoryPath.generic_string();
-    if (entry.is_directory())
-      deleteFolder(path + separator + filename);
-    deleteFile(path + separator + filename);
-  }
-  deleteFile(path);
-}
-
+// copies a folder and its components from a path to another path
 void copyFolder(string fromPath, string toPath) {
   // the separator is different between linux and windows
   string separator = fromPath.find_last_of("\\") ? "\\" : "/";
@@ -272,29 +294,53 @@ void copyFolder(string fromPath, string toPath) {
   }
 }
 
+// deletes a file from a specified path
+void deleteFile(string path) { fs::remove(path); }
+
+// deletes a folder from a specified path and its components
+void deleteFolder(string path) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") ? "\\" : "/";
+  for (const auto &entry : fs::directory_iterator(path)) {
+    fs::path directoryPath = entry.path().filename();
+    string filename = directoryPath.generic_string();
+    if (entry.is_directory())
+      deleteFolder(path + separator + filename);
+    deleteFile(path + separator + filename);
+  }
+  deleteFile(path);
+}
+
+// moves a file from a path to another path
+void moveFile(string fromPath, string toPath) {
+  copyFile(fromPath, toPath);
+  deleteFile(fromPath);
+}
+
+// moves a folder from a path to another path
+void moveFolder(string fromPath, string toPath) {
+  copyFolder(fromPath, toPath);
+  deleteFolder(fromPath);
+}
+
+// renames a file
 void editFileName(string path, string newName) {
   // the separator is different between linux and windows
   string separator = path.find_last_of("\\") ? "\\" : "/";
 
   string folder = path;
   folder = folder.erase(folder.find_last_of(separator) + 1);
-  cout << folder;
   copyFile(path, folder + newName);
   deleteFile(path);
 }
 
-void createFolder(string path, string name) {
+// renames a folder
+void editFolderName(string path, string newName) {
   // the separator is different between linux and windows
   string separator = path.find_last_of("\\") ? "\\" : "/";
 
-  // checks if the folder already exists, case in which we add "(counter)" at
-  // the end of the name
-  string folderName = name;
-  int counter = 0;
-  while (fs::exists(path + separator + name)) {
-    name = folderName + " (" + int2str(++counter) + ")";
-  }
-
-  // creates a folder with the specified name
-  fs::create_directory(path + separator + name);
+  string folder = path;
+  folder = folder.erase(folder.find_last_of(separator) + 1);
+  copyFolder(path, folder + newName);
+  deleteFolder(path);
 }
