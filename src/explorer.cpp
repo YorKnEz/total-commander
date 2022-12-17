@@ -54,7 +54,8 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
                    y + 2 * explorer.heightComp + explorer.heightFile,
-                   width - 20, explorer.heightFile, theme.fileStateColors);
+
+  sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
 
   updateFilesY(explorer.files, y + 2 * explorer.heightComp +
                                    explorer.heightFile + explorer.scrollOffset);
@@ -94,6 +95,13 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   explorer.button[3] = createButton(
       "Date", font, charSize, dateX, btnY, head->data.dateColumn - 1,
       explorer.heightFile - 2, theme.buttonStateColors, 1);
+
+  // append the sort indicator to the new sort button
+  explorer.button[explorer.sortedBy].fullText.append(
+      explorer.order == ASC ? " /" : " \\");
+  updateText(explorer.button[explorer.sortedBy].text,
+             explorer.button[explorer.sortedBy].fullText,
+             explorer.button[explorer.sortedBy].background.getGlobalBounds());
 
   // set the current folder text box
   explorer.textbox[1] = createTextBox(
@@ -141,8 +149,31 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
   for (int i = 0; i < 4; i++) {
     updateButtonState(explorer.button[i], event, type, clickBounds);
 
-    if (explorer.button[i].state == B_CLICKED) {
-      sortFiletree(explorer.files, sortBy(i), ASC);
+    if (explorer.button[i].state == B_CLICKED || explorer.button[i].state == B_DCLICKED) {
+      // remove the sort indicator from the last button
+      explorer.button[explorer.sortedBy].fullText.erase(
+          explorer.button[explorer.sortedBy].fullText.size() - 2);
+      updateText(
+          explorer.button[explorer.sortedBy].text,
+          explorer.button[explorer.sortedBy].fullText,
+          explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+      // update sortedBy and order indicators
+      if (explorer.sortedBy == sortBy(i)) {
+        explorer.order = explorer.order == ASC ? DESC : ASC;
+      } else {
+        explorer.order = ASC;
+      }
+      explorer.sortedBy = sortBy(i);
+
+      // append the sort indicator to the new sort button
+      explorer.button[explorer.sortedBy].fullText.append(
+          explorer.order == ASC ? " /" : " \\");
+      updateText(explorer.button[i].text, explorer.button[i].fullText,
+                 explorer.button[i].background.getGlobalBounds());
+
+      // sort and update the y of the files
+      sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
       updateFilesY(explorer.files,
                    explorer.background.getPosition().y + explorer.heightFile +
                        2 * explorer.heightComp + explorer.scrollOffset);

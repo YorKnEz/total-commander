@@ -18,6 +18,8 @@ enum ExplorerState { E_INACTIVE, E_ACTIVE };
 struct Explorer {
   string path;
   list files;
+  sortBy sortedBy = FILE_NAME;
+  sortOrder order = ASC;
   File *activeFile[2] = { nullptr, nullptr };
   int scrollOffset;
   int heightFile; // height of the files on the screen
