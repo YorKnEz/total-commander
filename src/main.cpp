@@ -88,7 +88,7 @@ int main() {
   ColorTheme theme = dark;
 
   Font font;
-  font.loadFromFile("assets/font.ttf");
+  font.loadFromFile("assets/hack.ttf");
 
   int charSize = 16;
 
