@@ -94,19 +94,25 @@ void printList(list l) {
   cout << '\n';
 }
 
-void free(list l) {
-  if (l.head) {
-    node *p = l.head->next;
+void free(list &l) {
+  // if (l.head) {
+  //   node *p = l.head->next;
+  //
+  //   while (p) {
+  //     delete p->prev;
+  //
+  //     p = p->next;
+  //   }
+  //
+  //   delete p;
+  // }
+
+  node *p = l.head;
 
     while (p) {
-      delete p->prev;
-
       p = p->next;
+    remove(l, 0);
     }
-
-    delete p;
-  }
-
   // cout << "\nFreed list\n";
 }
 
