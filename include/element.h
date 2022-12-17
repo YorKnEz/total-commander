@@ -116,8 +116,6 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
 void updateInputState(Input &input, Event event, MouseEventType type,
                       Input *&activeInput);
 
-void expandInput(Input &input);
-
 void shrinkInput(Input &input);
 
 void drawInput(RenderWindow &window, Input &input);
