@@ -119,7 +119,8 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
   case CLICK:
     // if the user clicks inside the explorer, move the focus to the explorer
     if (isHovered(explorer.background.getGlobalBounds(), event.mouseButton.x,
-                  event.mouseButton.y)) {
+                  event.mouseButton.y) &&
+        activeExplorer != &explorer) {
       if (activeExplorer) {
         activeExplorer->state = E_INACTIVE; // set old explorer as inactive
 
@@ -128,8 +129,9 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
         activeExplorer->textbox[1].fullText.erase(
             activeExplorer->textbox[1].fullText.size() - 2, 2);
 
-        activeExplorer->textbox[1].text.setString(
-            activeExplorer->textbox[1].fullText);
+        updateText(activeExplorer->textbox[1].text,
+                   activeExplorer->textbox[1].fullText,
+                   activeExplorer->textbox[1].background.getGlobalBounds());
       }
 
       activeExplorer = &explorer;
@@ -139,8 +141,9 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
       activeExplorer->textbox[1].fullText.insert(0, "> ");
       activeExplorer->textbox[1].fullText.append(" <");
 
-      activeExplorer->textbox[1].text.setString(
-          activeExplorer->textbox[1].fullText);
+      updateText(activeExplorer->textbox[1].text,
+                 activeExplorer->textbox[1].fullText,
+                 activeExplorer->textbox[1].background.getGlobalBounds());
     }
     break;
   }
