@@ -83,7 +83,7 @@ string getDefaultPath() {
       break;
   }
 #endif
-#ifdef linux
+#ifdef __linux__
   path = "home";
 #endif
   return path;
@@ -209,21 +209,48 @@ node *find(list l, string filename) {
   return NULL;
 }
 
+bool checkIfValid(string path) {
+  // the separator is different between linux and windows
+  string separator = path.find_last_of("\\") != path.npos ? "\\" : "/";
+  if (!fs::exists(path))
+    return false;
+  string folderName = path;
+  folderName = folderName.erase(0, folderName.find_last_of(separator));
+  if (folderName.find("\\/\n#<>$+%!'&*`|{}?\"=:@") != folderName.npos)
+    return false;
+  return true;
+}
+
 // goes into the next folder
 void openFolder(string &path, string name) {
   // the separator is different between linux and windows
-  if (!fs::exists(path))
+  string separator;
+  if (path.back() != '\\' and path.back() != '/')
+    separator = path.find_last_of("\\") != path.npos ? "\\" : "/";
+  else
+    separator.clear();
+  if (name.compare("..") == 0) {
+    if (path.back() == '\\' or path.back() == '/')
+      return;
+    else {
+      path = path.erase(path.find_last_of(separator), path.npos);
+      if (path.back() == ':')
+        path.append(separator);
+      return;
+    }
+  }
+  if (!checkIfValid(path) or !checkIfValid(path + separator + name)) {
     return;
-  string separator = path.find_last_of("\\") ? "\\" : "/";
-  if (!fs::is_directory("\"" + path + separator + name + "\""))
+  }
+  if (!fs::is_directory(path + separator + name))
     return;
-  path = "\"" + path + separator + name + "\"";
+  path = path + separator + name;
 }
 
 // creates a new folder
 void createFolder(string path, string name) {
   // the separator is different between linux and windows
-  string separator = path.find_last_of("\\") ? "\\" : "/";
+  string separator = path.find_last_of("\\") != path.npos ? "\\" : "/";
 
   // checks if the folder already exists, case in which we add "(counter)" at
   // the end of the name
@@ -279,7 +306,7 @@ void copyFile(string fromPath, string toPath) {
 // copies a folder and its components from a path to another path
 void copyFolder(string fromPath, string toPath) {
   // the separator is different between linux and windows
-  string separator = fromPath.find_last_of("\\") ? "\\" : "/";
+  string separator = fromPath.find_last_of("\\") != fromPath.npos ? "\\" : "/";
 
   // creates the folder in the path stored in toPath, but checks if it already
   // exists, case in which it generates with the format "name (x)", where x is
@@ -314,7 +341,7 @@ void deleteFile(string path) { fs::remove(path); }
 // deletes a folder from a specified path and its components
 void deleteFolder(string path) {
   // the separator is different between linux and windows
-  string separator = path.find_last_of("\\") ? "\\" : "/";
+  string separator = path.find_last_of("\\") != path.npos ? "\\" : "/";
   for (const auto &entry : fs::directory_iterator(path)) {
     fs::path directoryPath = entry.path().filename();
     string filename = directoryPath.generic_string();
@@ -340,7 +367,7 @@ void moveFolder(string fromPath, string toPath) {
 // renames a file
 void editFileName(string path, string newName) {
   // the separator is different between linux and windows
-  string separator = path.find_last_of("\\") ? "\\" : "/";
+  string separator = path.find_last_of("\\") != path.npos ? "\\" : "/";
 
   string folder = path;
   folder = folder.erase(folder.find_last_of(separator) + 1);
@@ -351,7 +378,7 @@ void editFileName(string path, string newName) {
 // renames a folder
 void editFolderName(string path, string newName) {
   // the separator is different between linux and windows
-  string separator = path.find_last_of("\\") ? "\\" : "/";
+  string separator = path.find_last_of("\\") != path.npos ? "\\" : "/";
 
   string folder = path;
   folder = folder.erase(folder.find_last_of(separator) + 1);
