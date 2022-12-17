@@ -109,16 +109,17 @@ void free(list &l) {
 
   node *p = l.head;
 
-    while (p) {
-      p = p->next;
+  while (p) {
+    p = p->next;
     remove(l, 0);
-    }
+  }
   // cout << "\nFreed list\n";
 }
 
 void sort(list &l, sortOrder order,
           bool (*sortCriteria)(node *a, node *b, sortOrder order)) {
-  node *p = l.head->data.data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
+  node *p =
+      l.head->data.data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
   node *q;
   File aux;
 

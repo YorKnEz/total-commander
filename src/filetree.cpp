@@ -119,55 +119,58 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
 
   // goes through the content of the current path
   for (const auto &entry : fs::directory_iterator(path)) {
-    // converts filename path to string
-    fs::path directoryPath = entry.path().filename();
-    string filename = directoryPath.generic_string();
+    try {
+      // converts filename path to string
+      fs::path directoryPath = entry.path().filename();
+      string filename = directoryPath.generic_string();
 
-    // gets the date at which the current file was last modified
-    const auto fileTime = fs::last_write_time(entry.path());
-    // converts the result to system time
-    const auto systemTime = chrono::file_clock::to_sys(fileTime);
-    // converts the new result to time_t (seconds that have passed since epoch
-    // time - 1 January 1970 00:00:00) / to UNIX timestamp
-    const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
+      // gets the date at which the current file was last modified
+      const auto fileTime = fs::last_write_time(entry.path());
+      // converts the result to system time
+      const auto systemTime = chrono::file_clock::to_sys(fileTime);
+      // converts the new result to time_t (seconds that have passed since epoch
+      // time - 1 January 1970 00:00:00) / to UNIX timestamp
+      const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
 
-    // checks whether the current entry is a file or a directory and sets the
-    // size accordingly (directory size = "<DIR>", file size is an integer
-    // value)
-    string size = is_regular_file(entry.path())
-                      ? int2str(file_size(entry.path()))
-                      : "<DIR>";
-    if (size == "") {
-      size = "0";
-    }
+      // checks whether the current entry is a file or a directory and sets the
+      // size accordingly (directory size = "<DIR>", file size is an integer
+      // value)
+      string size = is_regular_file(entry.path())
+                        ? int2str(file_size(entry.path()))
+                        : "<DIR>";
+      if (size == "") {
+        size = "0";
+      }
 
-    // generates a converted string from timestamp to GMT
-    string date = asctime(gmtime(&time));
-    Filedata filedata;
+      // generates a converted string from timestamp to GMT
+      string date = asctime(gmtime(&time));
+      Filedata filedata;
 
-    // generates the filedata with the previously obtained strings and adds them
-    // to the list
-    filedata.filename = filename;
-    filedata.size = size;
-    filedata.date = formatDate(date);
-    int lastDotPos = filedata.filename.find_last_of('.');
+      // generates the filedata with the previously obtained strings and adds
+      // them to the list
+      filedata.filename = filename;
+      filedata.size = size;
+      filedata.date = formatDate(date);
+      int lastDotPos = filedata.filename.find_last_of('.');
 
-    if (lastDotPos != string::npos && lastDotPos != 0 &&
-        filedata.size.compare("<DIR>")) {
-      filedata.ext = filedata.filename.substr(lastDotPos + 1);
-      filedata.filename.erase(filedata.filename.find_last_of('.'));
-    } else
-      filedata.ext = "";
+      if (lastDotPos != string::npos && lastDotPos != 0 &&
+          filedata.size.compare("<DIR>")) {
+        filedata.ext = filedata.filename.substr(lastDotPos + 1);
+        filedata.filename.erase(filedata.filename.find_last_of('.'));
+      } else
+        filedata.ext = "";
 
-    element =
-        createFile(filedata, font, charSize, x, y, width, height, stateColors);
+      element = createFile(filedata, font, charSize, x, y, width, height,
+                           stateColors);
 
-    if (!size.compare("<DIR>")) {
-      add(l, element, lastDir);
+      if (!size.compare("<DIR>")) {
+        add(l, element, lastDir);
 
-      lastDir++;
-    } else {
-      add(l, element, l.length);
+        lastDir++;
+      } else {
+        add(l, element, l.length);
+      }
+    } catch (fs::filesystem_error) {
     }
   }
 }
@@ -223,7 +226,7 @@ bool isValidPath(string path) {
 
   for (int i = 0; i < invalidSymbols.size(); i++) {
     if (folderName.find(invalidSymbols[i]) != folderName.npos) {
-    return false;
+      return false;
     }
   }
 
@@ -260,16 +263,16 @@ void openFolder(string &path, string name) {
     }
 
     // remove the last foldername from the path
-      path = path.erase(path.find_last_of(separator), path.npos);
+    path = path.erase(path.find_last_of(separator), path.npos);
 
     // if the path reaches it's base point, append a separator
     // windows: "C:", linux: ""
     if (path.back() == ':' || path == "") {
-        path.append(separator);
+      path.append(separator);
     }
 
-      return;
-    }
+    return;
+  }
 
   // check if either path or new path is valid
   if (!isValidPath(path) || !isValidPath(path + SEP + name)) {

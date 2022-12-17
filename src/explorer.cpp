@@ -8,20 +8,18 @@ void updateFilesY(list &files, int y) {
                 p->data.date.getPosition().y -
                 p->data.date.getGlobalBounds().top;
 
-  if (y)
+  while (p) {
+    p->data.background.setPosition(p->data.background.getPosition().x, fileY);
+    p->data.filename.setPosition(p->data.filename.getPosition().x,
+                                 fileY + offsetY);
+    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetY);
+    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
+    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
 
-    while (p) {
-      p->data.background.setPosition(p->data.background.getPosition().x, fileY);
-      p->data.filename.setPosition(p->data.filename.getPosition().x,
-                                   fileY + offsetY);
-      p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetY);
-      p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
-      p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
+    fileY += p->data.background.getGlobalBounds().height + 1;
 
-      fileY += p->data.background.getGlobalBounds().height + 1;
-
-      p = p->next;
-    }
+    p = p->next;
+  }
 }
 
 void drawFiles(RenderWindow &window, list &files) {
@@ -54,6 +52,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
                    y + 2 * explorer.heightComp + explorer.heightFile,
+                   width - 20 - 2, explorer.heightFile, theme.fileStateColors);
 
   sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
 
@@ -230,44 +229,45 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
       explorer.scrollOffset = 0;
       explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
     } else {
-    while (p) {
-      updateFileState(p->data, event, type, explorer.activeFile);
+      while (p) {
+        updateFileState(p->data, event, type, explorer.activeFile);
 
-      // if first file has been selected, save the node that has it
-      if (explorer.activeFile[0] == &p->data) {
-        // reset end pointer if start pointer has been changed
-        if (end && start) {
-          end = nullptr;
+        // if first file has been selected, save the node that has it
+        if (explorer.activeFile[0] == &p->data) {
+          // reset end pointer if start pointer has been changed
+          if (end && start) {
+            end = nullptr;
+          }
+
+          start = p;
         }
 
-        start = p;
+        // if second file has been selected, save the node that has it
+        if (explorer.activeFile[1] == &p->data) {
+          end = p;
+        }
+
+        // unmark anything besides first and second selected
+        if (explorer.activeFile[0] != &p->data &&
+            explorer.activeFile[1] != &p->data) {
+          p->data.state = F_INACTIVE;
+        }
+
+        p = p->next;
       }
 
-      // if second file has been selected, save the node that has it
-      if (explorer.activeFile[1] == &p->data) {
-        end = p;
-      }
+      // select all files between start and end if they exist
+      if (start && end) {
+        if (start->data.background.getPosition().y >
+            end->data.background.getPosition().y) {
+          swap(start, end);
+          // swap(explorer.activeFile[0], explorer.activeFile[1]);
+        }
 
-      // unmark anything besides first and second selected
-      if (explorer.activeFile[0] != &p->data &&
-          explorer.activeFile[1] != &p->data) {
-        p->data.state = F_INACTIVE;
-      }
-
-      p = p->next;
-    }
-
-    // select all files between start and end if they exist
-    if (start && end) {
-      if (start->data.background.getPosition().y >
-          end->data.background.getPosition().y) {
-        swap(start, end);
-        // swap(explorer.activeFile[0], explorer.activeFile[1]);
-      }
-
-      while (start != end) {
-        start->data.state = F_SELECTED;
-        start = start->next;
+        while (start != end) {
+          start->data.state = F_SELECTED;
+          start = start->next;
+        }
       }
     }
   }
