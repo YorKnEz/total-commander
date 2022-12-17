@@ -12,6 +12,13 @@
 #include <stdlib.h>
 #include <string>
 
+// define the file separator between linux and windows
+#if defined _WIN32
+#define SEP "\\"
+#elif defined __linux__
+#define SEP "/"
+#endif
+
 using namespace std;
 namespace fs = filesystem;
 using namespace chrono_literals;
