@@ -535,15 +535,17 @@ void drawInput(RenderWindow &window, Input &input) {
   // shrinkInput(input);
 
   window.draw(input.displayText);
+}
 
-  // temp
-  if (input.state == I_ACTIVE) {
-    int charSize = input.displayText.getCharacterSize();
-    Vector2f textPos = input.displayText.findCharacterPos(input.cursorLocation);
-    FloatRect inputBounds = input.background.getGlobalBounds();
+void drawCursor(RenderWindow &window, Input *activeInput) {
+  if (activeInput && activeInput->state == I_ACTIVE) {
+    int charSize = activeInput->displayText.getCharacterSize();
+    Vector2f textPos =
+        activeInput->displayText.findCharacterPos(activeInput->cursorLocation);
+    FloatRect inputBounds = activeInput->background.getGlobalBounds();
 
     RectangleShape r(Vector2f(1, 9 * charSize / 10));
-    r.setFillColor(input.stateColors[input.state].text);
+    r.setFillColor(activeInput->stateColors[activeInput->state].text);
     r.setPosition(Vector2f(textPos.x, inputBounds.top + inputBounds.height / 2 -
                                           r.getGlobalBounds().height / 2));
 

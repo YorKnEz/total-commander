@@ -122,4 +122,6 @@ void shrinkInput(Input &input);
 
 void drawInput(RenderWindow &window, Input &input);
 
+void drawCursor(RenderWindow &window, Input *activeInput);
+
 #endif

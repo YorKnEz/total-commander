@@ -346,6 +346,8 @@ int main() {
     for (int i = 0; i < buttons; i++) {
       drawButton(window, button[i]);
     }
+
+    drawCursor(window, activeInput);
     window.display();
   }
 
