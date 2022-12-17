@@ -114,7 +114,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, FloatRect &clickBounds,
-                         Input *&activeInput) {
+                         Input *&activeInput, Font &font, ColorTheme theme) {
   switch (type) {
   case CLICK:
     // if the user clicks inside the explorer, move the focus to the explorer
@@ -191,22 +191,45 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
     // update the state of the files
     node *p = explorer.files.head;
     node *start = nullptr, *end = nullptr;
-    bool dclick = false;
 
     if (type == DCLICK && explorer.activeFile[0] &&
         isHovered(explorer.activeFile[0]->background.getGlobalBounds(),
                   event.mouseButton.x, event.mouseButton.y)) {
-      explorer.activeFile[0]->state = F_DCLICKED;
+      openFolder(explorer.path, explorer.activeFile[0]->data.filename);
 
-      if (explorer.activeFile[1]) {
-        explorer.activeFile[1]->state = F_INACTIVE;
-      }
-      explorer.activeFile[1] = nullptr;
+      // use the head of the old list to extract its props
+      File file = explorer.files.head->data;
 
-      // handle dclick for this file
-      dclick = true;
-    }
+      // update the input of the explorer
+      explorer.input.value = explorer.path;
+      explorer.input.displayText.setString(explorer.path);
+      explorer.input.cursorLocation = explorer.path.size();
+      explorer.input.displayLength = explorer.path.size();
 
+      // reset explorer related props
+      explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
+      explorer.textbox[1].fullText.insert(0, "> ");
+      explorer.textbox[1].fullText.append(" <");
+      updateText(explorer.textbox[1].text, explorer.textbox[1].fullText,
+                 explorer.textbox[1].background.getGlobalBounds());
+
+      // delete old files list
+      free(explorer.files);
+      init(explorer.files);
+
+      // get the new files from the new path
+      getFilesFromPath(
+          explorer.files, explorer.path, font, file.filename.getCharacterSize(),
+          file.background.getPosition().x, file.background.getPosition().y,
+          file.background.getGlobalBounds().width, explorer.heightFile,
+          theme.fileStateColors);
+
+      updateFilesY(explorer.files,
+                   file.background.getPosition().y - explorer.scrollOffset);
+
+      explorer.scrollOffset = 0;
+      explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
+    } else {
     while (p) {
       updateFileState(p->data, event, type, explorer.activeFile);
 
