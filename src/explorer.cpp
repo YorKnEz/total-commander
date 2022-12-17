@@ -105,7 +105,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
   // set the current folder text box
   explorer.textbox[1] = createTextBox(
-      "Current folder", font, charSize, x + 1,
+      getCurrentFolder(explorer.path), font, charSize, x + 1,
       y + height - explorer.heightComp + 1, width - 2, explorer.heightComp - 2,
       theme.textMediumContrast, theme.bgLowContrast, theme.border, 1);
 

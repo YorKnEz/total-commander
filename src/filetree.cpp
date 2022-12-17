@@ -220,6 +220,19 @@ bool checkIfValid(string path) {
   return true;
 }
 
+string getCurrentFolder(string path) {
+  string oldPath = path;
+  path = path.erase(0, path.find_last_of(SEP) + 1);
+
+  // if the path is empty after erase, it means we are at the base point
+  // windows: "C:\", linux: "/"
+  if (path == "") {
+    return oldPath.substr(0, oldPath.find(SEP));
+  }
+
+  return path;
+}
+
 // goes into the next folder
 void openFolder(string &path, string name) {
   string separator = "";

@@ -37,6 +37,8 @@ node *find(list l, string filename);
 
 bool checkIfValid(string path);
 
+string getCurrentFolder(string path);
+
 void openFolder(string &path, string name);
 
 void createFolder(string path, string name);
