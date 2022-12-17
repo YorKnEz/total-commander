@@ -28,7 +28,9 @@ void sortFiletree(list &l, sortBy criteria, sortOrder order);
 
 node *find(list l, string filename);
 
-void openFolder(string &path);
+bool checkIfValid(string path);
+
+void openFolder(string &path, string name);
 
 void createFolder(string path, string name);
 
