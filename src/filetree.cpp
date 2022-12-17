@@ -75,16 +75,15 @@ bool byDate(node *a, node *b, sortOrder order) {
 // returns a string with the default path depending on the OS
 string getDefaultPath() {
   string path;
-#ifdef _WIN32
+#if defined _WIN32
   path = "x:\\";
   for (int i = 0; i < 26; i++) {
     path[0] = char(i + 'A');
     if (fs::exists(path))
       break;
   }
-#endif
-#ifdef __linux__
-  path = "home";
+#elif defined __linux__
+  path = "/";
 #endif
   return path;
 }

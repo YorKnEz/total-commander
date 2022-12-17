@@ -109,9 +109,9 @@ int main() {
 
   for (int i = 0; i < explorers; i++) {
     explorer[i] =
-        createExplorer(getDefaultPath(), font,
-                       charSize, i * WINDOW_W / explorers, 0,
-                       WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
+        createExplorer(getDefaultPath(), font, charSize,
+                       i * WINDOW_W / explorers, 0, WINDOW_W / explorers,
+                       WINDOW_H - btnHeight, theme);
   }
 
   // useful for determining double clicks
