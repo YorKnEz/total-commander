@@ -208,15 +208,25 @@ node *find(list l, string filename) {
   return NULL;
 }
 
-bool checkIfValid(string path) {
-  // the separator is different between linux and windows
-  string separator = path.find_last_of("\\") != path.npos ? "\\" : "/";
-  if (!fs::exists(path))
+bool isValidPath(string path) {
+  // the SEP is different between linux and windows
+
+  // check if the path exists
+  if (!fs::exists(path)) {
     return false;
-  string folderName = path;
-  folderName = folderName.erase(0, folderName.find_last_of(separator));
-  if (folderName.find("\\/\n#<>$+%!'&*`|{}?\"=:@") != folderName.npos)
+  }
+
+  string folderName = path.erase(0, path.find_last_of(SEP) + 1);
+
+  // check for invalid symbols in the path
+  string invalidSymbols = "\\/\n#<>$+%!'&*`|{}?\"=:@";
+
+  for (int i = 0; i < invalidSymbols.size(); i++) {
+    if (folderName.find(invalidSymbols[i]) != folderName.npos) {
     return false;
+    }
+  }
+
   return true;
 }
 
