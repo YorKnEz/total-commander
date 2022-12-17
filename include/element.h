@@ -72,6 +72,8 @@ bool isHovered(FloatRect box, int mouseX, int mouseY);
 Text createText(string textString, Font &font, int charSize, int x, int y,
                 int width, Color text);
 
+void updateText(Text &text, string newText, FloatRect bounds);
+
 void drawText(RenderWindow &window, Text text);
 
 // textbox functions

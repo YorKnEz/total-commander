@@ -72,6 +72,26 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
   return textbox;
 }
 
+void updateText(Text &text, string newText, FloatRect bounds) {
+  int oldWidth = text.getGlobalBounds().width;
+  text.setString(newText);
+
+  // shrink the text that is shown on the screen to avoid overflow
+  if (text.getGlobalBounds().width > bounds.width) {
+    newText.append("..");
+    text.setString(newText);
+  }
+
+  while (text.getGlobalBounds().width > bounds.width) {
+    newText.erase(newText.size() - 3, 1);
+    text.setString(newText);
+  }
+
+  int newWidth = text.getGlobalBounds().width;
+  text.setPosition(text.getPosition().x + oldWidth / 2 - newWidth / 2,
+                   text.getPosition().y);
+}
+
 void drawTextBox(RenderWindow &window, TextBox textbox) {
   window.draw(textbox.background);
   window.draw(textbox.text);
