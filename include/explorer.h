@@ -18,6 +18,8 @@ enum ExplorerState { E_INACTIVE, E_ACTIVE };
 struct Explorer {
   string path;
   list files;
+  sortBy sortedBy = FILE_NAME;
+  sortOrder order = ASC;
   File *activeFile[2] = { nullptr, nullptr };
   int scrollOffset;
   int heightFile; // height of the files on the screen
@@ -35,7 +37,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, FloatRect &clickBounds,
-                         Input *&activeInput);
+                         Input *&activeInput, Font &font, ColorTheme theme = {});
 
 void updateFilesY(list &files, int y);
 

@@ -94,25 +94,32 @@ void printList(list l) {
   cout << '\n';
 }
 
-void free(list l) {
-  if (l.head) {
-    node *p = l.head->next;
+void free(list &l) {
+  // if (l.head) {
+  //   node *p = l.head->next;
+  //
+  //   while (p) {
+  //     delete p->prev;
+  //
+  //     p = p->next;
+  //   }
+  //
+  //   delete p;
+  // }
 
-    while (p) {
-      delete p->prev;
+  node *p = l.head;
 
-      p = p->next;
-    }
-
-    delete p;
+  while (p) {
+    p = p->next;
+    remove(l, 0);
   }
-
   // cout << "\nFreed list\n";
 }
 
 void sort(list &l, sortOrder order,
           bool (*sortCriteria)(node *a, node *b, sortOrder order)) {
-  node *p = l.head->data.data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
+  node *p =
+      l.head->data.data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
   node *q;
   File aux;
 

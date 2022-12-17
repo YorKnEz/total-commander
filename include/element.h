@@ -72,6 +72,8 @@ bool isHovered(FloatRect box, int mouseX, int mouseY);
 Text createText(string textString, Font &font, int charSize, int x, int y,
                 int width, Color text);
 
+void updateText(Text &text, string newText, FloatRect bounds);
+
 void drawText(RenderWindow &window, Text text);
 
 // textbox functions
@@ -80,6 +82,7 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
                       Color bg = Color::Transparent,
                       Color border = Color::Transparent,
                       int borderThickness = 0);
+
 
 void drawTextBox(RenderWindow &window, TextBox textbox);
 
@@ -114,10 +117,10 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
 void updateInputState(Input &input, Event event, MouseEventType type,
                       Input *&activeInput);
 
-void expandInput(Input &input);
-
 void shrinkInput(Input &input);
 
 void drawInput(RenderWindow &window, Input &input);
+
+void drawCursor(RenderWindow &window, Input *activeInput);
 
 #endif

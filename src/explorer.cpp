@@ -8,20 +8,18 @@ void updateFilesY(list &files, int y) {
                 p->data.date.getPosition().y -
                 p->data.date.getGlobalBounds().top;
 
-  if (y)
+  while (p) {
+    p->data.background.setPosition(p->data.background.getPosition().x, fileY);
+    p->data.filename.setPosition(p->data.filename.getPosition().x,
+                                 fileY + offsetY);
+    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetY);
+    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
+    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
 
-    while (p) {
-      p->data.background.setPosition(p->data.background.getPosition().x, fileY);
-      p->data.filename.setPosition(p->data.filename.getPosition().x,
-                                   fileY + offsetY);
-      p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetY);
-      p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
-      p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
+    fileY += p->data.background.getGlobalBounds().height + 1;
 
-      fileY += p->data.background.getGlobalBounds().height + 1;
-
-      p = p->next;
-    }
+    p = p->next;
+  }
 }
 
 void drawFiles(RenderWindow &window, list &files) {
@@ -54,7 +52,9 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
                    y + 2 * explorer.heightComp + explorer.heightFile,
-                   width - 20, explorer.heightFile, theme.fileStateColors);
+                   width - 20 - 2, explorer.heightFile, theme.fileStateColors);
+
+  sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
 
   updateFilesY(explorer.files, y + 2 * explorer.heightComp +
                                    explorer.heightFile + explorer.scrollOffset);
@@ -95,9 +95,16 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
       "Date", font, charSize, dateX, btnY, head->data.dateColumn - 1,
       explorer.heightFile - 2, theme.buttonStateColors, 1);
 
+  // append the sort indicator to the new sort button
+  explorer.button[explorer.sortedBy].fullText.append(
+      explorer.order == ASC ? " /" : " \\");
+  updateText(explorer.button[explorer.sortedBy].text,
+             explorer.button[explorer.sortedBy].fullText,
+             explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
   // set the current folder text box
   explorer.textbox[1] = createTextBox(
-      "Current folder", font, charSize, x + 1,
+      getCurrentFolder(explorer.path), font, charSize, x + 1,
       y + height - explorer.heightComp + 1, width - 2, explorer.heightComp - 2,
       theme.textMediumContrast, theme.bgLowContrast, theme.border, 1);
 
@@ -106,12 +113,13 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, FloatRect &clickBounds,
-                         Input *&activeInput) {
+                         Input *&activeInput, Font &font, ColorTheme theme) {
   switch (type) {
   case CLICK:
     // if the user clicks inside the explorer, move the focus to the explorer
     if (isHovered(explorer.background.getGlobalBounds(), event.mouseButton.x,
-                  event.mouseButton.y)) {
+                  event.mouseButton.y) &&
+        activeExplorer != &explorer) {
       if (activeExplorer) {
         activeExplorer->state = E_INACTIVE; // set old explorer as inactive
 
@@ -120,8 +128,9 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
         activeExplorer->textbox[1].fullText.erase(
             activeExplorer->textbox[1].fullText.size() - 2, 2);
 
-        activeExplorer->textbox[1].text.setString(
-            activeExplorer->textbox[1].fullText);
+        updateText(activeExplorer->textbox[1].text,
+                   activeExplorer->textbox[1].fullText,
+                   activeExplorer->textbox[1].background.getGlobalBounds());
       }
 
       activeExplorer = &explorer;
@@ -131,8 +140,9 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
       activeExplorer->textbox[1].fullText.insert(0, "> ");
       activeExplorer->textbox[1].fullText.append(" <");
 
-      activeExplorer->textbox[1].text.setString(
-          activeExplorer->textbox[1].fullText);
+      updateText(activeExplorer->textbox[1].text,
+                 activeExplorer->textbox[1].fullText,
+                 activeExplorer->textbox[1].background.getGlobalBounds());
     }
     break;
   }
@@ -141,8 +151,31 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
   for (int i = 0; i < 4; i++) {
     updateButtonState(explorer.button[i], event, type, clickBounds);
 
-    if (explorer.button[i].state == B_CLICKED) {
-      sortFiletree(explorer.files, sortBy(i), ASC);
+    if (explorer.button[i].state == B_CLICKED || explorer.button[i].state == B_DCLICKED) {
+      // remove the sort indicator from the last button
+      explorer.button[explorer.sortedBy].fullText.erase(
+          explorer.button[explorer.sortedBy].fullText.size() - 2);
+      updateText(
+          explorer.button[explorer.sortedBy].text,
+          explorer.button[explorer.sortedBy].fullText,
+          explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+      // update sortedBy and order indicators
+      if (explorer.sortedBy == sortBy(i)) {
+        explorer.order = explorer.order == ASC ? DESC : ASC;
+      } else {
+        explorer.order = ASC;
+      }
+      explorer.sortedBy = sortBy(i);
+
+      // append the sort indicator to the new sort button
+      explorer.button[explorer.sortedBy].fullText.append(
+          explorer.order == ASC ? " /" : " \\");
+      updateText(explorer.button[i].text, explorer.button[i].fullText,
+                 explorer.button[i].background.getGlobalBounds());
+
+      // sort and update the y of the files
+      sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
       updateFilesY(explorer.files,
                    explorer.background.getPosition().y + explorer.heightFile +
                        2 * explorer.heightComp + explorer.scrollOffset);
@@ -157,60 +190,84 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
     // update the state of the files
     node *p = explorer.files.head;
     node *start = nullptr, *end = nullptr;
-    bool dclick = false;
 
     if (type == DCLICK && explorer.activeFile[0] &&
         isHovered(explorer.activeFile[0]->background.getGlobalBounds(),
                   event.mouseButton.x, event.mouseButton.y)) {
-      explorer.activeFile[0]->state = F_DCLICKED;
+      openFolder(explorer.path, explorer.activeFile[0]->data.filename);
 
-      if (explorer.activeFile[1]) {
-        explorer.activeFile[1]->state = F_INACTIVE;
-      }
-      explorer.activeFile[1] = nullptr;
+      // use the head of the old list to extract its props
+      File file = explorer.files.head->data;
 
-      // handle dclick for this file
-      dclick = true;
-    }
+      // update the input of the explorer
+      explorer.input.value = explorer.path;
+      explorer.input.displayText.setString(explorer.path);
+      explorer.input.cursorLocation = explorer.path.size();
+      explorer.input.displayLength = explorer.path.size();
 
-    while (p) {
-      updateFileState(p->data, event, type, explorer.activeFile);
+      // reset explorer related props
+      explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
+      explorer.textbox[1].fullText.insert(0, "> ");
+      explorer.textbox[1].fullText.append(" <");
+      updateText(explorer.textbox[1].text, explorer.textbox[1].fullText,
+                 explorer.textbox[1].background.getGlobalBounds());
 
-      // if first file has been selected, save the node that has it
-      if (explorer.activeFile[0] == &p->data) {
-        // reset end pointer if start pointer has been changed
-        if (end && start) {
-          end = nullptr;
+      // delete old files list
+      free(explorer.files);
+      init(explorer.files);
+
+      // get the new files from the new path
+      getFilesFromPath(
+          explorer.files, explorer.path, font, file.filename.getCharacterSize(),
+          file.background.getPosition().x, file.background.getPosition().y,
+          file.background.getGlobalBounds().width, explorer.heightFile,
+          theme.fileStateColors);
+
+      updateFilesY(explorer.files,
+                   file.background.getPosition().y - explorer.scrollOffset);
+
+      explorer.scrollOffset = 0;
+      explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
+    } else {
+      while (p) {
+        updateFileState(p->data, event, type, explorer.activeFile);
+
+        // if first file has been selected, save the node that has it
+        if (explorer.activeFile[0] == &p->data) {
+          // reset end pointer if start pointer has been changed
+          if (end && start) {
+            end = nullptr;
+          }
+
+          start = p;
         }
 
-        start = p;
+        // if second file has been selected, save the node that has it
+        if (explorer.activeFile[1] == &p->data) {
+          end = p;
+        }
+
+        // unmark anything besides first and second selected
+        if (explorer.activeFile[0] != &p->data &&
+            explorer.activeFile[1] != &p->data) {
+          p->data.state = F_INACTIVE;
+        }
+
+        p = p->next;
       }
 
-      // if second file has been selected, save the node that has it
-      if (explorer.activeFile[1] == &p->data) {
-        end = p;
-      }
+      // select all files between start and end if they exist
+      if (start && end) {
+        if (start->data.background.getPosition().y >
+            end->data.background.getPosition().y) {
+          swap(start, end);
+          // swap(explorer.activeFile[0], explorer.activeFile[1]);
+        }
 
-      // unmark anything besides first and second selected
-      if (explorer.activeFile[0] != &p->data &&
-          explorer.activeFile[1] != &p->data) {
-        p->data.state = F_INACTIVE;
-      }
-
-      p = p->next;
-    }
-
-    // select all files between start and end if they exist
-    if (start && end) {
-      if (start->data.background.getPosition().y >
-          end->data.background.getPosition().y) {
-        swap(start, end);
-        // swap(explorer.activeFile[0], explorer.activeFile[1]);
-      }
-
-      while (start != end) {
-        start->data.state = F_SELECTED;
-        start = start->next;
+        while (start != end) {
+          start->data.state = F_SELECTED;
+          start = start->next;
+        }
       }
     }
   }

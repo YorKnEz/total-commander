@@ -29,7 +29,7 @@ void remove(list &l, unsigned int index);
 
 void printList(list l);
 
-void free(list l);
+void free(list &l);
 
 void sort(list &l, sortOrder order,
           bool (*sortCriteria)(node *a, node *b, sortOrder order));

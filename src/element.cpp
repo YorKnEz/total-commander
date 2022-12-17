@@ -72,6 +72,26 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
   return textbox;
 }
 
+void updateText(Text &text, string newText, FloatRect bounds) {
+  int oldWidth = text.getGlobalBounds().width;
+  text.setString(newText);
+
+  // shrink the text that is shown on the screen to avoid overflow
+  if (text.getGlobalBounds().width > bounds.width) {
+    newText.append("..");
+    text.setString(newText);
+  }
+
+  while (text.getGlobalBounds().width > bounds.width) {
+    newText.erase(newText.size() - 3, 1);
+    text.setString(newText);
+  }
+
+  int newWidth = text.getGlobalBounds().width;
+  text.setPosition(text.getPosition().x + oldWidth / 2 - newWidth / 2,
+                   text.getPosition().y);
+}
+
 void drawTextBox(RenderWindow &window, TextBox textbox) {
   window.draw(textbox.background);
   window.draw(textbox.text);
@@ -372,34 +392,6 @@ void updateInputState(Input &input, Event event, MouseEventType type,
   }
 }
 
-// expand the text to avoid the text being too small for the input
-void expandInput(Input &input) {
-  if (input.displayLength == input.value.size()) {
-    return;
-  }
-
-  while (input.displayText.getGlobalBounds().width <
-         input.background.getGlobalBounds().width - 20) {
-    // if there is text to the right of the displayed text, add it
-    if (input.startPosition + input.displayLength < input.value.size()) {
-      input.displayLength++;
-    }
-    // if there is no text to the right
-    else if (input.startPosition + input.displayLength == input.value.size()) {
-      // expand from the left if possible
-      if (input.startPosition > 0) {
-        input.cursorLocation++;
-        input.displayLength++;
-        input.startPosition--;
-      }
-    }
-
-    input.displayText.setString(
-        input.value.substr(input.startPosition,
-                           input.displayLength)); // update string
-  }
-}
-
 // shrink the text to avoid overflow
 void shrinkInput(Input &input) {
   while (input.displayText.getGlobalBounds().width >
@@ -430,79 +422,6 @@ void drawInput(RenderWindow &window, Input &input) {
   // draw the input on the window
   window.draw(input.background);
 
-  // int radius = 10;
-  //
-  // CircleShape c(radius);
-  // c.setFillColor(input.inputStateColors[input.state].background);
-  // c.setOutlineThickness(input.background.getOutlineThickness());
-  // c.setOutlineColor(input.inputStateColors[input.state].primary);
-  //
-  // RectangleShape sq(Vector2f(2 * radius, 2 * radius));
-  // sq.setFillColor(Color(0x242424FF));
-  // sq.setOutlineThickness(input.background.getOutlineThickness());
-  // sq.setOutlineColor(Color(0x242424FF));
-  //
-  // FloatRect bgBounds = input.background.getGlobalBounds();
-  //
-  // // clear the corners
-  // sq.setPosition(bgBounds.left, bgBounds.top);
-  // window.draw(sq);
-  // sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
-  // bgBounds.top); window.draw(sq); sq.setPosition(bgBounds.left,
-  // bgBounds.top + bgBounds.height - 2 * radius); window.draw(sq);
-  // sq.setPosition(bgBounds.left + bgBounds.width - 2 * radius,
-  //                bgBounds.top + bgBounds.height - 2 * radius);
-  // window.draw(sq);
-  //
-  // // round the edges
-  // c.setPosition(bgBounds.left, bgBounds.top);
-  // window.draw(c);
-  // c.setPosition(bgBounds.left + bgBounds.width - 2 * radius, bgBounds.top);
-  // window.draw(c);
-  // c.setPosition(bgBounds.left, bgBounds.top + bgBounds.height - 2 *
-  // radius); window.draw(c); c.setPosition(bgBounds.left + bgBounds.width - 2
-  // * radius,
-  //               bgBounds.top + bgBounds.height - 2 * radius);
-  // window.draw(c);
-  //
-  // // fill the input
-  // sq.setFillColor(input.inputStateColors[input.state].background);
-  // sq.setOutlineThickness(input.background.getOutlineThickness());
-  // sq.setOutlineColor(input.inputStateColors[input.state].background);
-  //
-  // sq.setSize(Vector2f(bgBounds.width, bgBounds.height - 2 * radius));
-  // sq.setPosition(Vector2f(bgBounds.left, bgBounds.top + radius));
-  //
-  // window.draw(sq);
-  //
-  // sq.setSize(Vector2f(bgBounds.width - 2 * radius, bgBounds.height));
-  // sq.setPosition(Vector2f(bgBounds.left + radius, bgBounds.top));
-  //
-  // window.draw(sq);
-  //
-  // // draw the borders
-  // sq.setFillColor(input.inputStateColors[input.state].primary);
-  // sq.setOutlineThickness(0);
-  //
-  // sq.setSize(Vector2f(input.background.getOutlineThickness(),
-  //                     bgBounds.height - 2 * radius + 2));
-  // sq.setPosition(Vector2f(bgBounds.left - 1, bgBounds.top + radius - 1));
-  // window.draw(sq);
-  //
-  // sq.setPosition(
-  //     Vector2f(bgBounds.left + bgBounds.width, bgBounds.top + radius - 1));
-  // window.draw(sq);
-  //
-  // sq.setSize(Vector2f(bgBounds.width - 2 * radius + 2,
-  //                     input.background.getOutlineThickness()));
-  // sq.setPosition(Vector2f(bgBounds.left + radius - 1, bgBounds.top - 1));
-  // window.draw(sq);
-  //
-  // sq.setPosition(
-  //     Vector2f(bgBounds.left + radius - 1, bgBounds.top +
-  //     bgBounds.height));
-  // window.draw(sq);
-
   // initialize the text of the input
   if (input.value == "") {
     input.displayText.setString(input.placeholder);
@@ -511,19 +430,20 @@ void drawInput(RenderWindow &window, Input &input) {
         input.value.substr(input.startPosition, input.displayLength));
   }
 
-  // expandInput(input);
   // shrinkInput(input);
 
   window.draw(input.displayText);
+}
 
-  // temp
-  if (input.state == I_ACTIVE) {
-    int charSize = input.displayText.getCharacterSize();
-    Vector2f textPos = input.displayText.findCharacterPos(input.cursorLocation);
-    FloatRect inputBounds = input.background.getGlobalBounds();
+void drawCursor(RenderWindow &window, Input *activeInput) {
+  if (activeInput && activeInput->state == I_ACTIVE) {
+    int charSize = activeInput->displayText.getCharacterSize();
+    Vector2f textPos =
+        activeInput->displayText.findCharacterPos(activeInput->cursorLocation);
+    FloatRect inputBounds = activeInput->background.getGlobalBounds();
 
     RectangleShape r(Vector2f(1, 9 * charSize / 10));
-    r.setFillColor(input.stateColors[input.state].text);
+    r.setFillColor(activeInput->stateColors[activeInput->state].text);
     r.setPosition(Vector2f(textPos.x, inputBounds.top + inputBounds.height / 2 -
                                           r.getGlobalBounds().height / 2));
 

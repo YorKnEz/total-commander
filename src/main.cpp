@@ -88,7 +88,7 @@ int main() {
   ColorTheme theme = dark;
 
   Font font;
-  font.loadFromFile("assets/font.ttf");
+  font.loadFromFile("assets/hack.ttf");
 
   int charSize = 16;
 
@@ -109,9 +109,9 @@ int main() {
 
   for (int i = 0; i < explorers; i++) {
     explorer[i] =
-        createExplorer(getDefaultPath(), font,
-                       charSize, i * WINDOW_W / explorers, 0,
-                       WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
+        createExplorer(getDefaultPath(), font, charSize,
+                       i * WINDOW_W / explorers, 0, WINDOW_W / explorers,
+                       WINDOW_H - btnHeight, theme);
   }
 
   // useful for determining double clicks
@@ -280,7 +280,7 @@ int main() {
       case Event::MouseButtonReleased:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, RELEASE, activeExplorer,
-                              clickBounds, activeInput);
+                              clickBounds, activeInput, font);
         }
 
         for (int i = 0; i < buttons; i++) {
@@ -302,7 +302,7 @@ int main() {
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, DCLICK, activeExplorer,
-                                clickBounds, activeInput);
+                                clickBounds, activeInput, font, theme);
           }
 
           for (int i = 0; i < buttons; i++) {
@@ -313,7 +313,7 @@ int main() {
         else {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, CLICK, activeExplorer,
-                                clickBounds, activeInput);
+                                clickBounds, activeInput, font);
           }
 
           for (int i = 0; i < buttons; i++) {
@@ -328,7 +328,7 @@ int main() {
       case Event::MouseMoved:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, MOVE, activeExplorer,
-                              clickBounds, activeInput);
+                              clickBounds, activeInput, font);
         }
 
         for (int i = 0; i < buttons; i++) {
@@ -346,6 +346,8 @@ int main() {
     for (int i = 0; i < buttons; i++) {
       drawButton(window, button[i]);
     }
+
+    drawCursor(window, activeInput);
     window.display();
   }
 
