@@ -211,6 +211,38 @@ node *find(list l, string filename) {
   return NULL;
 }
 
+string evalPath(string path) {
+  if (!isValidPath(path)) {
+    return "path doesn't exist";
+  }
+
+  // checks if the path is of format "F:\\\\\\\\\\test\\\\\\..\\\\\\\.."
+  // (multiple separators)
+  string doubleSeparators = SEP;
+  doubleSeparators.append(SEP);
+  int doubleSep = path.find(doubleSeparators);
+  while (doubleSep != string::npos) {
+    path.erase(doubleSep, 1);
+    doubleSep = path.find(doubleSeparators);
+  }
+  string dotdot = "..";
+  int pos;
+  int firstSep = path.find(SEP + dotdot);
+
+  // if we find ".." we go backwards in the path, for example "F:\test\.."
+  // becomes "F:\"
+  while (firstSep != string::npos) {
+    pos = path.find_last_of(SEP, firstSep - 1);
+    path.erase(pos, firstSep - pos + 3);
+    firstSep = path.find(SEP + dotdot);
+  }
+
+  if (path == "" || path.back() == ':') {
+    path.append(SEP);
+  }
+  return path;
+}
+
 bool isValidPath(string path) {
   // the SEP is different between linux and windows
 
