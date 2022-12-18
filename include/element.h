@@ -68,7 +68,11 @@ struct Input {
 
 bool isHovered(FloatRect box, int mouseX, int mouseY);
 
-// // text functions
+RectangleShape createRect(int x, int y, int width, int height, Color fill,
+                          Color outline = Color::Transparent,
+                          int borderThickness = 0);
+
+// text functions
 Text createText(string textString, Font &font, int charSize, int x, int y,
                 int width, Color text);
 
