@@ -223,6 +223,29 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
           file.background.getGlobalBounds().width, explorer.heightFile,
           theme.fileStateColors);
 
+      // remove the sort indicator from the last button
+      explorer.button[explorer.sortedBy].fullText.erase(
+          explorer.button[explorer.sortedBy].fullText.size() - 2);
+      updateText(
+          explorer.button[explorer.sortedBy].text,
+          explorer.button[explorer.sortedBy].fullText,
+          explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+      // update sortedBy and order indicators
+      explorer.order = ASC;
+      explorer.sortedBy = FILE_NAME;
+
+      // append the sort indicator to the new sort button
+      explorer.button[explorer.sortedBy].fullText.append(
+          explorer.order == ASC ? " /" : " \\");
+      updateText(
+          explorer.button[explorer.sortedBy].text,
+          explorer.button[explorer.sortedBy].fullText,
+          explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+      // sort and update the y of the files
+      sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
+
       updateFilesY(explorer.files,
                    file.background.getPosition().y - explorer.scrollOffset);
 
