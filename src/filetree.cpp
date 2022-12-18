@@ -79,7 +79,7 @@ string getDefaultPath() {
   path = "x:\\";
   for (int i = 0; i < 26; i++) {
     path[0] = char(i + 'A');
-    if (fs::exists(path))
+    if (isValidPath(path))
       break;
   }
 #elif defined __linux__
@@ -306,28 +306,38 @@ void openFolder(string &path, string name) {
     return;
   }
 
+  string newPath = path;
+  if (newPath.back() != SEP[0]) {
+    newPath += SEP + name;
+
+  } else {
+    newPath += name;
+  }
+
   // check if either path or new path is valid
-  if (!isValidPath(path) || !isValidPath(path + SEP + name)) {
+  if (!isValidPath(path) || !isValidPath(newPath)) {
     return;
   }
 
   // check if the new path is a directory
-  if (!fs::is_directory(path + SEP + name)) {
+  if (!fs::is_directory(newPath)) {
     return;
   }
 
   // update path to new path
-  path = path + SEP + name;
+  path = newPath;
 }
 
 // creates a new folder
 void createFolder(string path, string name) {
   // checks if the folder already exists, case in which we add "(counter)" at
   // the end of the name
+  if (!isValidPath(path))
+    return;
   string folderName = name;
   int counter = 0;
 
-  while (fs::exists(path + SEP + name)) {
+  while (isValidPath(path + SEP + name)) {
     name = folderName + " (" + int2str(++counter) + ")";
   }
 
