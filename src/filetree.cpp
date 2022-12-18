@@ -451,10 +451,19 @@ void copyFolder(string fromPath, string toPath) {
 }
 
 // deletes a file from a specified path
-void deleteFile(string path) { fs::remove(path); }
+void deleteFile(string path) {
+  if (isValidPath(path) && !fs::is_directory(path)) {
+    fs::remove(path);
+  }
+}
 
 // deletes a folder from a specified path and its components
 void deleteFolder(string path) {
+  // checks if path exists
+  if (!isValidPath(path) || !fs::is_directory(path)) {
+    return;
+  }
+
   for (const auto &entry : fs::directory_iterator(path)) {
     fs::path directoryPath = entry.path().filename();
     string filename = directoryPath.generic_string();
@@ -465,7 +474,7 @@ void deleteFolder(string path) {
     deleteFile(path + SEP + filename);
   }
 
-  deleteFile(path);
+  fs::remove(path);
 }
 
 // moves a file from a path to another path
