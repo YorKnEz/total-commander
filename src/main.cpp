@@ -131,42 +131,25 @@ int main() {
         break;
       case Event::MouseWheelScrolled:
         if (activeExplorer) {
-          if (event.mouseWheelScroll.delta < 0) {
-            // updateExplorerState()
-            activeExplorer->scrollOffset -= 50;
-            updateFilesY(activeExplorer->files,
-                         activeExplorer->background.getPosition().y +
-                             activeExplorer->heightFile +
-                             2 * activeExplorer->heightComp +
-                             activeExplorer->scrollOffset);
-          } else if (event.mouseWheelScroll.delta > 0) {
-            activeExplorer->scrollOffset += 50;
-            updateFilesY(activeExplorer->files,
-                         activeExplorer->background.getPosition().y +
-                             activeExplorer->heightFile +
-                             2 * activeExplorer->heightComp +
-                             activeExplorer->scrollOffset);
+          // scroll up
+          if (event.mouseWheelScroll.delta > 0) {
+            scrollFiles(activeExplorer, UP);
+          }
+          // scroll down
+          else if (event.mouseWheelScroll.delta < 0) {
+            scrollFiles(activeExplorer, DOWN);
           }
         }
         break;
       case Event::KeyPressed:
-        // used for scroll
         if (activeExplorer) {
+          // scroll up
           if (event.key.code == Keyboard::Up) {
-            // updateExplorerState()
-            activeExplorer->scrollOffset -= 50;
-            updateFilesY(activeExplorer->files,
-                         activeExplorer->background.getPosition().y +
-                             activeExplorer->heightFile +
-                             2 * activeExplorer->heightComp +
-                             activeExplorer->scrollOffset);
-          } else if (event.key.code == Keyboard::Down) {
-            activeExplorer->scrollOffset += 50;
-            updateFilesY(activeExplorer->files,
-                         activeExplorer->background.getPosition().y +
-                             activeExplorer->heightFile +
-                             2 * activeExplorer->heightComp +
-                             activeExplorer->scrollOffset);
+            scrollFiles(activeExplorer, UP);
+          }
+          // scroll down
+          else if (event.key.code == Keyboard::Down) {
+            scrollFiles(activeExplorer, DOWN);
           }
         }
 

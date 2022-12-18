@@ -234,6 +234,10 @@ bool isValidPath(string path) {
 }
 
 string getCurrentFolder(string path) {
+  if (path == getDefaultPath()) {
+    return getDefaultPath();
+  }
+
   string oldPath = path;
   path = path.erase(0, path.find_last_of(SEP) + 1);
 
