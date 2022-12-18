@@ -431,18 +431,21 @@ void copyFolder(string fromPath, string toPath) {
   }
 
   createFolder(toPath, name);
-  toPath += SEP + name;
+  if (toPath.back() != SEP[0]) {
+    toPath += SEP;
+  }
+  toPath += name;
 
-  // iterates in the current directory and if the entry is a directory we recall
-  // the function recursively and when the entry is a file we copy it
+  // iterates in the current directory and if the entry is a directory we
+  // recall the function recursively and when the entry is a file we copy it
   for (const auto &entry : fs::directory_iterator(fromPath)) {
     fs::path directoryPath = entry.path().filename();
     string filename = directoryPath.generic_string();
 
     if (entry.is_directory()) {
-      copyFolder(fromPath + SEP + filename, toPath + SEP + filename);
+      copyFolder(fromPath + SEP + filename, toPath);
     } else {
-      copyFile(fromPath + SEP + filename, toPath + SEP + filename);
+      copyFile(fromPath + SEP + filename, toPath);
     }
   }
 }
