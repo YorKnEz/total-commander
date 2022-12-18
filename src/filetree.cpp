@@ -337,22 +337,31 @@ void createFolder(string path, string name) {
 
 // copies a file from a path to another path
 void copyFile(string fromPath, string toPath) {
+  // checks if the file to be copied exists
+  if (!isValidPath(fromPath) || !isValidPath(toPath)) {
+    return;
+  } else {
+    if (fs::is_directory(fromPath) || !fs::is_directory(toPath)) {
+      return;
+    }
+  }
+
   // initialize files and buffer
-  FILE *fromPtr, *toPtr;
+  FILE *fromPtr = fopen(fromPath.c_str(), "rb"), *toPtr;
   char buffer[1024];
   size_t bytes;
 
-  // checks if the file to be copied exists
-  fromPtr = fopen(fromPath.c_str(), "rb");
+  int lastDot = fromPath.find_last_of("."),
+      lastSep = fromPath.find_last_of(SEP[0]);
+  string name = fromPath.substr(lastSep + 1, lastDot - lastSep - 1);
+  // saves the extension of the file
+  string extension = fromPath.substr(lastDot);
 
-  if (!fromPtr) {
-    perror("File not found.");
-    return;
+  if (toPath.back() != SEP[0]) {
+    toPath.append(SEP);
   }
 
-  // saves the extension of the file
-  string extension = fromPath;
-  extension = extension.erase(0, extension.find_last_of("."));
+  toPath.append(name);
 
   // checks if a file already exists with the same name and extension, in which
   // case we add "(counter)" at the end
@@ -363,8 +372,9 @@ void copyFile(string fromPath, string toPath) {
     toPath = doesExist + " (" + int2str(++counter) + ")";
   }
 
-  // opens the file from "toPath" in write binary mode
-  toPath = toPath + extension;
+  toPath.append(extension);
+  // // opens the file from "toPath" in write binary mode
+  // toPath = toPath + extension;
   toPtr = fopen(toPath.c_str(), "wb");
 
   // copies the file from "fromPath" byte by byte to the file from "toPath" and
@@ -379,6 +389,29 @@ void copyFile(string fromPath, string toPath) {
 
 // copies a folder and its components from a path to another path
 void copyFolder(string fromPath, string toPath) {
+  // checks if the folder to be copied exists
+  if (!isValidPath(fromPath) || !isValidPath(toPath)) {
+    return;
+  } else {
+
+    if (!fs::is_directory(fromPath) || !fs::is_directory(toPath)) {
+      return;
+    }
+  }
+
+  // checks if the path where the folder is to be copied is valid
+  if (fromPath.find(toPath) != string::npos ||
+      toPath.find(fromPath) != string::npos) {
+    return;
+  }
+
+  // appends the folder name to the toPath string
+  string path = fromPath;
+  if (toPath.back() != SEP[0]) {
+    toPath.append(SEP);
+  }
+  toPath.append(path.erase(0, path.find_last_of(SEP[0]) + 1));
+
   // creates the folder in the path stored in toPath, but checks if it already
   // exists, case in which it generates with the format "name (x)", where x is
   // counting how many copies there are already with the same format
@@ -387,9 +420,14 @@ void copyFolder(string fromPath, string toPath) {
   toPath = toPath.erase(toPath.find_last_of(SEP), toPath.npos);
   string folderName = name;
   int counter = 0;
-
-  while (fs::exists(toPath + SEP + name)) {
+  while (isValidPath(toPath + SEP + name)) {
     name = folderName + " (" + int2str(++counter) + ")";
+  }
+
+  // checks if the path is the base drive, case in which appends the separator
+  // if it is missing
+  if (toPath == "" || toPath.back() == ':') {
+    toPath.append(SEP);
   }
 
   createFolder(toPath, name);
