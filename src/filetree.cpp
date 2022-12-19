@@ -69,8 +69,7 @@ bool byDate(node *a, node *b, sortOrder order) {
   // the string a token can be: dd, mm, yyyy etc.
   struct {
     int start,
-        len; // start position and length of each of the tokens mentioned
-             // above
+        len; // start position and length of each of the tokens mentioned above
   } substrPositions[] = {{6, 4}, {3, 2}, {0, 2}, {17, 2}, {11, 2}, {14, 2}};
 
   int comp;
@@ -143,20 +142,18 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // converts filename path to string
       fs::path directoryPath = entry.path().filename();
       string filename = directoryPath.generic_string();
-      string dim = "KMGT";
 
       // gets the date at which the current file was last modified
       const auto fileTime = fs::last_write_time(entry.path());
       // converts the result to system time
       const auto systemTime = chrono::file_clock::to_sys(fileTime);
-      // converts the new result to time_t (seconds that have passed since
-      // epoch time - 1 January 1970 00:00:00) / to UNIX timestamp
+      // converts the new result to time_t (seconds that have passed since epoch
+      // time - 1 January 1970 00:00:00) / to UNIX timestamp
       const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
 
-      // checks whether the current entry is a file or a directory and sets
-      // the size accordingly (directory size = "<DIR>", file size is an
-      // integer value)
-
+      // checks whether the current entry is a file or a directory and sets the
+      // size accordingly (directory size = "<DIR>", file size is an integer
+      // value)
       int intSize, dimIterator, decimalValue;
       string size;
 
@@ -176,8 +173,10 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
         if (size != "<DIR>") {
           size += "." + int2str(decimalValue) + " " + dim[dimIterator] + "B";
         }
-      } else
+      } else {
         size = "<DIR>";
+      }
+
       // generates a converted string from timestamp to GMT
       string date = asctime(gmtime(&time));
       Filedata filedata;
@@ -299,10 +298,8 @@ bool isValidFilename(string path) {
 }
 
 bool isValidPath(string path) {
-  // the SEP is different between linux and windows
-
   // check if the path exists
-  if (!fs::exists(path) or path == "invalid") {
+  if (!fs::exists(path) || path == "invalid") {
     return false;
   }
 
@@ -312,6 +309,10 @@ bool isValidPath(string path) {
 }
 
 string getCurrentFolder(string path) {
+  if (path == getDefaultPath()) {
+    return getDefaultPath();
+  }
+
   string oldPath = path;
   path = path.erase(0, path.find_last_of(SEP) + 1);
 
