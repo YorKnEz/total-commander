@@ -25,19 +25,38 @@ bool byName(node *a, node *b, sortOrder order) {
 
 // sort nodes by size
 bool bySize(node *a, node *b, sortOrder order) {
-  // try to sort by length of sizes
-  if (a->data.data.size.size() > b->data.data.size.size()) {
+  // try to sort by order of size (KB, MB, GB, TB)
+  string sizeA = a->data.data.size, sizeB = b->data.data.size;
+  string dim = "KMGT";
+  if (dim.find(sizeA[sizeA.size() - 2]) > dim.find(sizeB[sizeB.size() - 2])) {
     return order != ASC;
-  } else if (a->data.data.size.size() < b->data.data.size.size()) {
+  } else if (dim.find(sizeA[sizeA.size() - 2]) <
+             dim.find(sizeB[sizeB.size() - 2])) {
     return order == ASC;
   }
 
-  // try to sort by comparing the numbers
-  int comp = order * (a->data.data.size.compare(b->data.data.size));
+  string intPartA = sizeA.substr(0, sizeA.find("."));
+  string intPartB = sizeB.substr(0, sizeB.find("."));
+
+  // try to sort by comparing the sizes of the int numbers
+  if (intPartA.size() > intPartB.size()) {
+    return order != ASC;
+  } else if (intPartA.size() < intPartB.size()) {
+    return order == ASC;
+  }
+
+  // try to sort by comparing the int numbers
+  int comp = order * (intPartA.compare(intPartB));
 
   if (comp) {
     return comp <= 0;
   }
+
+  // try to sort by comparing the decimal numbers
+  if (sizeA[sizeA.find(".") + 1] > sizeB[sizeB.find(".") + 1]) {
+    return order != ASC;
+  } else
+    return order == ASC;
 
   // try to sort by filename
   return byName(a, b, order);
@@ -79,7 +98,7 @@ string getDefaultPath() {
   path = "x:\\";
   for (int i = 0; i < 26; i++) {
     path[0] = char(i + 'A');
-    if (fs::exists(path))
+    if (isValidPath(path))
       break;
   }
 #elif defined __linux__
@@ -135,11 +154,27 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // checks whether the current entry is a file or a directory and sets the
       // size accordingly (directory size = "<DIR>", file size is an integer
       // value)
-      string size = is_regular_file(entry.path())
-                        ? int2str(file_size(entry.path()))
-                        : "<DIR>";
-      if (size == "") {
-        size = "0";
+      int intSize, dimIterator, decimalValue;
+      string size;
+
+      if (is_regular_file(entry.path())) {
+        intSize = file_size(entry.path());
+        dimIterator = 0;
+        decimalValue = 0;
+
+        while (intSize > 999) {
+          dimIterator++;
+          decimalValue = (intSize / 100) % 10;
+          intSize /= 1000;
+        }
+
+        size = int2str(intSize);
+
+        if (size != "<DIR>") {
+          size += "." + int2str(decimalValue) + " " + dim[dimIterator] + "B";
+        }
+      } else {
+        size = "<DIR>";
       }
 
       // generates a converted string from timestamp to GMT
@@ -211,26 +246,66 @@ node *find(list l, string filename) {
   return NULL;
 }
 
-bool isValidPath(string path) {
-  // the SEP is different between linux and windows
+string evalPath(string path) {
+  if (!isValidPath(path)) {
+    return "invalid";
+  }
 
+  string initialPath = path;
+
+  // checks if the path is of format "F:\\\\\\\\\\test\\\\\\..\\\\\\\.."
+  // (multiple separators)
+  string doubleSeparators = SEP;
+  doubleSeparators.append(SEP);
+  int doubleSep = path.find(doubleSeparators);
+  while (doubleSep != string::npos) {
+    path.erase(doubleSep, 1);
+    doubleSep = path.find(doubleSeparators);
+  }
+  string dotdot = "..";
+  int pos;
+  int firstSep = path.find(SEP + dotdot);
+
+  // if we find ".." we go backwards in the path, for example "F:\test\.."
+  // becomes "F:\"
+  while (firstSep != string::npos) {
+    pos = path.find_last_of(SEP, firstSep - 1);
+
+    if (pos == string::npos) {
+      return "invalid";
+    }
+
+    path.erase(pos, firstSep - pos + 3);
+    firstSep = path.find(SEP + dotdot);
+  }
+
+  if (path == "" || path.back() == ':') {
+    path.append(SEP);
+  }
+  return path;
+}
+
+bool isValidFilename(string path) {
+  // check for invalid symbols in the path
+  string invalidSymbols = "\\/\n#<>$+%!'&*`|{}?\"=:@";
+
+  for (int i = 0; i < invalidSymbols.size(); i++) {
+    if (path.find(invalidSymbols[i]) != path.npos) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool isValidPath(string path) {
   // check if the path exists
-  if (!fs::exists(path)) {
+  if (!fs::exists(path) || path == "invalid") {
     return false;
   }
 
   string folderName = path.erase(0, path.find_last_of(SEP) + 1);
 
-  // check for invalid symbols in the path
-  string invalidSymbols = "\\/\n#<>$+%!'&*`|{}?\"=:@";
-
-  for (int i = 0; i < invalidSymbols.size(); i++) {
-    if (folderName.find(invalidSymbols[i]) != folderName.npos) {
-      return false;
-    }
-  }
-
-  return true;
+  return isValidFilename(folderName);
 }
 
 string getCurrentFolder(string path) {
@@ -278,28 +353,56 @@ void openFolder(string &path, string name) {
     return;
   }
 
+  string newPath = path;
+  if (newPath.back() != SEP[0]) {
+    newPath += SEP + name;
+
+  } else {
+    newPath += name;
+  }
+
   // check if either path or new path is valid
-  if (!isValidPath(path) || !isValidPath(path + SEP + name)) {
+  if (!isValidPath(path) || !isValidPath(newPath)) {
     return;
   }
 
   // check if the new path is a directory
-  if (!fs::is_directory(path + SEP + name)) {
+  if (!fs::is_directory(newPath)) {
     return;
   }
 
   // update path to new path
-  path = path + SEP + name;
+  path = newPath;
+}
+
+void openFile(string path, string name, string ext) {
+  if (!isValidPath(path))
+    return;
+
+  string command;
+  string file = path;
+  string app;
+
+  if (file.back() != SEP[0])
+    file.append(SEP);
+
+  file += name + "." + ext;
+  command =
+      SEP == "\\" ? "start \"\" \"" + file + "\"" : "xdg-open \"" + file + "\"";
+
+  system(command.c_str());
 }
 
 // creates a new folder
 void createFolder(string path, string name) {
   // checks if the folder already exists, case in which we add "(counter)" at
   // the end of the name
+  if (!isValidPath(path))
+    return;
   string folderName = name;
   int counter = 0;
 
-  while (fs::exists(path + SEP + name)) {
+  while (isValidPath(path + SEP + name)) {
     name = folderName + " (" + int2str(++counter) + ")";
   }
 
@@ -309,25 +412,34 @@ void createFolder(string path, string name) {
 
 // copies a file from a path to another path
 void copyFile(string fromPath, string toPath) {
+  // checks if the file to be copied exists
+  if (!isValidPath(fromPath) || !isValidPath(toPath)) {
+    return;
+  } else {
+    if (fs::is_directory(fromPath) || !fs::is_directory(toPath)) {
+      return;
+    }
+  }
+
   // initialize files and buffer
-  FILE *fromPtr, *toPtr;
+  FILE *fromPtr = fopen(fromPath.c_str(), "rb"), *toPtr;
   char buffer[1024];
   size_t bytes;
 
-  // checks if the file to be copied exists
-  fromPtr = fopen(fromPath.c_str(), "rb");
+  int lastDot = fromPath.find_last_of("."),
+      lastSep = fromPath.find_last_of(SEP[0]);
+  string name = fromPath.substr(lastSep + 1, lastDot - lastSep - 1);
+  // saves the extension of the file
+  string extension = fromPath.substr(lastDot);
 
-  if (!fromPtr) {
-    perror("File not found.");
-    return;
+  if (toPath.back() != SEP[0]) {
+    toPath.append(SEP);
   }
 
-  // saves the extension of the file
-  string extension = fromPath;
-  extension = extension.erase(0, extension.find_last_of("."));
+  toPath.append(name);
 
-  // checks if a file already exists with the same name and extension, in which
-  // case we add "(counter)" at the end
+  // checks if a file already exists with the same name and extension, in
+  // which case we add "(counter)" at the end
   string doesExist = toPath;
   int counter = 0;
 
@@ -335,12 +447,13 @@ void copyFile(string fromPath, string toPath) {
     toPath = doesExist + " (" + int2str(++counter) + ")";
   }
 
-  // opens the file from "toPath" in write binary mode
-  toPath = toPath + extension;
+  toPath.append(extension);
+  // // opens the file from "toPath" in write binary mode
+  // toPath = toPath + extension;
   toPtr = fopen(toPath.c_str(), "wb");
 
-  // copies the file from "fromPath" byte by byte to the file from "toPath" and
-  // then closes the files
+  // copies the file from "fromPath" byte by byte to the file from "toPath"
+  // and then closes the files
   while (0 < (bytes = fread(buffer, 1, sizeof(buffer), fromPtr))) {
     fwrite(buffer, 1, bytes, toPtr);
   }
@@ -351,6 +464,29 @@ void copyFile(string fromPath, string toPath) {
 
 // copies a folder and its components from a path to another path
 void copyFolder(string fromPath, string toPath) {
+  // checks if the folder to be copied exists
+  if (!isValidPath(fromPath) || !isValidPath(toPath)) {
+    return;
+  } else {
+
+    if (!fs::is_directory(fromPath) || !fs::is_directory(toPath)) {
+      return;
+    }
+  }
+
+  // checks if the path where the folder is to be copied is valid
+  if (fromPath.find(toPath) != string::npos ||
+      toPath.find(fromPath) != string::npos) {
+    return;
+  }
+
+  // appends the folder name to the toPath string
+  string path = fromPath;
+  if (toPath.back() != SEP[0]) {
+    toPath.append(SEP);
+  }
+  toPath.append(path.erase(0, path.find_last_of(SEP[0]) + 1));
+
   // creates the folder in the path stored in toPath, but checks if it already
   // exists, case in which it generates with the format "name (x)", where x is
   // counting how many copies there are already with the same format
@@ -359,33 +495,50 @@ void copyFolder(string fromPath, string toPath) {
   toPath = toPath.erase(toPath.find_last_of(SEP), toPath.npos);
   string folderName = name;
   int counter = 0;
-
-  while (fs::exists(toPath + SEP + name)) {
+  while (isValidPath(toPath + SEP + name)) {
     name = folderName + " (" + int2str(++counter) + ")";
   }
 
-  createFolder(toPath, name);
-  toPath += SEP + name;
+  // checks if the path is the base drive, case in which appends the separator
+  // if it is missing
+  if (toPath == "" || toPath.back() == ':') {
+    toPath.append(SEP);
+  }
 
-  // iterates in the current directory and if the entry is a directory we recall
-  // the function recursively and when the entry is a file we copy it
+  createFolder(toPath, name);
+  if (toPath.back() != SEP[0]) {
+    toPath += SEP;
+  }
+  toPath += name;
+
+  // iterates in the current directory and if the entry is a directory we
+  // recall the function recursively and when the entry is a file we copy it
   for (const auto &entry : fs::directory_iterator(fromPath)) {
     fs::path directoryPath = entry.path().filename();
     string filename = directoryPath.generic_string();
 
     if (entry.is_directory()) {
-      copyFolder(fromPath + SEP + filename, toPath + SEP + filename);
+      copyFolder(fromPath + SEP + filename, toPath);
     } else {
-      copyFile(fromPath + SEP + filename, toPath + SEP + filename);
+      copyFile(fromPath + SEP + filename, toPath);
     }
   }
 }
 
 // deletes a file from a specified path
-void deleteFile(string path) { fs::remove(path); }
+void deleteFile(string path) {
+  if (isValidPath(path) && !fs::is_directory(path)) {
+    fs::remove(path);
+  }
+}
 
 // deletes a folder from a specified path and its components
 void deleteFolder(string path) {
+  // checks if path exists
+  if (!isValidPath(path) || !fs::is_directory(path)) {
+    return;
+  }
+
   for (const auto &entry : fs::directory_iterator(path)) {
     fs::path directoryPath = entry.path().filename();
     string filename = directoryPath.generic_string();
@@ -396,7 +549,7 @@ void deleteFolder(string path) {
     deleteFile(path + SEP + filename);
   }
 
-  deleteFile(path);
+  fs::remove(path);
 }
 
 // moves a file from a path to another path
@@ -413,16 +566,18 @@ void moveFolder(string fromPath, string toPath) {
 
 // renames a file
 void editFileName(string path, string newName) {
-  string folder = path;
-  folder = folder.erase(folder.find_last_of(SEP) + 1);
-  copyFile(path, folder + newName);
-  deleteFile(path);
+  if (!isValidPath(path) || fs::is_directory(path)) {
+    return;
+  }
+  string folder = path.substr(0, path.find_last_of(SEP) + 1);
+  rename(path.c_str(), (folder + newName).c_str());
 }
 
 // renames a folder
 void editFolderName(string path, string newName) {
-  string folder = path;
-  folder = folder.erase(folder.find_last_of(SEP) + 1);
-  copyFolder(path, folder + newName);
-  deleteFolder(path);
+  if (!isValidPath(path) || !fs::is_directory(path)) {
+    return;
+  }
+  string folder = path.substr(0, path.find_last_of(SEP) + 1);
+  rename(path.c_str(), (folder + newName).c_str());
 }

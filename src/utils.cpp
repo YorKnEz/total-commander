@@ -23,6 +23,8 @@ int str2int(string stringNumber) {
 string int2str(int a) {
   if (a == -1) {
     return "<DIR>";
+  } else if (a == 0) {
+    return "0";
   }
 
   string stringNumber;

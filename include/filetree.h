@@ -35,9 +35,15 @@ void sortFiletree(list &l, sortBy criteria, sortOrder order);
 
 node *find(list l, string filename);
 
+string evalPath(string path);
+
+bool isValidFilename(string path);
+
 bool isValidPath(string path);
 
 string getCurrentFolder(string path);
+
+void openFile(string path, string name, string ext);
 
 void openFolder(string &path, string name);
 
