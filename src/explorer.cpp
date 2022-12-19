@@ -151,7 +151,8 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
   for (int i = 0; i < 4; i++) {
     updateButtonState(explorer.button[i], event, type, clickBounds);
 
-    if (explorer.button[i].state == B_CLICKED || explorer.button[i].state == B_DCLICKED) {
+    if (explorer.button[i].state == B_CLICKED ||
+        explorer.button[i].state == B_DCLICKED) {
       // remove the sort indicator from the last button
       explorer.button[explorer.sortedBy].fullText.erase(
           explorer.button[explorer.sortedBy].fullText.size() - 2);
@@ -194,40 +195,46 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
     if (type == DCLICK && explorer.activeFile[0] &&
         isHovered(explorer.activeFile[0]->background.getGlobalBounds(),
                   event.mouseButton.x, event.mouseButton.y)) {
-      openFolder(explorer.path, explorer.activeFile[0]->data.filename);
+      if (explorer.activeFile[0]->data.size == "<DIR>") {
+        openFolder(explorer.path, explorer.activeFile[0]->data.filename);
 
-      // use the head of the old list to extract its props
-      File file = explorer.files.head->data;
+        // use the head of the old list to extract its props
+        File file = explorer.files.head->data;
 
-      // update the input of the explorer
-      explorer.input.value = explorer.path;
-      explorer.input.displayText.setString(explorer.path);
-      explorer.input.cursorLocation = explorer.path.size();
-      explorer.input.displayLength = explorer.path.size();
+        // update the input of the explorer
+        explorer.input.value = explorer.path;
+        explorer.input.displayText.setString(explorer.path);
+        explorer.input.cursorLocation = explorer.path.size();
+        explorer.input.displayLength = explorer.path.size();
 
-      // reset explorer related props
-      explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
-      explorer.textbox[1].fullText.insert(0, "> ");
-      explorer.textbox[1].fullText.append(" <");
-      updateText(explorer.textbox[1].text, explorer.textbox[1].fullText,
-                 explorer.textbox[1].background.getGlobalBounds());
+        // reset explorer related props
+        explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
+        explorer.textbox[1].fullText.insert(0, "> ");
+        explorer.textbox[1].fullText.append(" <");
+        updateText(explorer.textbox[1].text, explorer.textbox[1].fullText,
+                   explorer.textbox[1].background.getGlobalBounds());
 
-      // delete old files list
-      free(explorer.files);
-      init(explorer.files);
+        // delete old files list
+        free(explorer.files);
+        init(explorer.files);
 
-      // get the new files from the new path
-      getFilesFromPath(
-          explorer.files, explorer.path, font, file.filename.getCharacterSize(),
-          file.background.getPosition().x, file.background.getPosition().y,
-          file.background.getGlobalBounds().width, explorer.heightFile,
-          theme.fileStateColors);
+        // get the new files from the new path
+        getFilesFromPath(explorer.files, explorer.path, font,
+                         file.filename.getCharacterSize(),
+                         file.background.getPosition().x,
+                         file.background.getPosition().y,
+                         file.background.getGlobalBounds().width,
+                         explorer.heightFile, theme.fileStateColors);
 
-      updateFilesY(explorer.files,
-                   file.background.getPosition().y - explorer.scrollOffset);
+        updateFilesY(explorer.files,
+                     file.background.getPosition().y - explorer.scrollOffset);
 
-      explorer.scrollOffset = 0;
-      explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
+        explorer.scrollOffset = 0;
+        explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
+      } else {
+        openFile(explorer.path, explorer.activeFile[0]->data.filename,
+                 explorer.activeFile[0]->data.ext);
+      }
     } else {
       while (p) {
         updateFileState(p->data, event, type, explorer.activeFile);
