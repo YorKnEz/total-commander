@@ -38,7 +38,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme);
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
-                         Explorer *&activeExplorer, FloatRect &clickBounds,
+                         Explorer *&activeExplorer, Vector2i &oldClick,
                          Input *&activeInput, Font &font, ColorTheme theme = {});
 
 void updateFilesY(list &files, int y);

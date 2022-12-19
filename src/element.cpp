@@ -149,7 +149,7 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
 }
 
 void updateButtonState(Button &button, Event event, MouseEventType type,
-                       FloatRect &clickBounds) {
+                       Vector2i &oldClick) {
   FloatRect buttonBounds =
       button.background.getGlobalBounds(); // get bounds of button
 
@@ -166,9 +166,9 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
     // if a double click happens, then we execute the if, else we jump to the
     // simple click case, which is guarenteed to handle the event
     if (isHovered(buttonBounds, event.mouseButton.x, event.mouseButton.y) &&
-        isHovered(clickBounds, event.mouseButton.x, event.mouseButton.y)) {
+        isHovered(buttonBounds, oldClick.x, oldClick.y)) {
       button.state = B_DCLICKED;
-      clickBounds = buttonBounds;
+      oldClick = Vector2i(event.mouseButton.x, event.mouseButton.y);
       break;
     }
   case CLICK:
@@ -178,7 +178,7 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
             : B_INACTIVE;
 
     if (button.state == B_CLICKED) {
-      clickBounds = buttonBounds;
+      oldClick = Vector2i(event.mouseButton.x, event.mouseButton.y);
     }
     break;
   case MOVE:

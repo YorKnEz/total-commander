@@ -116,11 +116,11 @@ int main() {
 
   // useful for determining double clicks
   Clock clock;           // a timer that is set between two clicks
-  FloatRect clickBounds; // the bounds of the last click
   Input *activeInput = nullptr;
   Explorer *activeExplorer =
       nullptr; // current active explorer will be the first one by default
   RectangleShape cursor; // cursor to display on inputs
+  Vector2i oldClick; // required for dragging the scrollbar
 
   while (window.isOpen()) {
     Event event;
@@ -263,11 +263,11 @@ int main() {
       case Event::MouseButtonReleased:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, RELEASE, activeExplorer,
-                              clickBounds, activeInput, font);
+                              oldClick, activeInput, font);
         }
 
         for (int i = 0; i < buttons; i++) {
-          updateButtonState(button[i], event, RELEASE, clickBounds);
+          updateButtonState(button[i], event, RELEASE, oldClick);
         }
 
         break;
@@ -285,23 +285,23 @@ int main() {
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, DCLICK, activeExplorer,
-                                clickBounds, activeInput, font, theme);
+                                oldClick, activeInput, font, theme);
           }
 
           for (int i = 0; i < buttons; i++) {
-            updateButtonState(button[i], event, DCLICK, clickBounds);
+            updateButtonState(button[i], event, DCLICK, oldClick);
           }
         }
         // simple click
         else {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, CLICK, activeExplorer,
-                                clickBounds, activeInput, font);
+                                oldClick, activeInput, font);
+          }
+          for (int i = 0; i < buttons; i++) {
+            updateButtonState(button[i], event, CLICK, oldClick);
           }
 
-          for (int i = 0; i < buttons; i++) {
-            updateButtonState(button[i], event, CLICK, clickBounds);
-          }
         }
 
         // reset timer if a click happened
@@ -311,12 +311,13 @@ int main() {
       case Event::MouseMoved:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, MOVE, activeExplorer,
-                              clickBounds, activeInput, font);
+                              oldClick, activeInput, font);
         }
 
         for (int i = 0; i < buttons; i++) {
-          updateButtonState(button[i], event, MOVE, clickBounds);
+          updateButtonState(button[i], event, MOVE, oldClick);
         }
+
         break;
       }
     }

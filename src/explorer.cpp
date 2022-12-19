@@ -120,7 +120,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 }
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
-                         Explorer *&activeExplorer, FloatRect &clickBounds,
+                         Explorer *&activeExplorer, Vector2i &oldClick,
                          Input *&activeInput, Font &font, ColorTheme theme) {
   switch (type) {
   case CLICK:
@@ -157,7 +157,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
 
   // update the state of the buttons
   for (int i = 0; i < 4; i++) {
-    updateButtonState(explorer.button[i], event, type, clickBounds);
+    updateButtonState(explorer.button[i], event, type, oldClick);
 
     if (explorer.button[i].state == B_CLICKED ||
         explorer.button[i].state == B_DCLICKED) {
@@ -188,7 +188,29 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
       updateFilesY(explorer.files,
                    explorer.background.getPosition().y + explorer.heightFile +
                        2 * explorer.heightComp + explorer.scrollOffset);
+
+      // turn off the button to avoid side effects (such as the event triggering
+      // multipel times)
+      explorer.button[i].state = B_INACTIVE;
     }
+  }
+
+  // update scrollbar buttons
+  updateButtonState(explorer.scrollbar.up, event, type, oldClick);
+  updateButtonState(explorer.scrollbar.down, event, type, oldClick);
+
+  if (explorer.scrollbar.up.state == B_CLICKED ||
+      explorer.scrollbar.up.state == B_DCLICKED) {
+    scrollFiles(activeExplorer, UP);
+    // turn off the button to avoid side effects (such as the event triggering
+    // multipel times)
+    explorer.scrollbar.up.state = B_INACTIVE;
+  } else if (explorer.scrollbar.down.state == B_CLICKED ||
+             explorer.scrollbar.down.state == B_DCLICKED) {
+    scrollFiles(activeExplorer, DOWN);
+    // turn off the button to avoid side effects (such as the event triggering
+    // multipel times)
+    explorer.scrollbar.down.state = B_INACTIVE;
   }
 
   FloatRect filelistBounds = explorer.background.getGlobalBounds();

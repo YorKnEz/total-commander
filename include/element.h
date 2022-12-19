@@ -106,7 +106,7 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
 void drawButton(RenderWindow &window, Button button);
 
 void updateButtonState(Button &button, Event event, MouseEventType type,
-                       FloatRect &clickBounds);
+                       Vector2i &oldClick);
 
 // file functions
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
