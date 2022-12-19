@@ -43,6 +43,8 @@ bool isValidPath(string path);
 
 string getCurrentFolder(string path);
 
+void openFile(string path, string name, string ext);
+
 void openFolder(string &path, string name);
 
 void createFolder(string path, string name);

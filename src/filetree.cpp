@@ -338,6 +338,24 @@ void openFolder(string &path, string name) {
   path = newPath;
 }
 
+void openFile(string path, string name, string ext) {
+  if (!isValidPath(path))
+    return;
+
+  string command;
+  string file = path;
+  string app;
+
+  if (file.back() != SEP[0])
+    file.append(SEP);
+
+  file += name + "." + ext;
+  command =
+      SEP == "\\" ? "start \"\" \"" + file + "\"" : "xdg-open \"" + file + "\"";
+
+  system(command.c_str());
+}
+
 // creates a new folder
 void createFolder(string path, string name) {
   // checks if the folder already exists, case in which we add "(counter)" at
@@ -383,8 +401,8 @@ void copyFile(string fromPath, string toPath) {
 
   toPath.append(name);
 
-  // checks if a file already exists with the same name and extension, in which
-  // case we add "(counter)" at the end
+  // checks if a file already exists with the same name and extension, in
+  // which case we add "(counter)" at the end
   string doesExist = toPath;
   int counter = 0;
 
@@ -397,8 +415,8 @@ void copyFile(string fromPath, string toPath) {
   // toPath = toPath + extension;
   toPtr = fopen(toPath.c_str(), "wb");
 
-  // copies the file from "fromPath" byte by byte to the file from "toPath" and
-  // then closes the files
+  // copies the file from "fromPath" byte by byte to the file from "toPath"
+  // and then closes the files
   while (0 < (bytes = fread(buffer, 1, sizeof(buffer), fromPtr))) {
     fwrite(buffer, 1, bytes, toPtr);
   }
