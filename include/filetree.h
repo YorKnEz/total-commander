@@ -37,6 +37,8 @@ node *find(list l, string filename);
 
 string evalPath(string path);
 
+bool isValidFilename(string path);
+
 bool isValidPath(string path);
 
 string getCurrentFolder(string path);

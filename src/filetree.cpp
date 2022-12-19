@@ -213,8 +213,10 @@ node *find(list l, string filename) {
 
 string evalPath(string path) {
   if (!isValidPath(path)) {
-    return "path doesn't exist";
+    return "invalid";
   }
+
+  string initialPath = path;
 
   // checks if the path is of format "F:\\\\\\\\\\test\\\\\\..\\\\\\\.."
   // (multiple separators)
@@ -233,6 +235,11 @@ string evalPath(string path) {
   // becomes "F:\"
   while (firstSep != string::npos) {
     pos = path.find_last_of(SEP, firstSep - 1);
+
+    if (pos == string::npos) {
+      return "invalid";
+    }
+
     path.erase(pos, firstSep - pos + 3);
     firstSep = path.find(SEP + dotdot);
   }
@@ -243,26 +250,29 @@ string evalPath(string path) {
   return path;
 }
 
+bool isValidFilename(string path) {
+  // check for invalid symbols in the path
+  string invalidSymbols = "\\/\n#<>$+%!'&*`|{}?\"=:@";
+
+  for (int i = 0; i < invalidSymbols.size(); i++) {
+    if (path.find(invalidSymbols[i]) != path.npos) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool isValidPath(string path) {
   // the SEP is different between linux and windows
 
   // check if the path exists
-  if (!fs::exists(path)) {
+  if (!fs::exists(path) or path == "invalid") {
     return false;
   }
 
   string folderName = path.erase(0, path.find_last_of(SEP) + 1);
 
-  // check for invalid symbols in the path
-  string invalidSymbols = "\\/\n#<>$+%!'&*`|{}?\"=:@";
-
-  for (int i = 0; i < invalidSymbols.size(); i++) {
-    if (folderName.find(invalidSymbols[i]) != folderName.npos) {
-      return false;
-    }
-  }
-
-  return true;
+  return isValidFilename(folderName);
 }
 
 string getCurrentFolder(string path) {
