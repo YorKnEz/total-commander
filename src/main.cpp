@@ -1,6 +1,7 @@
 #include "element.h"
 #include "explorer.h"
 #include "filetree.h"
+#include "menu.h"
 #include "theme.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
