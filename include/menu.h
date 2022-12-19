@@ -4,7 +4,11 @@
 #include "element.h"
 #include "filetree.h"
 #include "theme.h"
+#include <string>
 #include <SFML/Graphics.hpp>
+
+using namespace sf;
+using namespace std;
 
 enum PopUpType { GET_FILENAME, GET_PATH };
 

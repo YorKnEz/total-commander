@@ -55,8 +55,9 @@ bool bySize(node *a, node *b, sortOrder order) {
   // try to sort by comparing the decimal numbers
   if (sizeA[sizeA.find(".") + 1] > sizeB[sizeB.find(".") + 1]) {
     return order != ASC;
-  } else
+  } else if (sizeA[sizeA.find(".") + 1] < sizeB[sizeB.find(".") + 1]) {
     return order == ASC;
+  }
 
   // try to sort by filename
   return byName(a, b, order);
@@ -142,18 +143,20 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // converts filename path to string
       fs::path directoryPath = entry.path().filename();
       string filename = directoryPath.generic_string();
+      string dim = "KMGT";
 
       // gets the date at which the current file was last modified
       const auto fileTime = fs::last_write_time(entry.path());
       // converts the result to system time
       const auto systemTime = chrono::file_clock::to_sys(fileTime);
-      // converts the new result to time_t (seconds that have passed since epoch
-      // time - 1 January 1970 00:00:00) / to UNIX timestamp
+      // converts the new result to time_t (seconds that have passed since
+      // epoch time - 1 January 1970 00:00:00) / to UNIX timestamp
       const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
 
-      // checks whether the current entry is a file or a directory and sets the
-      // size accordingly (directory size = "<DIR>", file size is an integer
-      // value)
+      // checks whether the current entry is a file or a directory and sets
+      // the size accordingly (directory size = "<DIR>", file size is an
+      // integer value)
+
       int intSize, dimIterator, decimalValue;
       string size;
 
@@ -173,10 +176,8 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
         if (size != "<DIR>") {
           size += "." + int2str(decimalValue) + " " + dim[dimIterator] + "B";
         }
-      } else {
+      } else
         size = "<DIR>";
-      }
-
       // generates a converted string from timestamp to GMT
       string date = asctime(gmtime(&time));
       Filedata filedata;
@@ -287,7 +288,7 @@ string evalPath(string path) {
 
 bool isValidFilename(string path) {
   // check for invalid symbols in the path
-  string invalidSymbols = "\\/\n#<>$+%!'&*`|{}?\"=:@";
+  string invalidSymbols = ILLEGAL_SYMBOLS;
 
   for (int i = 0; i < invalidSymbols.size(); i++) {
     if (path.find(invalidSymbols[i]) != path.npos) {

@@ -15,8 +15,10 @@
 // define the file separator between linux and windows
 #if defined _WIN32
 #define SEP "\\"
+#define ILLEGAL_SYMBOLS "\\/:*?\"<>|\n"
 #elif defined __linux__
 #define SEP "/"
+#define ILLEGAL_SYMBOLS "/\n"
 #endif
 
 using namespace std;

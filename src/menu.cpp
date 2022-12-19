@@ -9,7 +9,7 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
   window.setPosition(
       Vector2i(VideoMode::getDesktopMode().width / 2 - width / 2,
                VideoMode::getDesktopMode().height / 2 - height / 2));
-  FloatRect clickBounds; // the bounds of the last click
+  Vector2i oldClick; // the bounds of the last click
   RectangleShape cursor; // cursor to display on inputs
   Event event;
   string errorText;
@@ -140,7 +140,7 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
         break;
       case Event::MouseButtonReleased:
         updateInputState(input, event, RELEASE, activeInput);
-        updateButtonState(button, event, RELEASE, clickBounds);
+        updateButtonState(button, event, RELEASE, oldClick);
 
         break;
       case Event::MouseButtonPressed:
@@ -154,7 +154,7 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
         }
         // simple click
         updateInputState(input, event, CLICK, activeInput);
-        updateButtonState(button, event, CLICK, clickBounds);
+        updateButtonState(button, event, CLICK, oldClick);
 
         if (button.state == B_CLICKED) {
           if (input.value == "") {
@@ -194,7 +194,7 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
 
       case Event::MouseMoved:
         updateInputState(input, event, RELEASE, activeInput);
-        updateButtonState(button, event, MOVE, clickBounds);
+        updateButtonState(button, event, MOVE, oldClick);
         break;
       }
     }
@@ -216,7 +216,7 @@ void createErrorPopUp(int width, int height, string windowTitle,
   window.setPosition(
       Vector2i(VideoMode::getDesktopMode().width / 2 - width / 2,
                VideoMode::getDesktopMode().height / 2 - height / 2));
-  FloatRect clickBounds; // the bounds of the last click
+  FloatRect oldClick; // the bounds of the last click
   RectangleShape cursor; // cursor to display on inputs
   Event event;
   Input *activeInput = nullptr;
