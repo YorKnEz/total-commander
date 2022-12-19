@@ -143,6 +143,8 @@ void updateScrollableHeight(Scrollbar &scrollbar, int scrollableHeight);
 
 void updateScrollbar(Scrollbar &scrollbar, int scrollOffset);
 
+void updateScrollbarOnDrag(Scrollbar &scrollbar, int &scrollOffset);
+
 void drawScrollbar(RenderWindow &window, Scrollbar scrollbar);
 
 #endif
