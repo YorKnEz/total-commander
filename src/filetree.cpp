@@ -25,19 +25,38 @@ bool byName(node *a, node *b, sortOrder order) {
 
 // sort nodes by size
 bool bySize(node *a, node *b, sortOrder order) {
-  // try to sort by length of sizes
-  if (a->data.data.size.size() > b->data.data.size.size()) {
+  // try to sort by order of size (KB, MB, GB, TB)
+  string sizeA = a->data.data.size, sizeB = b->data.data.size;
+  string dim = "KMGT";
+  if (dim.find(sizeA[sizeA.size() - 2]) > dim.find(sizeB[sizeB.size() - 2])) {
     return order != ASC;
-  } else if (a->data.data.size.size() < b->data.data.size.size()) {
+  } else if (dim.find(sizeA[sizeA.size() - 2]) <
+             dim.find(sizeB[sizeB.size() - 2])) {
     return order == ASC;
   }
 
-  // try to sort by comparing the numbers
-  int comp = order * (a->data.data.size.compare(b->data.data.size));
+  string intPartA = sizeA.substr(0, sizeA.find("."));
+  string intPartB = sizeB.substr(0, sizeB.find("."));
+
+  // try to sort by comparing the sizes of the int numbers
+  if (intPartA.size() > intPartB.size()) {
+    return order != ASC;
+  } else if (intPartA.size() < intPartB.size()) {
+    return order == ASC;
+  }
+
+  // try to sort by comparing the int numbers
+  int comp = order * (intPartA.compare(intPartB));
 
   if (comp) {
     return comp <= 0;
   }
+
+  // try to sort by comparing the decimal numbers
+  if (sizeA[sizeA.find(".") + 1] > sizeB[sizeB.find(".") + 1]) {
+    return order != ASC;
+  } else
+    return order == ASC;
 
   // try to sort by filename
   return byName(a, b, order);
@@ -50,7 +69,8 @@ bool byDate(node *a, node *b, sortOrder order) {
   // the string a token can be: dd, mm, yyyy etc.
   struct {
     int start,
-        len; // start position and length of each of the tokens mentioned above
+        len; // start position and length of each of the tokens mentioned
+             // above
   } substrPositions[] = {{6, 4}, {3, 2}, {0, 2}, {17, 2}, {11, 2}, {14, 2}};
 
   int comp;
@@ -123,25 +143,41 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // converts filename path to string
       fs::path directoryPath = entry.path().filename();
       string filename = directoryPath.generic_string();
+      string dim = "KMGT";
 
       // gets the date at which the current file was last modified
       const auto fileTime = fs::last_write_time(entry.path());
       // converts the result to system time
       const auto systemTime = chrono::file_clock::to_sys(fileTime);
-      // converts the new result to time_t (seconds that have passed since epoch
-      // time - 1 January 1970 00:00:00) / to UNIX timestamp
+      // converts the new result to time_t (seconds that have passed since
+      // epoch time - 1 January 1970 00:00:00) / to UNIX timestamp
       const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
 
-      // checks whether the current entry is a file or a directory and sets the
-      // size accordingly (directory size = "<DIR>", file size is an integer
-      // value)
-      string size = is_regular_file(entry.path())
-                        ? int2str(file_size(entry.path()))
-                        : "<DIR>";
-      if (size == "") {
-        size = "0";
-      }
+      // checks whether the current entry is a file or a directory and sets
+      // the size accordingly (directory size = "<DIR>", file size is an
+      // integer value)
 
+      int intSize, dimIterator, decimalValue;
+      string size;
+
+      if (is_regular_file(entry.path())) {
+        intSize = file_size(entry.path());
+        dimIterator = 0;
+        decimalValue = 0;
+
+        while (intSize > 999) {
+          dimIterator++;
+          decimalValue = (intSize / 100) % 10;
+          intSize /= 1000;
+        }
+
+        size = int2str(intSize);
+
+        if (size != "<DIR>") {
+          size += "." + int2str(decimalValue) + " " + dim[dimIterator] + "B";
+        }
+      } else
+        size = "<DIR>";
       // generates a converted string from timestamp to GMT
       string date = asctime(gmtime(&time));
       Filedata filedata;
