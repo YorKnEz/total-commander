@@ -529,16 +529,18 @@ void moveFolder(string fromPath, string toPath) {
 
 // renames a file
 void editFileName(string path, string newName) {
-  string folder = path;
-  folder = folder.erase(folder.find_last_of(SEP) + 1);
-  copyFile(path, folder + newName);
-  deleteFile(path);
+  if (!isValidPath(path) || fs::is_directory(path)) {
+    return;
+  }
+  string folder = path.substr(0, path.find_last_of(SEP) + 1);
+  rename(path.c_str(), (folder + newName).c_str());
 }
 
 // renames a folder
 void editFolderName(string path, string newName) {
-  string folder = path;
-  folder = folder.erase(folder.find_last_of(SEP) + 1);
-  copyFolder(path, folder + newName);
-  deleteFolder(path);
+  if (!isValidPath(path) || !fs::is_directory(path)) {
+    return;
+  }
+  string folder = path.substr(0, path.find_last_of(SEP) + 1);
+  rename(path.c_str(), (folder + newName).c_str());
 }
