@@ -66,9 +66,21 @@ struct Input {
   int displayLength; // max length that can be displayed at once
 };
 
+struct Scrollbar {
+  Button up, down;
+  int scrollableHeight, scrollOffset;
+  RectangleShape track, thumb;
+  ButtonState state;
+};
+
+// helpful functions
 bool isHovered(FloatRect box, int mouseX, int mouseY);
 
-// // text functions
+RectangleShape createRect(int x, int y, int width, int height, Color fill,
+                          Color outline = Color::Transparent,
+                          int borderThickness = 0);
+
+// text functions
 Text createText(string textString, Font &font, int charSize, int x, int y,
                 int width, Color text);
 
@@ -83,7 +95,6 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
                       Color border = Color::Transparent,
                       int borderThickness = 0);
 
-
 void drawTextBox(RenderWindow &window, TextBox textbox);
 
 // button functions
@@ -95,7 +106,7 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
 void drawButton(RenderWindow &window, Button button);
 
 void updateButtonState(Button &button, Event event, MouseEventType type,
-                       FloatRect &clickBounds);
+                       Vector2i &oldClick);
 
 // file functions
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
@@ -122,5 +133,16 @@ void shrinkInput(Input &input);
 void drawInput(RenderWindow &window, Input &input);
 
 void drawCursor(RenderWindow &window, Input *activeInput);
+
+Scrollbar createScrollbar(Font &font, int charSize, int x, int y, int width,
+                          int height, int scrollableHeight, int btnHeight,
+                          StateColors stateColors[B_MAX_STATES],
+                          unsigned int borderThickness = 0);
+
+void updateScrollableHeight(Scrollbar &scrollbar, int scrollableHeight);
+
+void updateScrollbar(Scrollbar &scrollbar, int scrollOffset);
+
+void drawScrollbar(RenderWindow &window, Scrollbar scrollbar);
 
 #endif

@@ -36,6 +36,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme) {
   Explorer explorer;
 
+  int scrollbarWidth = 20;
   explorer.heightFile = 32; // used for files and file sorting buttons
   explorer.heightComp = 40; // used for anything else
 
@@ -52,7 +53,8 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
                    y + 2 * explorer.heightComp + explorer.heightFile,
-                   width - 20 - 2, explorer.heightFile, theme.fileStateColors);
+                   width - scrollbarWidth - 2, explorer.heightFile,
+                   theme.fileStateColors);
 
   sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
 
@@ -108,11 +110,17 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
       y + height - explorer.heightComp + 1, width - 2, explorer.heightComp - 2,
       theme.textMediumContrast, theme.bgLowContrast, theme.border, 1);
 
+  explorer.scrollbar = createScrollbar(
+      font, charSize, x + width - scrollbarWidth - 2, btnY, scrollbarWidth + 1,
+      height - 3 * explorer.heightComp - 4, explorer.heightFile - 2,
+      (explorer.heightFile + 1) * explorer.files.length,
+      theme.buttonStateColors, 1);
+
   return explorer;
 }
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
-                         Explorer *&activeExplorer, FloatRect &clickBounds,
+                         Explorer *&activeExplorer, Vector2i &oldClick,
                          Input *&activeInput, Font &font, ColorTheme theme) {
   switch (type) {
   case CLICK:
@@ -149,9 +157,10 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
 
   // update the state of the buttons
   for (int i = 0; i < 4; i++) {
-    updateButtonState(explorer.button[i], event, type, clickBounds);
+    updateButtonState(explorer.button[i], event, type, oldClick);
 
-    if (explorer.button[i].state == B_CLICKED || explorer.button[i].state == B_DCLICKED) {
+    if (explorer.button[i].state == B_CLICKED ||
+        explorer.button[i].state == B_DCLICKED) {
       // remove the sort indicator from the last button
       explorer.button[explorer.sortedBy].fullText.erase(
           explorer.button[explorer.sortedBy].fullText.size() - 2);
@@ -179,7 +188,29 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
       updateFilesY(explorer.files,
                    explorer.background.getPosition().y + explorer.heightFile +
                        2 * explorer.heightComp + explorer.scrollOffset);
+
+      // turn off the button to avoid side effects (such as the event triggering
+      // multipel times)
+      explorer.button[i].state = B_INACTIVE;
     }
+  }
+
+  // update scrollbar buttons
+  updateButtonState(explorer.scrollbar.up, event, type, oldClick);
+  updateButtonState(explorer.scrollbar.down, event, type, oldClick);
+
+  if (explorer.scrollbar.up.state == B_CLICKED ||
+      explorer.scrollbar.up.state == B_DCLICKED) {
+    scrollFiles(activeExplorer, UP);
+    // turn off the button to avoid side effects (such as the event triggering
+    // multipel times)
+    explorer.scrollbar.up.state = B_INACTIVE;
+  } else if (explorer.scrollbar.down.state == B_CLICKED ||
+             explorer.scrollbar.down.state == B_DCLICKED) {
+    scrollFiles(activeExplorer, DOWN);
+    // turn off the button to avoid side effects (such as the event triggering
+    // multipel times)
+    explorer.scrollbar.down.state = B_INACTIVE;
   }
 
   FloatRect filelistBounds = explorer.background.getGlobalBounds();
@@ -223,11 +254,42 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
           file.background.getGlobalBounds().width, explorer.heightFile,
           theme.fileStateColors);
 
+      // remove the sort indicator from the last button
+      explorer.button[explorer.sortedBy].fullText.erase(
+          explorer.button[explorer.sortedBy].fullText.size() - 2);
+      updateText(
+          explorer.button[explorer.sortedBy].text,
+          explorer.button[explorer.sortedBy].fullText,
+          explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+      // update sortedBy and order indicators
+      explorer.order = ASC;
+      explorer.sortedBy = FILE_NAME;
+
+      // append the sort indicator to the new sort button
+      explorer.button[explorer.sortedBy].fullText.append(
+          explorer.order == ASC ? " /" : " \\");
+      updateText(
+          explorer.button[explorer.sortedBy].text,
+          explorer.button[explorer.sortedBy].fullText,
+          explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+      // sort and update the y of the files
+      sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
+
       updateFilesY(explorer.files,
                    file.background.getPosition().y - explorer.scrollOffset);
 
-      explorer.scrollOffset = 0;
+      // reset active file pointers
       explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
+
+      // update scrollbar
+      updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
+      updateScrollableHeight(explorer.scrollbar,
+                             (explorer.heightFile + 1) * explorer.files.length);
+
+      explorer.scrollOffset = 0;           // reset scroll offset
+      explorer.scrollbar.scrollOffset = 0; // reset scroll offset of scrollbar
     } else {
       while (p) {
         updateFileState(p->data, event, type, explorer.activeFile);
@@ -261,7 +323,6 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
         if (start->data.background.getPosition().y >
             end->data.background.getPosition().y) {
           swap(start, end);
-          // swap(explorer.activeFile[0], explorer.activeFile[1]);
         }
 
         while (start != end) {
@@ -274,6 +335,34 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
 
   // update the state of the input
   updateInputState(explorer.input, event, type, activeInput);
+}
+
+void scrollFiles(Explorer *activeExplorer, Direction d) {
+  // check if file list is scrollable
+  if (activeExplorer->scrollbar.thumb.getGlobalBounds().height <
+      activeExplorer->scrollbar.track.getGlobalBounds().height) {
+    // scroll up means the content moves down and the scollbar up
+    activeExplorer->scrollOffset += d == UP ? 50 : -50;
+
+    int displayHeight = activeExplorer->background.getGlobalBounds().height -
+                        3 * activeExplorer->heightComp -
+                        activeExplorer->heightFile;
+
+    if (activeExplorer->scrollOffset > 0) {
+      activeExplorer->scrollOffset = 0;
+    } else if (activeExplorer->scrollOffset <
+               displayHeight - activeExplorer->scrollbar.scrollableHeight) {
+      activeExplorer->scrollOffset =
+          displayHeight - activeExplorer->scrollbar.scrollableHeight;
+    }
+
+    updateFilesY(activeExplorer->files,
+                 activeExplorer->background.getPosition().y +
+                     activeExplorer->heightFile +
+                     2 * activeExplorer->heightComp +
+                     activeExplorer->scrollOffset);
+    updateScrollbar(activeExplorer->scrollbar, activeExplorer->scrollOffset);
+  }
 }
 
 void drawExplorer(RenderWindow &window, Explorer explorer) {
@@ -290,4 +379,6 @@ void drawExplorer(RenderWindow &window, Explorer explorer) {
   for (int i = 0; i < 2; i++) {
     drawTextBox(window, explorer.textbox[i]);
   }
+
+  drawScrollbar(window, explorer.scrollbar);
 }

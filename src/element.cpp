@@ -10,6 +10,19 @@ bool isHovered(FloatRect box, int mouseX, int mouseY) {
   return false;
 }
 
+RectangleShape createRect(int x, int y, int width, int height, Color fill,
+                          Color outline, int borderThickness) {
+  RectangleShape r;
+
+  r.setPosition(x, y);
+  r.setSize(Vector2f(width, height));
+  r.setFillColor(fill);
+  r.setOutlineColor(outline);
+  r.setOutlineThickness(borderThickness);
+
+  return r;
+}
+
 Text createText(string textString, Font &font, int charSize, int x, int y,
                 int width, Color text) {
   Text textObj;
@@ -44,11 +57,8 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
       textString; // save the string that is supposed to be shown on the screen
 
   // initialize the background of the textbox
-  textbox.background.setSize(Vector2f(width, height));
-  textbox.background.setFillColor(bg);
-  textbox.background.setOutlineColor(border);
-  textbox.background.setOutlineThickness(borderThickness);
-  textbox.background.setPosition(x, y);
+  textbox.background =
+      createRect(x, y, width, height, bg, border, borderThickness);
 
   // initialize the text of the button
   textbox.text = createText(textString, font, charSize, x, y,
@@ -112,17 +122,15 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
   }
 
   // initialize the background of the button
-  button.background.setSize(Vector2f(width, height));
-  button.background.setFillColor(stateColors[B_INACTIVE].background);
-  button.background.setOutlineColor(stateColors[B_INACTIVE].border);
-  button.background.setOutlineThickness(borderThickness);
-  button.background.setPosition(x, y);
+  button.background =
+      createRect(x, y, width, height, stateColors[button.state].background,
+                 stateColors[button.state].border, borderThickness);
 
   // initialize the text of the button
   button.text = createText(text, font, charSize, x, y,
                            button.background.getGlobalBounds().width -
                                2 * (borderThickness + 1),
-                           stateColors[B_INACTIVE].text);
+                           stateColors[button.state].text);
 
   // set the offset to the text relative to the button
   int offsetX = button.background.getGlobalBounds().left +
@@ -141,7 +149,7 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
 }
 
 void updateButtonState(Button &button, Event event, MouseEventType type,
-                       FloatRect &clickBounds) {
+                       Vector2i &oldClick) {
   FloatRect buttonBounds =
       button.background.getGlobalBounds(); // get bounds of button
 
@@ -158,9 +166,9 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
     // if a double click happens, then we execute the if, else we jump to the
     // simple click case, which is guarenteed to handle the event
     if (isHovered(buttonBounds, event.mouseButton.x, event.mouseButton.y) &&
-        isHovered(clickBounds, event.mouseButton.x, event.mouseButton.y)) {
+        isHovered(buttonBounds, oldClick.x, oldClick.y)) {
       button.state = B_DCLICKED;
-      clickBounds = buttonBounds;
+      oldClick = Vector2i(event.mouseButton.x, event.mouseButton.y);
       break;
     }
   case CLICK:
@@ -170,7 +178,7 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
             : B_INACTIVE;
 
     if (button.state == B_CLICKED) {
-      clickBounds = buttonBounds;
+      oldClick = Vector2i(event.mouseButton.x, event.mouseButton.y);
     }
     break;
   case MOVE:
@@ -207,11 +215,9 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
   }
 
   // initialize background
-  file.background.setSize(Vector2f(width, height));
-  file.background.setFillColor(file.stateColors[file.state].background);
-  file.background.setOutlineColor(file.stateColors[file.state].border);
-  file.background.setOutlineThickness(borderThickness);
-  file.background.setPosition(x, y);
+  file.background =
+      createRect(x, y, width, height, file.stateColors[file.state].background,
+                 file.stateColors[file.state].border, borderThickness);
 
   // initialize data
   file.data = data;
@@ -332,18 +338,16 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
   }
 
   // initialize the background of the input
-  input.background.setSize(Vector2f(width, height));
-  input.background.setFillColor(stateColors[I_INACTIVE].background);
-  input.background.setOutlineColor(stateColors[I_INACTIVE].border);
-  input.background.setOutlineThickness(borderThickness);
-  input.background.setPosition(x, y);
+  input.background =
+      createRect(x, y, width, height, stateColors[input.state].background,
+                 stateColors[input.state].border, borderThickness);
 
   // set the text to display on the screen
   string displayText = value == "" ? placeholder : value;
   input.displayText = createText(displayText, font, charSize, x + 10, y,
                                  input.background.getGlobalBounds().width -
                                      2 * (borderThickness + 1) - 10,
-                                 stateColors[I_INACTIVE].text);
+                                 stateColors[input.state].text);
 
   // display only a segment of the text so it fits in the text box
   input.startPosition = 0;
@@ -449,4 +453,80 @@ void drawCursor(RenderWindow &window, Input *activeInput) {
 
     window.draw(r);
   }
+}
+
+Scrollbar createScrollbar(Font &font, int charSize, int x, int y, int width,
+                          int height, int btnHeight, int scrollableHeight,
+                          StateColors stateColors[B_MAX_STATES],
+                          unsigned int borderThickness) {
+  Scrollbar scrollbar;
+
+  scrollbar.state = B_INACTIVE;
+  scrollbar.scrollableHeight = scrollableHeight;
+  scrollbar.scrollOffset = 0;
+
+  scrollbar.up = createButton("/\\", font, charSize, x, y, width, btnHeight,
+                              stateColors, borderThickness);
+  scrollbar.down = createButton("\\/", font, charSize, x,
+                                y + height - btnHeight + 2 * borderThickness,
+                                width, btnHeight, stateColors, borderThickness);
+
+  int trackHeight = height - 2 * btnHeight;
+
+  scrollbar.track =
+      createRect(x, y + btnHeight + 2 * borderThickness, width,
+                 trackHeight - 2 * borderThickness,
+                 stateColors[scrollbar.state].background,
+                 stateColors[scrollbar.state].border, borderThickness);
+
+  int displayHeight = trackHeight + btnHeight + borderThickness;
+  int thumbHeight =
+      (float(displayHeight) / float(scrollableHeight)) * float(trackHeight);
+
+  if (thumbHeight > trackHeight) {
+    thumbHeight = trackHeight;
+  }
+
+  scrollbar.thumb = createRect(x, y + btnHeight + 2 * borderThickness, width,
+                               thumbHeight, stateColors[scrollbar.state].text,
+                               stateColors[scrollbar.state].border, 0);
+
+  return scrollbar;
+}
+
+void updateScrollableHeight(Scrollbar &scrollbar, int scrollableHeight) {
+  FloatRect bounds = scrollbar.thumb.getGlobalBounds();
+
+  int trackHeight = scrollbar.track.getGlobalBounds().height;
+  int displayHeight =
+      trackHeight + scrollbar.down.background.getGlobalBounds().height;
+  int thumbHeight =
+      (float(displayHeight) / float(scrollableHeight)) * float(trackHeight);
+
+  if (thumbHeight > trackHeight) {
+    thumbHeight = trackHeight;
+  }
+
+  scrollbar.thumb.setSize(Vector2f(bounds.width, thumbHeight));
+
+  scrollbar.scrollableHeight = scrollableHeight;
+}
+
+void updateScrollbar(Scrollbar &scrollbar, int scrollOffset) {
+  float ratio =
+      scrollbar.track.getGlobalBounds().height / scrollbar.scrollableHeight;
+
+  Vector2f position = scrollbar.track.getPosition();
+
+  scrollbar.scrollOffset = -ratio * float(scrollOffset);
+  scrollbar.thumb.setPosition(
+      Vector2f(position.x, position.y + scrollbar.scrollOffset));
+}
+
+void drawScrollbar(RenderWindow &window, Scrollbar scrollbar) {
+  drawButton(window, scrollbar.up);
+  drawButton(window, scrollbar.down);
+
+  window.draw(scrollbar.track);
+  window.draw(scrollbar.thumb);
 }
