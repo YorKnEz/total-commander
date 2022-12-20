@@ -273,6 +273,7 @@ int main() {
 
         break;
       case Event::MouseButtonPressed:
+        oldClick = Vector2i(event.mouseButton.x, event.mouseButton.y);
         // disable the last active input if user clicks outside it's box,
         // regardless of type of click
         if (activeInput &&

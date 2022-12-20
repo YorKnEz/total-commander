@@ -68,7 +68,7 @@ struct Input {
 
 struct Scrollbar {
   Button up, down;
-  int scrollableHeight, scrollOffset;
+  int scrollableHeight, scrollOffset, oldMouseY;
   RectangleShape track, thumb;
   ButtonState state;
 };
@@ -139,9 +139,13 @@ Scrollbar createScrollbar(Font &font, int charSize, int x, int y, int width,
                           StateColors stateColors[B_MAX_STATES],
                           unsigned int borderThickness = 0);
 
+float getScrollbarRatio(Scrollbar scrollbar);
+
 void updateScrollableHeight(Scrollbar &scrollbar, int scrollableHeight);
 
 void updateScrollbar(Scrollbar &scrollbar, int scrollOffset);
+
+void updateScrollbarOnDrag(Scrollbar &scrollbar, int &scrollOffset);
 
 void drawScrollbar(RenderWindow &window, Scrollbar scrollbar);
 

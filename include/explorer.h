@@ -14,7 +14,7 @@ using namespace std;
 #define E_MAX_STATES 2
 
 enum ExplorerState { E_INACTIVE, E_ACTIVE };
-enum Direction { UP, DOWN };
+enum Direction { UP = 50, DOWN = -50 };
 
 struct Explorer {
   string path;
@@ -36,6 +36,9 @@ struct Explorer {
 
 Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme);
+
+void updateScrollbarState(Explorer &explorer, Event event,
+                          MouseEventType type, Vector2i &oldClick);
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,

@@ -119,6 +119,58 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   return explorer;
 }
 
+void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
+                          Vector2i &oldClick) {
+  // update scrollbar buttons
+  updateButtonState(explorer.scrollbar.up, event, type, oldClick);
+  updateButtonState(explorer.scrollbar.down, event, type, oldClick);
+
+  if (explorer.scrollbar.up.state == B_CLICKED ||
+      explorer.scrollbar.up.state == B_DCLICKED) {
+    scrollFiles(&explorer, UP);
+    // turn off the button to avoid side effects (such as the event triggering
+    // multipel times)
+    explorer.scrollbar.up.state = B_INACTIVE;
+  } else if (explorer.scrollbar.down.state == B_CLICKED ||
+             explorer.scrollbar.down.state == B_DCLICKED) {
+    scrollFiles(&explorer, DOWN);
+    // turn off the button to avoid side effects (such as the event triggering
+    // multipel times)
+    explorer.scrollbar.down.state = B_INACTIVE;
+  }
+
+  switch (type) {
+  case RELEASE:
+    explorer.scrollbar.state = B_INACTIVE;
+    break;
+  case DCLICK:
+  case CLICK:
+    if (isHovered(explorer.scrollbar.thumb.getGlobalBounds(),
+                  event.mouseButton.x, event.mouseButton.y)) {
+      explorer.scrollbar.state = B_CLICKED;
+      explorer.scrollbar.oldMouseY = event.mouseButton.y;
+      oldClick = Vector2i(event.mouseButton.x, event.mouseButton.y);
+    }
+    break;
+  case MOVE:
+    if (explorer.scrollbar.state == B_CLICKED) {
+      // get the offset by which the cursor has moved relative to the last
+      // move position
+      int newOffset = (event.mouseMove.y - explorer.scrollbar.oldMouseY);
+      // update the old scroll offset
+      explorer.scrollbar.oldMouseY = event.mouseMove.y;
+      // ratio the new offset to be used for scrolling the files
+      newOffset = float(newOffset) / (-getScrollbarRatio(explorer.scrollbar));
+
+      Direction d = Direction(newOffset);
+
+      scrollFiles(&explorer, d);
+    }
+
+    break;
+  }
+}
+
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,
                          Input *&activeInput, Font &font, ColorTheme theme) {
@@ -195,23 +247,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
     }
   }
 
-  // update scrollbar buttons
-  updateButtonState(explorer.scrollbar.up, event, type, oldClick);
-  updateButtonState(explorer.scrollbar.down, event, type, oldClick);
-
-  if (explorer.scrollbar.up.state == B_CLICKED ||
-      explorer.scrollbar.up.state == B_DCLICKED) {
-    scrollFiles(activeExplorer, UP);
-    // turn off the button to avoid side effects (such as the event triggering
-    // multipel times)
-    explorer.scrollbar.up.state = B_INACTIVE;
-  } else if (explorer.scrollbar.down.state == B_CLICKED ||
-             explorer.scrollbar.down.state == B_DCLICKED) {
-    scrollFiles(activeExplorer, DOWN);
-    // turn off the button to avoid side effects (such as the event triggering
-    // multipel times)
-    explorer.scrollbar.down.state = B_INACTIVE;
-  }
+  updateScrollbarState(explorer, event, type, oldClick);
 
   FloatRect filelistBounds = explorer.background.getGlobalBounds();
   filelistBounds.top += 2 * explorer.heightComp + explorer.heightFile;
@@ -347,7 +383,7 @@ void scrollFiles(Explorer *activeExplorer, Direction d) {
   if (activeExplorer->scrollbar.thumb.getGlobalBounds().height <
       activeExplorer->scrollbar.track.getGlobalBounds().height) {
     // scroll up means the content moves down and the scollbar up
-    activeExplorer->scrollOffset += d == UP ? 50 : -50;
+    activeExplorer->scrollOffset += int(d);
 
     int displayHeight = activeExplorer->background.getGlobalBounds().height -
                         3 * activeExplorer->heightComp -
