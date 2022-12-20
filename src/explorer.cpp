@@ -148,15 +148,21 @@ void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
     if (isHovered(explorer.scrollbar.thumb.getGlobalBounds(),
                   event.mouseButton.x, event.mouseButton.y)) {
       explorer.scrollbar.state = B_CLICKED;
+      explorer.scrollbar.oldMouseY = event.mouseButton.y;
       oldClick = Vector2i(event.mouseButton.x, event.mouseButton.y);
     }
     break;
   case MOVE:
     if (explorer.scrollbar.state == B_CLICKED) {
-      int newOffset = event.mouseMove.y - oldClick.y;
-      updateScrollbarOnDrag(explorer.scrollbar, newOffset);
+      // get the offset by which the cursor has moved relative to the last
+      // move position
+      int newOffset = (event.mouseMove.y - explorer.scrollbar.oldMouseY);
+      // update the old scroll offset
+      explorer.scrollbar.oldMouseY = event.mouseMove.y;
+      // ratio the new offset to be used for scrolling the files
+      newOffset = float(newOffset) / (-getScrollbarRatio(explorer.scrollbar));
 
-      Direction d = Direction(newOffset - explorer.scrollOffset);
+      Direction d = Direction(newOffset);
 
       scrollFiles(&explorer, d);
     }

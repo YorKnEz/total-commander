@@ -494,6 +494,13 @@ Scrollbar createScrollbar(Font &font, int charSize, int x, int y, int width,
   return scrollbar;
 }
 
+float getScrollbarRatio(Scrollbar scrollbar) {
+  float ratio =
+      scrollbar.track.getGlobalBounds().height / scrollbar.scrollableHeight;
+
+  return ratio;
+}
+
 void updateScrollableHeight(Scrollbar &scrollbar, int scrollableHeight) {
   FloatRect bounds = scrollbar.thumb.getGlobalBounds();
 
@@ -513,28 +520,11 @@ void updateScrollableHeight(Scrollbar &scrollbar, int scrollableHeight) {
 }
 
 void updateScrollbar(Scrollbar &scrollbar, int scrollOffset) {
-  float ratio =
-      scrollbar.track.getGlobalBounds().height / scrollbar.scrollableHeight;
-
   Vector2f position = scrollbar.track.getPosition();
 
-  scrollbar.scrollOffset = -ratio * float(scrollOffset);
+  scrollbar.scrollOffset = -getScrollbarRatio(scrollbar) * float(scrollOffset);
   scrollbar.thumb.setPosition(
       Vector2f(position.x, position.y + scrollbar.scrollOffset));
-}
-
-void updateScrollbarOnDrag(Scrollbar &scrollbar, int &scrollOffset) {
-  float ratio =
-      scrollbar.track.getGlobalBounds().height / scrollbar.scrollableHeight;
-
-  Vector2f position = scrollbar.track.getPosition();
-
-  scrollbar.scrollOffset += scrollOffset;
-  scrollbar.thumb.setPosition(
-      Vector2f(position.x, position.y + scrollbar.scrollOffset));
-
-  // update the scrollOffset to the proper ratio
-  scrollOffset = float(scrollOffset) / (-ratio);
 }
 
 void drawScrollbar(RenderWindow &window, Scrollbar scrollbar) {

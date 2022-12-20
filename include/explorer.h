@@ -14,7 +14,7 @@ using namespace std;
 #define E_MAX_STATES 2
 
 enum ExplorerState { E_INACTIVE, E_ACTIVE };
-enum Direction { UP = 50, DOWN = -50, DRAG };
+enum Direction { UP = 50, DOWN = -50 };
 
 struct Explorer {
   string path;
