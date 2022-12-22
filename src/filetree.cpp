@@ -382,6 +382,13 @@ void openFolder(string &path, string name) {
   path = newPath;
 }
 
+void openEntry(string &path, string name, string ext) {
+  if (!ext.empty()) {
+    openFile(path, name, ext);
+  } else
+    openFolder(path, name);
+}
+
 void openFile(string path, string name, string ext) {
   if (!isValidPath(path))
     return;
@@ -415,6 +422,14 @@ void createFolder(string path, string name) {
 
   // creates a folder with the specified name
   fs::create_directory(path + SEP + name);
+}
+
+// checks which function should be called based on entry
+void copyEntry(string fromPath, string toPath) {
+  if (fs::is_directory(fromPath)) {
+    copyFolder(fromPath, toPath);
+  } else
+    copyFile(fromPath, toPath);
 }
 
 // copies a file from a path to another path
@@ -532,6 +547,14 @@ void copyFolder(string fromPath, string toPath) {
   }
 }
 
+// checks which function should be called based on entry
+void deleteEntry(string path) {
+  if (fs::is_directory(path)) {
+    deleteFolder(path);
+  } else
+    deleteFile(path);
+}
+
 // deletes a file from a specified path
 void deleteFile(string path) {
   if (isValidPath(path) && !fs::is_directory(path)) {
@@ -559,6 +582,13 @@ void deleteFolder(string path) {
   fs::remove(path);
 }
 
+// checks which function should be called
+void moveEntry(string fromPath, string toPath) {
+  if (fs::is_directory(fromPath)) {
+    moveFolder(fromPath, toPath);
+  } else
+    moveFile(fromPath, toPath);
+}
 // moves a file from a path to another path
 void moveFile(string fromPath, string toPath) {
   copyFile(fromPath, toPath);
@@ -571,6 +601,13 @@ void moveFolder(string fromPath, string toPath) {
   deleteFolder(fromPath);
 }
 
+// checks which function should be called
+void editEntryName(string path, string newName) {
+  if (fs::is_directory(path)) {
+    editFolderName(path, newName);
+  } else
+    editFileName(path, newName);
+}
 // renames a file
 void editFileName(string path, string newName) {
   if (!isValidPath(path) || fs::is_directory(path)) {
