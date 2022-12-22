@@ -119,6 +119,70 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   return explorer;
 }
 
+void refreshExplorer(Explorer &explorer, Font &font, ColorTheme theme) {
+  // use the head of the old list to extract its props
+  File file = explorer.files.head->data;
+
+  // update the input of the explorer
+  explorer.input.value = explorer.path;
+  explorer.input.displayText.setString(explorer.path);
+  explorer.input.cursorLocation = explorer.path.size();
+  explorer.input.displayLength = explorer.path.size();
+
+  // reset explorer related props
+  explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
+  explorer.textbox[1].fullText.insert(0, "> ");
+  explorer.textbox[1].fullText.append(" <");
+  updateText(explorer.textbox[1].text, explorer.textbox[1].fullText,
+             explorer.textbox[1].background.getGlobalBounds());
+
+  // delete old files list
+  free(explorer.files);
+  init(explorer.files);
+
+  // get the new files from the new path
+  getFilesFromPath(
+      explorer.files, explorer.path, font, file.filename.getCharacterSize(),
+      file.background.getPosition().x, file.background.getPosition().y,
+      file.background.getGlobalBounds().width, explorer.heightFile,
+      theme.fileStateColors);
+
+  // remove the sort indicator from the last button
+  explorer.button[explorer.sortedBy].fullText.erase(
+      explorer.button[explorer.sortedBy].fullText.size() - 2);
+  updateText(explorer.button[explorer.sortedBy].text,
+             explorer.button[explorer.sortedBy].fullText,
+             explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+  // update sortedBy and order indicators
+  explorer.order = ASC;
+  explorer.sortedBy = FILE_NAME;
+
+  // append the sort indicator to the new sort button
+  explorer.button[explorer.sortedBy].fullText.append(
+      explorer.order == ASC ? " /" : " \\");
+  updateText(explorer.button[explorer.sortedBy].text,
+             explorer.button[explorer.sortedBy].fullText,
+             explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+  // sort and update the y of the files
+  sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
+
+  updateFilesY(explorer.files,
+               file.background.getPosition().y - explorer.scrollOffset);
+
+  // reset active file pointers
+  explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
+
+  // update scrollbar
+  updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
+  updateScrollableHeight(explorer.scrollbar,
+                         (explorer.heightFile + 1) * explorer.files.length);
+
+  explorer.scrollOffset = 0;           // reset scroll offset
+  explorer.scrollbar.scrollOffset = 0; // reset scroll offset of scrollbar
+}
+
 void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
                           Vector2i &oldClick) {
   // update scrollbar buttons

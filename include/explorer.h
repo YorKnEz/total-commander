@@ -37,8 +37,8 @@ struct Explorer {
 Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme);
 
-void updateScrollbarState(Explorer &explorer, Event event,
-                          MouseEventType type, Vector2i &oldClick);
+void refreshExplorer(Explorer &explorer);
+
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,
