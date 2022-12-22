@@ -27,7 +27,7 @@ bool byName(node *a, node *b, sortOrder order) {
 bool bySize(node *a, node *b, sortOrder order) {
   // try to sort by order of size (KB, MB, GB, TB)
   string sizeA = a->data.data.size, sizeB = b->data.data.size;
-  string dim = "KMGT";
+  string dim = " KMGT";
   if (dim.find(sizeA[sizeA.size() - 2]) > dim.find(sizeB[sizeB.size() - 2])) {
     return order != ASC;
   } else if (dim.find(sizeA[sizeA.size() - 2]) <
@@ -143,7 +143,7 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // converts filename path to string
       fs::path directoryPath = entry.path().filename();
       string filename = directoryPath.generic_string();
-      string dim = "KMGT";
+      string dim = " KMGT";
 
       // gets the date at which the current file was last modified
       const auto fileTime = fs::last_write_time(entry.path());
@@ -172,12 +172,18 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
         }
 
         size = int2str(intSize);
+        string dimLetter = "";
+
+        if (dim[dimIterator] != ' ') {
+          dimLetter = dim[dimIterator];
+        }
 
         if (size != "<DIR>") {
-          size += "." + int2str(decimalValue) + " " + dim[dimIterator] + "B";
+          size += "." + int2str(decimalValue) + " " + dimLetter + "B";
         }
       } else
         size = "<DIR>";
+
       // generates a converted string from timestamp to GMT
       string date = asctime(gmtime(&time));
       Filedata filedata;
