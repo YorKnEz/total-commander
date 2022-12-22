@@ -497,8 +497,7 @@ void copyFolder(string fromPath, string toPath) {
   }
 
   // checks if the path where the folder is to be copied is valid
-  if (fromPath.find(toPath) != string::npos ||
-      toPath.find(fromPath) != string::npos) {
+  if (toPath.find(fromPath) != string::npos) {
     return;
   }
 
@@ -613,8 +612,16 @@ void editFileName(string path, string newName) {
   if (!isValidPath(path) || fs::is_directory(path)) {
     return;
   }
+
   string folder = path.substr(0, path.find_last_of(SEP) + 1);
-  rename(path.c_str(), (folder + newName).c_str());
+  string ext = path.substr(path.find_last_of("."));
+  string oldName = newName;
+  int counter = 0;
+  while (isValidPath(folder + SEP + newName + ext)) {
+    newName = oldName + " (" + int2str(++counter) + ")";
+  }
+
+  rename(path.c_str(), (folder + newName + ext).c_str());
 }
 
 // renames a folder
@@ -622,6 +629,13 @@ void editFolderName(string path, string newName) {
   if (!isValidPath(path) || !fs::is_directory(path)) {
     return;
   }
+
   string folder = path.substr(0, path.find_last_of(SEP) + 1);
+  string oldName = newName;
+  int counter = 0;
+  while (isValidPath(folder + SEP + newName)) {
+    newName = oldName + " (" + int2str(++counter) + ")";
+  }
+
   rename(path.c_str(), (folder + newName).c_str());
 }
