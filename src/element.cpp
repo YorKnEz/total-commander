@@ -249,63 +249,6 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
   return file;
 }
 
-void updateFileState(File &file, Event event, MouseEventType type,
-                     File *activeFile[2]) {
-  FloatRect fileBounds =
-      file.background.getGlobalBounds(); // get bounds of button
-  Keyboard kbd;                          // used for checking combos
-
-  switch (type) {
-  case DCLICK:
-    // if a dclick happens, let the explorer handle it
-    if (activeFile[0] == &file) {
-      break;
-    }
-  case CLICK:
-    // if there is a click on a file
-    if (isHovered(fileBounds, event.mouseButton.x, event.mouseButton.y)) {
-      // if no file has been selected, set first file as crt file
-      if (!activeFile[0]) {
-        activeFile[0] = &file;
-        activeFile[0]->state = F_SELECTED;
-      }
-      // if the first file has been selected, select the second
-      else if (!activeFile[1]) {
-        // select the second if shift key is also pressed
-        if (kbd.isKeyPressed(Keyboard::LShift) && activeFile[0] != &file) {
-          activeFile[1] = &file;
-          activeFile[1]->state = F_SELECTED;
-        }
-        // select the first if the user just clicked
-        else {
-          activeFile[0]->state = F_INACTIVE;
-          activeFile[0] = &file;
-          activeFile[0]->state = F_SELECTED;
-        }
-      }
-      // if both have been selected, reset them
-      else {
-        // select the second if shift key is pressed
-        if (kbd.isKeyPressed(Keyboard::LShift) && activeFile[0] != &file) {
-          activeFile[1]->state = F_INACTIVE;
-          activeFile[1] = &file;
-          activeFile[1]->state = F_SELECTED;
-        }
-        // reset both if not
-        else {
-          activeFile[0]->state = F_INACTIVE;
-          activeFile[0] = &file;
-          activeFile[0]->state = F_SELECTED;
-
-          activeFile[1]->state = F_INACTIVE;
-          activeFile[1] = nullptr;
-        }
-      }
-    }
-    break;
-  }
-}
-
 void drawFile(RenderWindow &window, File file) {
   // update the color of the file depending on it's state
   file.filename.setFillColor(file.stateColors[file.state].textHighContrast);
