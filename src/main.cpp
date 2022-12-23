@@ -96,8 +96,17 @@ int main() {
   int buttons = 6;
   int btnWidth = WINDOW_W / buttons, btnHeight = 32;
   Button button[buttons];
-  string buttonString[buttons] = {"Rename", "Edit",  "Copy",
-                                  "Move",   "Mkdir", "Delete"};
+  string buttonString[buttons] = {"Open",   "Mkdir", "Copy",
+                                  "Delete", "Move",  "Rename"};
+  string newName, newPath, currentEntryName, currentEntryExt, currentEntry;
+  enum buttons {
+    OPEN_ENTRY,
+    MKDIR,
+    COPY_ENTRY,
+    DELETE_ENTRY,
+    MOVE_ENTRY,
+    RENAME_ENTRY
+  };
 
   for (int i = 0; i < buttons; i++) {
     button[i] = createButton(buttonString[i], font, charSize, i * btnWidth + 2,
@@ -283,6 +292,87 @@ int main() {
           activeInput = nullptr;
         }
 
+        for (int i = 0; i < buttons; i++) {
+          updateButtonState(button[i], event, CLICK, oldClick);
+
+          if (button[i].state == B_CLICKED && activeExplorer &&
+              activeExplorer->activeFile[0]) {
+
+            currentEntryName = activeExplorer->activeFile[0]->data.filename;
+            currentEntryExt = activeExplorer->activeFile[0]->data.ext;
+
+            if (currentEntryExt.empty()) {
+              currentEntry = currentEntryName;
+            } else
+              currentEntry = currentEntryName + "." + currentEntryExt;
+
+            switch (i) {
+            case OPEN_ENTRY:
+              openEntry(activeExplorer->path, currentEntryName,
+                        currentEntryExt);
+              // add explorer refresh
+              break;
+
+            case MKDIR:
+              newName =
+                  createPopUp(400, 150, GET_FILENAME, TITLE, "New name:", "OK",
+                              "insert text here", "", font, charSize, theme);
+
+              if (!newName.empty()) {
+                createFolder(activeExplorer->path, newName);
+              }
+              break;
+
+            case COPY_ENTRY:
+              newPath =
+                  createPopUp(400, 150, GET_PATH, TITLE, "Copy to:", "OK",
+                              "insert text here", "", font, charSize, theme);
+
+              if (!newPath.empty()) {
+                copyEntry(activeExplorer->path + SEP + currentEntry, newPath);
+              }
+              break;
+
+            case DELETE_ENTRY:
+              deleteEntry(activeExplorer->path + currentEntry);
+              break;
+
+            case MOVE_ENTRY:
+              newPath =
+                  createPopUp(400, 150, GET_PATH, TITLE, "Copy to:", "OK",
+                              "insert text here", "", font, charSize, theme);
+
+              if (!newPath.empty()) {
+                moveEntry(activeExplorer->path + SEP + currentEntry, newPath);
+              }
+              break;
+
+            case RENAME_ENTRY:
+              newName =
+                  createPopUp(400, 150, GET_FILENAME, TITLE, "New name:", "OK",
+                              "insert text here", "", font, charSize, theme);
+
+              if (!newName.empty()) {
+                editEntryName(activeExplorer->path + SEP + currentEntry,
+                              newName);
+              }
+
+              break;
+            }
+          } else if (activeExplorer) {
+
+            if (i == MKDIR && button[i].state == B_CLICKED) {
+              newName =
+                  createPopUp(400, 150, GET_FILENAME, TITLE, "New name:", "OK",
+                              "insert text here", "", font, charSize, theme);
+
+              if (!newName.empty()) {
+                createFolder(activeExplorer->path, newName);
+              }
+            }
+          }
+        }
+
         // double click
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 0; i < explorers; i++) {
@@ -290,9 +380,6 @@ int main() {
                                 oldClick, activeInput, font, theme);
           }
 
-          for (int i = 0; i < buttons; i++) {
-            updateButtonState(button[i], event, DCLICK, oldClick);
-          }
         }
         // simple click
         else {
@@ -300,10 +387,6 @@ int main() {
             updateExplorerState(explorer[i], event, CLICK, activeExplorer,
                                 oldClick, activeInput, font);
           }
-          for (int i = 0; i < buttons; i++) {
-            updateButtonState(button[i], event, CLICK, oldClick);
-          }
-
         }
 
         // reset timer if a click happened

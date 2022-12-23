@@ -45,23 +45,33 @@ bool isValidPath(string path);
 
 string getCurrentFolder(string path);
 
+void openEntry(string &path, string name, string ext);
+
 void openFile(string path, string name, string ext);
 
 void openFolder(string &path, string name);
 
 void createFolder(string path, string name);
 
+void copyEntry(string fromPath, string toPath);
+
 void copyFile(string fromPath, string toPath);
 
 void copyFolder(string fromPath, string toPath);
+
+void deleteEntry(string path);
 
 void deleteFile(string path);
 
 void deleteFolder(string path);
 
+void moveEntry(string fromPath, string toPath);
+
 void moveFile(string fromPath, string toPath);
 
 void moveFolder(string fromPath, string toPath);
+
+void editEntryName(string path, string newName);
 
 void editFileName(string path, string newName);
 

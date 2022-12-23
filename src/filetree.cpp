@@ -27,7 +27,7 @@ bool byName(node *a, node *b, sortOrder order) {
 bool bySize(node *a, node *b, sortOrder order) {
   // try to sort by order of size (KB, MB, GB, TB)
   string sizeA = a->data.data.size, sizeB = b->data.data.size;
-  string dim = "KMGT";
+  string dim = " KMGT";
   if (dim.find(sizeA[sizeA.size() - 2]) > dim.find(sizeB[sizeB.size() - 2])) {
     return order != ASC;
   } else if (dim.find(sizeA[sizeA.size() - 2]) <
@@ -143,7 +143,7 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // converts filename path to string
       fs::path directoryPath = entry.path().filename();
       string filename = directoryPath.generic_string();
-      string dim = "KMGT";
+      string dim = " KMGT";
 
       // gets the date at which the current file was last modified
       const auto fileTime = fs::last_write_time(entry.path());
@@ -172,12 +172,18 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
         }
 
         size = int2str(intSize);
+        string dimLetter = "";
+
+        if (dim[dimIterator] != ' ') {
+          dimLetter = dim[dimIterator];
+        }
 
         if (size != "<DIR>") {
-          size += "." + int2str(decimalValue) + " " + dim[dimIterator] + "B";
+          size += "." + int2str(decimalValue) + " " + dimLetter + "B";
         }
       } else
         size = "<DIR>";
+
       // generates a converted string from timestamp to GMT
       string date = asctime(gmtime(&time));
       Filedata filedata;
@@ -376,6 +382,13 @@ void openFolder(string &path, string name) {
   path = newPath;
 }
 
+void openEntry(string &path, string name, string ext) {
+  if (!ext.empty()) {
+    openFile(path, name, ext);
+  } else
+    openFolder(path, name);
+}
+
 void openFile(string path, string name, string ext) {
   if (!isValidPath(path))
     return;
@@ -415,6 +428,14 @@ void createFolder(string path, string name) {
 
   // creates a folder with the specified name
   fs::create_directory(path + SEP + name);
+}
+
+// checks which function should be called based on entry
+void copyEntry(string fromPath, string toPath) {
+  if (fs::is_directory(fromPath)) {
+    copyFolder(fromPath, toPath);
+  } else
+    copyFile(fromPath, toPath);
 }
 
 // copies a file from a path to another path
@@ -482,8 +503,7 @@ void copyFolder(string fromPath, string toPath) {
   }
 
   // checks if the path where the folder is to be copied is valid
-  if (fromPath.find(toPath) != string::npos ||
-      toPath.find(fromPath) != string::npos) {
+  if (toPath.find(fromPath) != string::npos) {
     return;
   }
 
@@ -532,6 +552,14 @@ void copyFolder(string fromPath, string toPath) {
   }
 }
 
+// checks which function should be called based on entry
+void deleteEntry(string path) {
+  if (fs::is_directory(path)) {
+    deleteFolder(path);
+  } else
+    deleteFile(path);
+}
+
 // deletes a file from a specified path
 void deleteFile(string path) {
   if (isValidPath(path) && !fs::is_directory(path)) {
@@ -559,6 +587,13 @@ void deleteFolder(string path) {
   fs::remove(path);
 }
 
+// checks which function should be called
+void moveEntry(string fromPath, string toPath) {
+  if (fs::is_directory(fromPath)) {
+    moveFolder(fromPath, toPath);
+  } else
+    moveFile(fromPath, toPath);
+}
 // moves a file from a path to another path
 void moveFile(string fromPath, string toPath) {
   copyFile(fromPath, toPath);
@@ -571,13 +606,28 @@ void moveFolder(string fromPath, string toPath) {
   deleteFolder(fromPath);
 }
 
+// checks which function should be called
+void editEntryName(string path, string newName) {
+  if (fs::is_directory(path)) {
+    editFolderName(path, newName);
+  } else
+    editFileName(path, newName);
+}
 // renames a file
 void editFileName(string path, string newName) {
   if (!isValidPath(path) || fs::is_directory(path)) {
     return;
   }
+
   string folder = path.substr(0, path.find_last_of(SEP) + 1);
-  rename(path.c_str(), (folder + newName).c_str());
+  string ext = path.substr(path.find_last_of("."));
+  string oldName = newName;
+  int counter = 0;
+  while (isValidPath(folder + SEP + newName + ext)) {
+    newName = oldName + " (" + int2str(++counter) + ")";
+  }
+
+  rename(path.c_str(), (folder + newName + ext).c_str());
 }
 
 // renames a folder
@@ -585,6 +635,13 @@ void editFolderName(string path, string newName) {
   if (!isValidPath(path) || !fs::is_directory(path)) {
     return;
   }
+
   string folder = path.substr(0, path.find_last_of(SEP) + 1);
+  string oldName = newName;
+  int counter = 0;
+  while (isValidPath(folder + SEP + newName)) {
+    newName = oldName + " (" + int2str(++counter) + ")";
+  }
+
   rename(path.c_str(), (folder + newName).c_str());
 }

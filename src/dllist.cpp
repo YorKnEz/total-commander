@@ -118,6 +118,10 @@ void free(list &l) {
 
 void sort(list &l, sortOrder order,
           bool (*sortCriteria)(node *a, node *b, sortOrder order)) {
+  if (l.length < 2) {
+    return;
+  }
+
   node *p =
       l.head->data.data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
   node *q;
