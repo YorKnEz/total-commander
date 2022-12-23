@@ -53,7 +53,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
 
 void scrollFiles(Explorer *activeExplorer, Direction d);
 
-void drawFiles(RenderWindow &window, list &files);
+void drawFiles(RenderWindow &window, Explorer explorer);
 
 void drawExplorer(RenderWindow &window, Explorer explorer);
 

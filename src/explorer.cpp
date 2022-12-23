@@ -455,11 +455,28 @@ void scrollFiles(Explorer *activeExplorer, Direction d) {
   }
 }
 
-void drawFiles(RenderWindow &window, list &files) {
-  node *p = files.head;
+void drawFiles(RenderWindow &window, Explorer explorer) {
+  node *p = explorer.files.head;
+
+  FloatRect explorerBounds = explorer.background.getGlobalBounds(),
+            currentFileBounds;
+  // the y coordonates for which files can be drawn in between
+  int miny = explorerBounds.top + 2 * explorer.heightComp + explorer.heightFile,
+      maxy = explorerBounds.top + explorerBounds.height - explorer.heightComp;
 
   while (p) {
-    drawFile(window, p->data);
+    currentFileBounds = p->data.background.getGlobalBounds();
+
+    // draw only the files that are on the screen
+    if (currentFileBounds.top + currentFileBounds.height > miny &&
+        currentFileBounds.top < maxy) {
+      drawFile(window, p->data);
+    }
+
+    // break the loop if the current file is below the screen
+    if (currentFileBounds.top >= maxy) {
+      break;
+    }
 
     p = p->next;
   }
@@ -468,7 +485,7 @@ void drawFiles(RenderWindow &window, list &files) {
 void drawExplorer(RenderWindow &window, Explorer explorer) {
   window.draw(explorer.background);
 
-  drawFiles(window, explorer.files);
+  drawFiles(window, explorer);
 
   for (int i = 0; i < 4; i++) {
     drawButton(window, explorer.button[i]);
