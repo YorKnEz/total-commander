@@ -21,7 +21,7 @@ struct Explorer {
   list files;
   sortBy sortedBy = FILE_NAME;
   sortOrder order = ASC;
-  File *activeFile[2] = { nullptr, nullptr };
+  node *activeFile[2] = {nullptr, nullptr};
   int scrollOffset;
   int heightFile; // height of the files on the screen
   int heightComp; // height of the other components
@@ -33,20 +33,27 @@ struct Explorer {
   Scrollbar scrollbar;
 };
 
-
 Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme);
 
-void updateScrollbarState(Explorer &explorer, Event event,
-                          MouseEventType type, Vector2i &oldClick);
-
-void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
-                         Explorer *&activeExplorer, Vector2i &oldClick,
-                         Input *&activeInput, Font &font, ColorTheme theme = {});
+void refreshExplorer(Explorer &explorer);
 
 void updateFilesY(list &files, int y);
 
+void updateFilesState(Explorer &explorer, Event event, MouseEventType type,
+                      Vector2i &oldClick);
+
+void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
+                          Vector2i &oldClick);
+
+void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
+                         Explorer *&activeExplorer, Vector2i &oldClick,
+                         Input *&activeInput, Font &font,
+                         ColorTheme theme = {});
+
 void scrollFiles(Explorer *activeExplorer, Direction d);
+
+void drawFiles(RenderWindow &window, Explorer explorer);
 
 void drawExplorer(RenderWindow &window, Explorer explorer);
 

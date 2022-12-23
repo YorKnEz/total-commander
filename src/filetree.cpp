@@ -387,7 +387,13 @@ void openFile(string path, string name, string ext) {
   if (file.back() != SEP[0])
     file.append(SEP);
 
-  file += name + "." + ext;
+  file += name;
+
+  // add extension only if there is one
+  if (ext.size() > 0) {
+    file += "." + ext;
+  }
+
   command =
       SEP == "\\" ? "start \"\" \"" + file + "\"" : "xdg-open \"" + file + "\"";
 

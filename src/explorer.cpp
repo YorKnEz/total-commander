@@ -1,37 +1,5 @@
 #include "explorer.h"
 
-void updateFilesY(list &files, int y) {
-  node *p = files.head;
-  int fileY = y;
-  int offsetY = p->data.background.getGlobalBounds().height / 2 -
-                p->data.date.getGlobalBounds().height / 2 +
-                p->data.date.getPosition().y -
-                p->data.date.getGlobalBounds().top;
-
-  while (p) {
-    p->data.background.setPosition(p->data.background.getPosition().x, fileY);
-    p->data.filename.setPosition(p->data.filename.getPosition().x,
-                                 fileY + offsetY);
-    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetY);
-    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
-    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
-
-    fileY += p->data.background.getGlobalBounds().height + 1;
-
-    p = p->next;
-  }
-}
-
-void drawFiles(RenderWindow &window, list &files) {
-  node *p = files.head;
-
-  while (p) {
-    drawFile(window, p->data);
-
-    p = p->next;
-  }
-}
-
 Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme) {
   Explorer explorer;
@@ -117,6 +85,191 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
       theme.buttonStateColors, 1);
 
   return explorer;
+}
+
+void refreshExplorer(Explorer &explorer, Font &font, ColorTheme theme) {
+  // use the head of the old list to extract its props
+  File file = explorer.files.head->data;
+
+  // update the input of the explorer
+  explorer.input.value = explorer.path;
+  explorer.input.displayText.setString(explorer.path);
+  explorer.input.cursorLocation = explorer.path.size();
+  explorer.input.displayLength = explorer.path.size();
+
+  // reset explorer related props
+  explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
+  explorer.textbox[1].fullText.insert(0, "> ");
+  explorer.textbox[1].fullText.append(" <");
+  updateText(explorer.textbox[1].text, explorer.textbox[1].fullText,
+             explorer.textbox[1].background.getGlobalBounds());
+
+  // delete old files list
+  free(explorer.files);
+  init(explorer.files);
+
+  // get the new files from the new path
+  getFilesFromPath(
+      explorer.files, explorer.path, font, file.filename.getCharacterSize(),
+      file.background.getPosition().x, file.background.getPosition().y,
+      file.background.getGlobalBounds().width, explorer.heightFile,
+      theme.fileStateColors);
+
+  // remove the sort indicator from the last button
+  explorer.button[explorer.sortedBy].fullText.erase(
+      explorer.button[explorer.sortedBy].fullText.size() - 2);
+  updateText(explorer.button[explorer.sortedBy].text,
+             explorer.button[explorer.sortedBy].fullText,
+             explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+  // update sortedBy and order indicators
+  explorer.order = ASC;
+  explorer.sortedBy = FILE_NAME;
+
+  // append the sort indicator to the new sort button
+  explorer.button[explorer.sortedBy].fullText.append(
+      explorer.order == ASC ? " /" : " \\");
+  updateText(explorer.button[explorer.sortedBy].text,
+             explorer.button[explorer.sortedBy].fullText,
+             explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+  // sort and update the y of the files
+  sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
+
+  updateFilesY(explorer.files,
+               file.background.getPosition().y - explorer.scrollOffset);
+
+  // reset active file pointers
+  explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
+
+  // update scrollbar
+  updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
+  updateScrollableHeight(explorer.scrollbar,
+                         (explorer.heightFile + 1) * explorer.files.length);
+
+  explorer.scrollOffset = 0;           // reset scroll offset
+  explorer.scrollbar.scrollOffset = 0; // reset scroll offset of scrollbar
+}
+
+void updateFilesY(list &files, int y) {
+  node *p = files.head;
+  int fileY = y;
+  int offsetY = p->data.background.getGlobalBounds().height / 2 -
+                p->data.date.getGlobalBounds().height / 2 +
+                p->data.date.getPosition().y -
+                p->data.date.getGlobalBounds().top;
+
+  while (p) {
+    p->data.background.setPosition(p->data.background.getPosition().x, fileY);
+    p->data.filename.setPosition(p->data.filename.getPosition().x,
+                                 fileY + offsetY);
+    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetY);
+    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
+    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
+
+    fileY += p->data.background.getGlobalBounds().height + 1;
+
+    p = p->next;
+  }
+}
+
+void updateFilesState(Explorer &explorer, Event event, MouseEventType type,
+                      Vector2i &oldClick) {
+  node *p = explorer.files.head,        // file list iterator
+      *start = nullptr, *end = nullptr; // used for going through the list
+  Keyboard kbd;                         // used for checking combos
+  bool shouldSelect = false;            // flag used for checking reselect
+
+  while (p) {
+    switch (type) {
+    case DCLICK:
+      // if a dclick happens, let the explorer handle it
+      if (explorer.activeFile[0] == p) {
+        break;
+      }
+    case CLICK:
+      // if there is a click on a file
+      if (isHovered(p->data.background.getGlobalBounds(), event.mouseButton.x,
+                    event.mouseButton.y)) {
+        // if user presses control, toggle the select state of clicked file
+        if (kbd.isKeyPressed(Keyboard::LControl)) {
+          explorer.activeFile[0] = p;
+          explorer.activeFile[0]->data.state =
+              explorer.activeFile[0]->data.state == F_SELECTED ? F_INACTIVE
+                                                               : F_SELECTED;
+        }
+        // if no file has been selected, set first file as crt file
+        else if (!explorer.activeFile[0]) {
+          explorer.activeFile[0] = p;
+          explorer.activeFile[0]->data.state = F_SELECTED;
+          shouldSelect = true;
+        }
+        // if the first file has been selected, select the second
+        else {
+          // select the second if shift key is also pressed
+          if (kbd.isKeyPressed(Keyboard::LShift) &&
+              explorer.activeFile[0] != p) {
+            // select the new one
+            explorer.activeFile[1] = p;
+            explorer.activeFile[1]->data.state = F_SELECTED;
+          }
+          // select the first if the user just clicked
+          else {
+            explorer.activeFile[0]->data.state = F_INACTIVE;
+            explorer.activeFile[0] = p;
+            explorer.activeFile[0]->data.state = F_SELECTED;
+
+            if (explorer.activeFile[1]) {
+              explorer.activeFile[1]->data.state = F_INACTIVE;
+              explorer.activeFile[1] = nullptr;
+            }
+          }
+          shouldSelect = true;
+        }
+
+        // if a click happened, we should probably redo the selection
+      }
+      break;
+    }
+
+    p = p->next;
+  }
+
+  if (shouldSelect) {
+    if (!explorer.activeFile[1]) {
+      p = explorer.files.head; // get current file pointer
+
+      // deselect all files that are not the currently select
+      while (p) {
+        if (p != explorer.activeFile[0]) {
+          p->data.state = F_INACTIVE;
+        }
+
+        p = p->next;
+      }
+    } else {
+      // init start and end pointers
+      start = explorer.activeFile[0];
+      end = explorer.activeFile[1];
+
+      // swap the pointers if they are not in order
+      if (start->data.background.getPosition().y >
+          end->data.background.getPosition().y) {
+        swap(start, end);
+      }
+
+      // make the files selected in case they weren't
+      start->data.state = F_SELECTED;
+      end->data.state = F_SELECTED;
+
+      // select all files between start and end
+      while (start != end) {
+        start->data.state = F_SELECTED;
+
+        start = start->next;
+      }
+    }
+  }
 }
 
 void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
@@ -254,123 +407,19 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
   filelistBounds.height -= (3 * explorer.heightComp + explorer.heightFile);
 
   if (isHovered(filelistBounds, event.mouseButton.x, event.mouseButton.y)) {
-    // update the state of the files
-    node *p = explorer.files.head;
-    node *start = nullptr, *end = nullptr;
-
     if (type == DCLICK && explorer.activeFile[0] &&
-        isHovered(explorer.activeFile[0]->background.getGlobalBounds(),
+        isHovered(explorer.activeFile[0]->data.background.getGlobalBounds(),
                   event.mouseButton.x, event.mouseButton.y)) {
-      if (explorer.activeFile[0]->data.size == "<DIR>") {
-        openFolder(explorer.path, explorer.activeFile[0]->data.filename);
+      if (explorer.activeFile[0]->data.data.size == "<DIR>") {
+        openFolder(explorer.path, explorer.activeFile[0]->data.data.filename);
 
-        // use the head of the old list to extract its props
-        File file = explorer.files.head->data;
-
-        // update the input of the explorer
-        explorer.input.value = explorer.path;
-        explorer.input.displayText.setString(explorer.path);
-        explorer.input.cursorLocation = explorer.path.size();
-        explorer.input.displayLength = explorer.path.size();
-
-        // reset explorer related props
-        explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
-        explorer.textbox[1].fullText.insert(0, "> ");
-        explorer.textbox[1].fullText.append(" <");
-        updateText(explorer.textbox[1].text, explorer.textbox[1].fullText,
-                   explorer.textbox[1].background.getGlobalBounds());
-
-        // delete old files list
-        free(explorer.files);
-        init(explorer.files);
-
-        // get the new files from the new path
-        getFilesFromPath(
-            explorer.files, explorer.path, font, file.filename.getCharacterSize(),
-            file.background.getPosition().x, file.background.getPosition().y,
-            file.background.getGlobalBounds().width, explorer.heightFile,
-            theme.fileStateColors);
-
-        // remove the sort indicator from the last button
-        explorer.button[explorer.sortedBy].fullText.erase(
-            explorer.button[explorer.sortedBy].fullText.size() - 2);
-        updateText(
-            explorer.button[explorer.sortedBy].text,
-            explorer.button[explorer.sortedBy].fullText,
-            explorer.button[explorer.sortedBy].background.getGlobalBounds());
-
-        // update sortedBy and order indicators
-        explorer.order = ASC;
-        explorer.sortedBy = FILE_NAME;
-
-        // append the sort indicator to the new sort button
-        explorer.button[explorer.sortedBy].fullText.append(
-            explorer.order == ASC ? " /" : " \\");
-        updateText(
-            explorer.button[explorer.sortedBy].text,
-            explorer.button[explorer.sortedBy].fullText,
-            explorer.button[explorer.sortedBy].background.getGlobalBounds());
-
-        // sort and update the y of the files
-        sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
-
-        updateFilesY(explorer.files,
-                     file.background.getPosition().y - explorer.scrollOffset);
-
-        // reset active file pointers
-        explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
-
-        // update scrollbar
-        updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
-        updateScrollableHeight(explorer.scrollbar,
-                               (explorer.heightFile + 1) * explorer.files.length);
-
-        explorer.scrollOffset = 0;           // reset scroll offset
-        explorer.scrollbar.scrollOffset = 0; // reset scroll offset of scrollbar
+        refreshExplorer(explorer, font, theme);
       } else {
-        openFile(explorer.path, explorer.activeFile[0]->data.filename,
-                 explorer.activeFile[0]->data.ext);
+        openFile(explorer.path, explorer.activeFile[0]->data.data.filename,
+                 explorer.activeFile[0]->data.data.ext);
       }
     } else {
-      while (p) {
-        updateFileState(p->data, event, type, explorer.activeFile);
-
-        // if first file has been selected, save the node that has it
-        if (explorer.activeFile[0] == &p->data) {
-          // reset end pointer if start pointer has been changed
-          if (end && start) {
-            end = nullptr;
-          }
-
-          start = p;
-        }
-
-        // if second file has been selected, save the node that has it
-        if (explorer.activeFile[1] == &p->data) {
-          end = p;
-        }
-
-        // unmark anything besides first and second selected
-        if (explorer.activeFile[0] != &p->data &&
-            explorer.activeFile[1] != &p->data) {
-          p->data.state = F_INACTIVE;
-        }
-
-        p = p->next;
-      }
-
-      // select all files between start and end if they exist
-      if (start && end) {
-        if (start->data.background.getPosition().y >
-            end->data.background.getPosition().y) {
-          swap(start, end);
-        }
-
-        while (start != end) {
-          start->data.state = F_SELECTED;
-          start = start->next;
-        }
-      }
+      updateFilesState(explorer, event, type, oldClick);
     }
   }
 
@@ -406,10 +455,37 @@ void scrollFiles(Explorer *activeExplorer, Direction d) {
   }
 }
 
+void drawFiles(RenderWindow &window, Explorer explorer) {
+  node *p = explorer.files.head;
+
+  FloatRect explorerBounds = explorer.background.getGlobalBounds(),
+            currentFileBounds;
+  // the y coordonates for which files can be drawn in between
+  int miny = explorerBounds.top + 2 * explorer.heightComp + explorer.heightFile,
+      maxy = explorerBounds.top + explorerBounds.height - explorer.heightComp;
+
+  while (p) {
+    currentFileBounds = p->data.background.getGlobalBounds();
+
+    // draw only the files that are on the screen
+    if (currentFileBounds.top + currentFileBounds.height > miny &&
+        currentFileBounds.top < maxy) {
+      drawFile(window, p->data);
+    }
+
+    // break the loop if the current file is below the screen
+    if (currentFileBounds.top >= maxy) {
+      break;
+    }
+
+    p = p->next;
+  }
+}
+
 void drawExplorer(RenderWindow &window, Explorer explorer) {
   window.draw(explorer.background);
 
-  drawFiles(window, explorer.files);
+  drawFiles(window, explorer);
 
   for (int i = 0; i < 4; i++) {
     drawButton(window, explorer.button[i]);
