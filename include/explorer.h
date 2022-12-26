@@ -36,7 +36,7 @@ struct Explorer {
 Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme);
 
-void refreshExplorer(Explorer &explorer);
+void refreshExplorer(Explorer &explorer, Font &font, ColorTheme theme);
 
 void updateFilesY(list &files, int y);
 
