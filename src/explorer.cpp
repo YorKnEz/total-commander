@@ -94,8 +94,9 @@ void refreshExplorer(Explorer &explorer, Font &font, ColorTheme theme) {
   // update the input of the explorer
   explorer.input.value = explorer.path;
   explorer.input.displayText.setString(explorer.path);
-  explorer.input.cursorLocation = explorer.path.size();
   explorer.input.displayLength = explorer.path.size();
+  explorer.input.cursorLocation = explorer.path.size();
+  explorer.input.startPosition = 0;
 
   // reset explorer related props
   explorer.textbox[1].fullText = getCurrentFolder(explorer.path);

@@ -66,7 +66,7 @@ int main() {
        {Color(0xffffffff), Color(0x7e5d02ff), Color(0x322501ff)}}};
 
   ColorTheme green = {
-     Color(0xffffffff), // text with high contrast
+      Color(0xffffffff), // text with high contrast
       Color(0x8dbd96ff), // text with medium contrast
       Color(0x499556ff), // text with low contrast
       Color(0x1b7a2cff), // background of body
@@ -118,19 +118,18 @@ int main() {
   Explorer explorer[explorers];
 
   for (int i = 0; i < explorers; i++) {
-    explorer[i] =
-        createExplorer(getDefaultPath(), font, charSize,
-                       i * WINDOW_W / explorers, 0, WINDOW_W / explorers,
-                       WINDOW_H - btnHeight, theme);
+    explorer[i] = createExplorer(
+        getDefaultPath(), font, charSize, i * WINDOW_W / explorers, 0,
+        WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
   }
 
   // useful for determining double clicks
-  Clock clock;           // a timer that is set between two clicks
+  Clock clock; // a timer that is set between two clicks
   Input *activeInput = nullptr;
   Explorer *activeExplorer =
       nullptr; // current active explorer will be the first one by default
   RectangleShape cursor; // cursor to display on inputs
-  Vector2i oldClick; // required for dragging the scrollbar
+  Vector2i oldClick;     // required for dragging the scrollbar
 
   while (window.isOpen()) {
     Event event;
@@ -295,80 +294,78 @@ int main() {
         for (int i = 0; i < buttons; i++) {
           updateButtonState(button[i], event, CLICK, oldClick);
 
-          if (button[i].state == B_CLICKED && activeExplorer &&
-              activeExplorer->activeFile[0]) {
+          if (button[i].state == B_CLICKED && activeExplorer) {
+            if (i == MKDIR) {
+              newName = createPopUp(400, 150, GET_FILENAME, TITLE,
+                                    "Folder name: ", "OK", "Folder name", "",
+                                    font, charSize, theme);
 
-            currentEntryName = activeExplorer->activeFile[0]->data.filename;
-            currentEntryExt = activeExplorer->activeFile[0]->data.ext;
+              if (!newName.empty()) {
+                createFolder(activeExplorer->path, newName);
+              }
 
-            if (currentEntryExt.empty()) {
+              refreshExplorer((*activeExplorer), font, theme);
+            } else if (activeExplorer->activeFile[0] &&
+                       activeExplorer->activeFile[0]
+                           ->data.data.filename.compare("..")) {
+              currentEntryName =
+                  activeExplorer->activeFile[0]->data.data.filename;
+              currentEntryExt = activeExplorer->activeFile[0]->data.data.ext;
               currentEntry = currentEntryName;
-            } else
-              currentEntry = currentEntryName + "." + currentEntryExt;
 
-            switch (i) {
-            case OPEN_ENTRY:
-              openEntry(activeExplorer->path, currentEntryName,
-                        currentEntryExt);
-              // add explorer refresh
-              break;
-
-            case MKDIR:
-              newName =
-                  createPopUp(400, 150, GET_FILENAME, TITLE, "New name:", "OK",
-                              "insert text here", "", font, charSize, theme);
-
-              if (!newName.empty()) {
-                createFolder(activeExplorer->path, newName);
-              }
-              break;
-
-            case COPY_ENTRY:
-              newPath =
-                  createPopUp(400, 150, GET_PATH, TITLE, "Copy to:", "OK",
-                              "insert text here", "", font, charSize, theme);
-
-              if (!newPath.empty()) {
-                copyEntry(activeExplorer->path + SEP + currentEntry, newPath);
-              }
-              break;
-
-            case DELETE_ENTRY:
-              deleteEntry(activeExplorer->path + currentEntry);
-              break;
-
-            case MOVE_ENTRY:
-              newPath =
-                  createPopUp(400, 150, GET_PATH, TITLE, "Copy to:", "OK",
-                              "insert text here", "", font, charSize, theme);
-
-              if (!newPath.empty()) {
-                moveEntry(activeExplorer->path + SEP + currentEntry, newPath);
-              }
-              break;
-
-            case RENAME_ENTRY:
-              newName =
-                  createPopUp(400, 150, GET_FILENAME, TITLE, "New name:", "OK",
-                              "insert text here", "", font, charSize, theme);
-
-              if (!newName.empty()) {
-                editEntryName(activeExplorer->path + SEP + currentEntry,
-                              newName);
+              if (!currentEntryExt.empty()) {
+                currentEntry += "." + currentEntryExt;
               }
 
-              break;
-            }
-          } else if (activeExplorer) {
+              switch (i) {
+              case OPEN_ENTRY:
+                openEntry(activeExplorer->path, currentEntryName,
+                          currentEntryExt);
 
-            if (i == MKDIR && button[i].state == B_CLICKED) {
-              newName =
-                  createPopUp(400, 150, GET_FILENAME, TITLE, "New name:", "OK",
-                              "insert text here", "", font, charSize, theme);
+                break;
+              case COPY_ENTRY:
+                newPath =
+                    createPopUp(400, 150, GET_PATH, TITLE,
+                                "Copy " + currentEntryName + " to:", "OK",
+                                "Destination path", /*activeExplorer->path*/ "",
+                                font, charSize, theme);
 
-              if (!newName.empty()) {
-                createFolder(activeExplorer->path, newName);
+                if (!newPath.empty()) {
+                  copyEntry(activeExplorer->path + SEP + currentEntry, newPath);
+                }
+
+                break;
+              case DELETE_ENTRY:
+                deleteEntry(activeExplorer->path + SEP + currentEntry);
+
+                break;
+              case MOVE_ENTRY:
+                newPath =
+                    createPopUp(400, 150, GET_PATH, TITLE,
+                                "Move " + currentEntryName + " to:", "OK",
+                                "Destination path", /*activeExplorer->path*/ "",
+                                font, charSize, theme);
+
+                if (!newPath.empty()) {
+                  moveEntry(activeExplorer->path + SEP + currentEntry, newPath);
+                }
+
+                break;
+              case RENAME_ENTRY:
+                newName = createPopUp(
+                    400, 150, GET_FILENAME, TITLE,
+                    "Rename " + currentEntryName + " to: ", "OK", "New name",
+                    currentEntryName, font, charSize, theme);
+
+                if (!newName.empty()) {
+                  editEntryName(activeExplorer->path + SEP + currentEntry,
+                                newName);
+                }
+
+                break;
               }
+
+              refreshExplorer((*activeExplorer), font, theme);
             }
           }
         }

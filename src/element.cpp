@@ -274,7 +274,6 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
   input.state = I_INACTIVE;        // set the state of the input
   input.placeholder = placeholder; // text to show if value is empty
   input.value = value;             // text that the user types
-  input.cursorLocation = 0;
   // copy the state colors
   for (int i = 0; i < I_MAX_STATES; i++) {
     input.stateColors[i] = stateColors[i];
@@ -295,6 +294,7 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
   // display only a segment of the text so it fits in the text box
   input.startPosition = 0;
   input.displayLength = input.value.size();
+  input.cursorLocation = input.displayLength;
 
   input.displayText.setString(displayText);
 
@@ -377,7 +377,7 @@ void drawInput(RenderWindow &window, Input &input) {
         input.value.substr(input.startPosition, input.displayLength));
   }
 
-  // shrinkInput(input);
+  shrinkInput(input);
 
   window.draw(input.displayText);
 }
