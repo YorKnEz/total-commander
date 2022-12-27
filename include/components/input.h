@@ -27,9 +27,16 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
 void updateInputState(Input &input, Event event, MouseEventType type,
                       Input *&activeInput);
 
+void insertChar(Input *activeInput, char c);
+
+void eraseChar(Input *activeInput);
+
 void shrinkInput(Input &input);
 
 void drawInput(RenderWindow &window, Input &input);
+
+void moveCursor(Input *activeInput, int direction);
+
 void drawCursor(RenderWindow &window, Input *activeInput);
 
 #endif

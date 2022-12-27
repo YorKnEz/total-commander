@@ -67,6 +67,73 @@ void updateInputState(Input &input, Event event, MouseEventType type,
   }
 }
 
+void insertChar(Input *activeInput, char c) {
+  activeInput->value.insert(
+      activeInput->startPosition + activeInput->cursorLocation, 1, c);
+
+  // expand the displayed text if there is space
+  if (activeInput->displayText.getGlobalBounds().width <
+      activeInput->background.getGlobalBounds().width -
+          2 * activeInput->displayText.getCharacterSize()) {
+    activeInput->displayLength++;  // increse number of chars shown
+    activeInput->cursorLocation++; // advance cursor
+  }
+  // move the cursor after the added character
+  else {
+    moveCursor(activeInput, 1);
+  }
+
+  activeInput->displayText.setString(
+      activeInput->value.substr(activeInput->startPosition,
+                                activeInput->displayLength)); // update string
+}
+
+void eraseChar(Input *activeInput) {
+  // delete the character before the cursor position
+  if (activeInput->startPosition + activeInput->cursorLocation > 0) {
+    activeInput->value.erase(
+        activeInput->startPosition + activeInput->cursorLocation - 1, 1);
+
+    // first case: text is smaller than the input or equal
+    if (activeInput->displayLength == activeInput->value.size() + 1) {
+      // a: the cursor is not at the beginning of the text
+      if (activeInput->cursorLocation > 0) {
+        activeInput->displayLength--; // shrink displayed text
+        activeInput->cursorLocation--;
+      }
+    }
+    // second case: text is larger than the input
+    else {
+      // a: there is no text to the right of the displayed text
+      //    so try to expand the text from the left
+      //
+      //    being at this case implies that startPosition > 0
+      if (activeInput->startPosition + activeInput->displayLength ==
+          activeInput->value.size() + 1) {
+        activeInput->startPosition--;
+      }
+      // b: there is text to the right of the displayed text
+      //    so try to expand the input from the right
+      else {
+        // move cursor to the left if possible
+        if (activeInput->cursorLocation > 0) {
+          activeInput->cursorLocation--;
+        }
+        // move start position to the left if cursor can't be moved
+        else {
+          activeInput->startPosition--;
+        }
+      }
+    }
+  }
+
+  string newValue = activeInput->value.substr(activeInput->startPosition,
+                                              activeInput->displayLength);
+
+  activeInput->displayText.setString(
+      newValue == "" ? activeInput->placeholder : newValue); // update string
+}
+
 // shrink the text to avoid overflow
 void shrinkInput(Input &input) {
   while (input.displayText.getGlobalBounds().width >
@@ -97,6 +164,28 @@ void drawInput(RenderWindow &window, Input &input) {
   // draw the input on the window
   window.draw(input.background);
   window.draw(input.displayText);
+}
+
+void moveCursor(Input *activeInput, int direction) {
+  // update the cursor's location only if it doesn't get out of the input's
+  // bounds
+  int newCursorLocation = activeInput->cursorLocation + direction;
+  int newStartPosition = activeInput->startPosition + direction;
+
+  if (0 <= newCursorLocation &&
+      newCursorLocation <= activeInput->displayLength) {
+    activeInput->cursorLocation = newCursorLocation;
+  }
+  // move the start position if cursor location can't be updated
+  else if (0 <= newStartPosition &&
+           newStartPosition + activeInput->displayLength <=
+               activeInput->value.size()) {
+    activeInput->startPosition = newStartPosition;
+  }
+
+  activeInput->displayText.setString(
+      activeInput->value.substr(activeInput->startPosition,
+                                activeInput->displayLength)); // update string
 }
 
 void drawCursor(RenderWindow &window, Input *activeInput) {
