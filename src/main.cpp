@@ -177,13 +177,13 @@ int main() {
         }
         break;
       case Event::TextEntered:
-          if (activeInput) {
+        if (activeInput) {
           char enteredChar = event.text.unicode;
 
           // backspace
           if (enteredChar == 8) {
             eraseChar(activeInput);
-                  }
+          }
           // enter
           else if (enteredChar == 13) {
             activeExplorer->path = activeInput->value;
@@ -194,7 +194,7 @@ int main() {
             openFolder(activeExplorer->path, filename);
 
             refreshExplorer(*activeExplorer, font, theme);
-            }
+          }
           // normal characters
           else if (31 < enteredChar && enteredChar < 128) {
             insertChar(activeInput, enteredChar);
@@ -228,15 +228,13 @@ int main() {
 
           if (button[i].state == B_CLICKED && activeExplorer) {
             if (i == MKDIR) {
-              newName = createPopUp(400, 150, GET_FILENAME, TITLE,
+              newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_FILENAME, TITLE,
                                     "Folder name: ", "OK", "Folder name", "",
                                     font, charSize, theme);
 
               if (!newName.empty()) {
                 createFolder(activeExplorer->path, newName);
               }
-
-              refreshExplorer((*activeExplorer), font, theme);
             } else if (activeExplorer->activeFile[0] &&
                        activeExplorer->activeFile[0]
                            ->data.data.filename.compare("..")) {
@@ -257,7 +255,7 @@ int main() {
                 break;
               case COPY_ENTRY:
                 newPath =
-                    createPopUp(400, 150, GET_PATH, TITLE,
+                    createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH, TITLE,
                                 "Copy " + currentEntryName + " to:", "OK",
                                 "Destination path", /*activeExplorer->path*/ "",
                                 font, charSize, theme);
@@ -273,7 +271,7 @@ int main() {
                 break;
               case MOVE_ENTRY:
                 newPath =
-                    createPopUp(400, 150, GET_PATH, TITLE,
+                    createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH, TITLE,
                                 "Move " + currentEntryName + " to:", "OK",
                                 "Destination path", /*activeExplorer->path*/ "",
                                 font, charSize, theme);
@@ -285,7 +283,7 @@ int main() {
                 break;
               case RENAME_ENTRY:
                 newName = createPopUp(
-                    400, 150, GET_FILENAME, TITLE,
+                    POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_FILENAME, TITLE,
                     "Rename " + currentEntryName + " to: ", "OK", "New name",
                     currentEntryName, font, charSize, theme);
 
@@ -296,9 +294,9 @@ int main() {
 
                 break;
               }
-
-              refreshExplorer((*activeExplorer), font, theme);
             }
+
+            refreshExplorer(*activeExplorer, font, theme);
           }
         }
 
