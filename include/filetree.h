@@ -2,7 +2,6 @@
 #define FILE_TREE_H
 
 #include "dllist.h"
-#include "element.h"
 #include "utils.h"
 #include <chrono>
 #include <filesystem>
@@ -31,7 +30,7 @@ string getDefaultPath();
 
 void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
                       int y, int width, int height,
-                      FileStateColors stateColors[B_MAX_STATES]);
+                      FileStateColors stateColors[F_MAX_STATES]);
 
 void sortFiletree(list &l, sortBy criteria, sortOrder order);
 

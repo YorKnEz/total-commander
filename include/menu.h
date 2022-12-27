@@ -2,6 +2,10 @@
 #define MENU_H
 
 #include "element.h"
+#include "button.h"
+#include "input.h"
+#include "textbox.h"
+
 #include "filetree.h"
 #include "theme.h"
 #include <string>

@@ -1,8 +1,13 @@
 #ifndef EXPLORER_H
 #define EXPLORER_H
 
-#include "dllist.h"
 #include "element.h"
+#include "button.h"
+#include "input.h"
+#include "scrollbar.h"
+#include "textbox.h"
+
+#include "dllist.h"
 #include "filetree.h"
 #include "theme.h"
 #include <SFML/Graphics.hpp>

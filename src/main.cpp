@@ -1,4 +1,7 @@
+#include "button.h"
 #include "element.h"
+#include "input.h"
+
 #include "explorer.h"
 #include "filetree.h"
 #include "menu.h"

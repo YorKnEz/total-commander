@@ -111,7 +111,7 @@ string getDefaultPath() {
 // generates a list of files containing data about the path's content
 void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
                       int y, int width, int height,
-                      FileStateColors stateColors[B_MAX_STATES]) {
+                      FileStateColors stateColors[F_MAX_STATES]) {
   // lastDir is used in order to separate files from directories in the list.
   // The directories are inserted after the last directory or at the beginning
   // of the list if there are none, and the files are always added at the end.
