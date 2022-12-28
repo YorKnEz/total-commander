@@ -186,14 +186,20 @@ int main() {
           }
           // enter
           else if (enteredChar == 13) {
-            activeExplorer->path = activeInput->value;
-            string filename = activeInput->value.substr(
-                activeInput->value.find_last_of(SEP) + 1);
+            // activeExplorer->path = activeInput->value;
+            // string filename = activeInput->value.substr(
+            //     activeInput->value.find_last_of(SEP) + 1);
 
-            // add an error pop up
-            openFolder(activeExplorer->path, filename);
+            string destinationPath = evalPath(activeInput->value);
+            cout << destinationPath << "\n";
 
+            if (fs::is_directory(destinationPath)) {
+              activeExplorer->path = destinationPath;
             refreshExplorer(*activeExplorer, font, theme);
+            } else
+              createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
+                               "The given path is invalid.", font, charSize,
+                               theme);
           }
           // normal characters
           else if (31 < enteredChar && enteredChar < 128) {
