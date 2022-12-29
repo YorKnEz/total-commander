@@ -254,6 +254,11 @@ node *find(list l, string filename) {
 }
 
 string evalPath(string path) {
+  if (path == "" || (path.back() == ':' && path.size() == 2)) {
+    path.append(SEP);
+    return path;
+  }
+
   if (!isValidPath(path)) {
     return "invalid";
   }
@@ -286,9 +291,14 @@ string evalPath(string path) {
     firstSep = path.find(SEP + dotdot);
   }
 
-  if (path == "" || path.back() == ':') {
+  if (path.substr(path.size() - 1) == SEP) {
+    path.erase(path.size() - 1);
+  }
+
+  if (path == "" || (path.back() == ':' && path.size() == 2)) {
     path.append(SEP);
   }
+
   return path;
 }
 
