@@ -41,7 +41,7 @@ struct Explorer {
 Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme);
 
-void refreshExplorer(Explorer &explorer, Font &font, ColorTheme theme);
+void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font, ColorTheme theme);
 
 void updateFilesY(list &files, int y);
 
@@ -61,5 +61,7 @@ void scrollFiles(Explorer *activeExplorer, Direction d);
 void drawFiles(RenderWindow &window, Explorer explorer);
 
 void drawExplorer(RenderWindow &window, Explorer explorer);
+
+void closeExplorer(Explorer &explorer);
 
 #endif

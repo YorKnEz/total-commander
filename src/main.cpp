@@ -139,6 +139,10 @@ int main() {
     while (window.pollEvent(event)) {
       switch (event.type) {
       case Event::Closed:
+        for (int i = 0; i < explorers; i++) {
+          closeExplorer(explorer[i]);
+        }
+
         window.close();
         break;
       case Event::MouseWheelScrolled:
@@ -194,7 +198,7 @@ int main() {
 
             if (fs::is_directory(destinationPath)) {
               activeExplorer->path = destinationPath;
-            refreshExplorer(*activeExplorer, font, theme);
+            refreshExplorer(*activeExplorer, activeExplorer, font, theme);
             } else
               createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
                                "The given path is invalid.", font, charSize,
@@ -231,77 +235,162 @@ int main() {
         for (int i = 0; i < buttons; i++) {
           updateButtonState(button[i], event, CLICK, oldClick);
 
+          string newPath = "";
+          string newName, currentEntryName, currentEntryExt, currentEntry;
+
           if (button[i].state == B_CLICKED && activeExplorer) {
-            if (i == MKDIR) {
-              newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_FILENAME, TITLE,
-                                    "Folder name: ", "OK", "Folder name", "",
-                                    font, charSize, theme);
+            switch (i) {
+            case MKDIR:
+              newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H,
+                                    GET_FILENAME, TITLE, "Folder name: ", "OK",
+                                    "Folder name", "", font, charSize, theme);
 
               if (!newName.empty()) {
                 createFolder(activeExplorer->path, newName);
               }
-            } else if (activeExplorer->activeFile[0] &&
-                       activeExplorer->activeFile[0]
-                           ->data.data.filename.compare("..")) {
-              currentEntryName =
-                  activeExplorer->activeFile[0]->data.data.filename;
-              currentEntryExt = activeExplorer->activeFile[0]->data.data.ext;
-              currentEntry = currentEntryName;
 
-              if (!currentEntryExt.empty()) {
-                currentEntry += "." + currentEntryExt;
-              }
+              break;
+            case OPEN_ENTRY:
+              if (activeExplorer->activeFile[0]) {
+                currentEntryName =
+                    activeExplorer->activeFile[0]->data.data.filename;
+                currentEntryExt = activeExplorer->activeFile[0]->data.data.ext;
+                currentEntry = currentEntryName;
 
-              switch (i) {
-              case OPEN_ENTRY:
+                // add the extension to the crt entry if it exists
+                if (!currentEntryExt.empty()) {
+                  currentEntry += "." + currentEntryExt;
+                }
+
                 openEntry(activeExplorer->path, currentEntryName,
                           currentEntryExt);
+              }
 
-                break;
-              case COPY_ENTRY:
+              break;
+            case COPY_ENTRY:
+              if (activeExplorer->activeFile[0]) {
                 newPath =
-                    createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH, TITLE,
-                                "Copy " + currentEntryName + " to:", "OK",
-                                "Destination path", /*activeExplorer->path*/ "",
-                                font, charSize, theme);
+                    createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH,
+                                TITLE, "Copy to:", "OK", "Destination path",
+                                activeExplorer->path, font, charSize, theme);
 
                 if (!newPath.empty()) {
-                  copyEntry(activeExplorer->path + SEP + currentEntry, newPath);
+                  node *p = activeExplorer->files.head;
+
+                  while (p) {
+                    if (p->data.state == F_SELECTED && p->data.data.filename.compare("..")) {
+                      currentEntryName = p->data.data.filename;
+                      currentEntryExt = p->data.data.ext;
+                      currentEntry = currentEntryName;
+
+                      // add the extension to the crt entry if it exists
+                      if (!currentEntryExt.empty()) {
+                        currentEntry += "." + currentEntryExt;
+                      }
+
+                      copyEntry(activeExplorer->path + SEP + currentEntry,
+                                newPath);
+                    }
+
+                    p = p->next;
+                  }
                 }
+              }
 
-                break;
-              case DELETE_ENTRY:
-                deleteEntry(activeExplorer->path + SEP + currentEntry);
+              break;
+            case DELETE_ENTRY:
+              if (activeExplorer->activeFile[0]) {
+                node *p = activeExplorer->files.head;
 
-                break;
-              case MOVE_ENTRY:
+                while (p) {
+                  if (p->data.state == F_SELECTED && p->data.data.filename.compare("..")) {
+                    currentEntryName = p->data.data.filename;
+                    currentEntryExt = p->data.data.ext;
+                    currentEntry = currentEntryName;
+
+                    // add the extension to the crt entry if it exists
+                    if (!currentEntryExt.empty()) {
+                      currentEntry += "." + currentEntryExt;
+                    }
+
+                    deleteEntry(activeExplorer->path + SEP + currentEntry);
+                  }
+
+                  p = p->next;
+                }
+              }
+
+              break;
+            case MOVE_ENTRY:
+              if (activeExplorer->activeFile[0]) {
                 newPath =
-                    createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH, TITLE,
-                                "Move " + currentEntryName + " to:", "OK",
-                                "Destination path", /*activeExplorer->path*/ "",
-                                font, charSize, theme);
+                    createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH,
+                                TITLE, "Move to:", "OK", "Destination path",
+                                activeExplorer->path, font, charSize, theme);
 
                 if (!newPath.empty()) {
-                  moveEntry(activeExplorer->path + SEP + currentEntry, newPath);
-                }
+                  node *p = activeExplorer->files.head;
 
-                break;
-              case RENAME_ENTRY:
-                newName = createPopUp(
-                    POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_FILENAME, TITLE,
-                    "Rename " + currentEntryName + " to: ", "OK", "New name",
-                    currentEntryName, font, charSize, theme);
+                  while (p) {
+                    if (p->data.state == F_SELECTED && p->data.data.filename.compare("..")) {
+                      currentEntryName = p->data.data.filename;
+                      currentEntryExt = p->data.data.ext;
+                      currentEntry = currentEntryName;
+
+                      // add the extension to the crt entry if it exists
+                      if (!currentEntryExt.empty()) {
+                        currentEntry += "." + currentEntryExt;
+                      }
+
+                      moveEntry(activeExplorer->path + SEP + currentEntry,
+                                newPath);
+                    }
+
+                    p = p->next;
+                  }
+                }
+              }
+
+              break;
+            case RENAME_ENTRY:
+              if (activeExplorer->activeFile[0]) {
+
+                newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H,
+                                      GET_FILENAME, TITLE, "Rename to: ", "OK",
+                                      "New name", "", font, charSize, theme);
 
                 if (!newName.empty()) {
-                  editEntryName(activeExplorer->path + SEP + currentEntry,
-                                newName);
-                }
+                  node *p = activeExplorer->files.head;
 
-                break;
+                  while (p) {
+                    if (p->data.state == F_SELECTED && p->data.data.filename.compare("..")) {
+                      currentEntryName = p->data.data.filename;
+                      currentEntryExt = p->data.data.ext;
+                      currentEntry = currentEntryName;
+
+                      // add the extension to the crt entry if it exists
+                      if (!currentEntryExt.empty()) {
+                        currentEntry += "." + currentEntryExt;
+                      }
+
+                      editEntryName(activeExplorer->path + SEP + currentEntry,
+                                    newName);
+                    }
+
+                    p = p->next;
+                  }
+                }
               }
+
+              break;
             }
 
-            refreshExplorer(*activeExplorer, font, theme);
+            for (int i = 0; i < explorers; i++) {
+              if (explorer[i].path == activeExplorer->path ||
+                  explorer[i].path == newPath) {
+                refreshExplorer(explorer[i], activeExplorer, font, theme);
+              }
+            }
           }
         }
 
