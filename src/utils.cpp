@@ -20,6 +20,23 @@ int str2int(string stringNumber) {
 }
 
 // converts an integer to string
+string uint2str(uintmax_t a) {
+  if (a == -1) {
+    return "<DIR>";
+  } else if (a == 0) {
+    return "0";
+  }
+
+  string stringNumber;
+
+  while (a) {
+    stringNumber.insert(stringNumber.begin(), char(a % 10 + '0'));
+    a /= 10;
+  }
+
+  return stringNumber;
+}
+
 string int2str(int a) {
   if (a == -1) {
     return "<DIR>";

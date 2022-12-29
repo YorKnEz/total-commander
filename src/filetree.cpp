@@ -157,21 +157,24 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // the size accordingly (directory size = "<DIR>", file size is an
       // integer value)
 
-      int intSize, dimIterator, decimalValue;
+      double doubleSize;
+      uintmax_t intSize;
+      int dimIterator, decimalValue;
       string size;
 
       if (is_regular_file(entry.path())) {
-        intSize = file_size(entry.path());
+        doubleSize = file_size(entry.path());
+        intSize = 0;
         dimIterator = 0;
         decimalValue = 0;
 
-        while (intSize > 999) {
+        while (doubleSize > 999) {
+          doubleSize /= 1024;
+          intSize = (unsigned long long)(doubleSize * 10);
           dimIterator++;
-          decimalValue = (intSize / 100) % 10;
-          intSize /= 1000;
         }
 
-        size = int2str(intSize);
+        size = uint2str(intSize / 10);
         string dimLetter = "";
 
         if (dim[dimIterator] != ' ') {
@@ -179,7 +182,7 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
         }
 
         if (size != "<DIR>") {
-          size += "." + int2str(decimalValue) + " " + dimLetter + "B";
+          size += "." + int2str(intSize % 10) + " " + dimLetter + "B";
         }
       } else
         size = "<DIR>";
