@@ -60,6 +60,12 @@ string formatDate(string date) {
   string months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
+
+  // if day is lower than 10, append a 0
+  if (day[0] == ' ') {
+    day[0] = '0';
+  }
+
   // converts month from word to number
   for (int i = 0; i < 12; i++) {
     if (month.compare(months[i]) == 0) {
@@ -75,10 +81,8 @@ string formatDate(string date) {
 
   if (hourFormat.compare("PM") == 0) {
     int hourInteger = str2int(hour) - 12;
-    if (hourInteger < 10) {
-      hour = "0";
-    }
-    hour = int2str(hourInteger);
+    hour = (hourInteger < 10 ? "0" : "") + int2str(hourInteger);
+
     time.erase(0, 2);
     time = hour + time;
   }

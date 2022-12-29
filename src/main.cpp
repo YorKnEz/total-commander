@@ -1,4 +1,7 @@
+#include "button.h"
 #include "element.h"
+#include "input.h"
+
 #include "explorer.h"
 #include "filetree.h"
 #include "menu.h"
@@ -66,7 +69,7 @@ int main() {
        {Color(0xffffffff), Color(0x7e5d02ff), Color(0x322501ff)}}};
 
   ColorTheme green = {
-     Color(0xffffffff), // text with high contrast
+      Color(0xffffffff), // text with high contrast
       Color(0x8dbd96ff), // text with medium contrast
       Color(0x499556ff), // text with low contrast
       Color(0x1b7a2cff), // background of body
@@ -118,25 +121,28 @@ int main() {
   Explorer explorer[explorers];
 
   for (int i = 0; i < explorers; i++) {
-    explorer[i] =
-        createExplorer(getDefaultPath(), font, charSize,
-                       i * WINDOW_W / explorers, 0, WINDOW_W / explorers,
-                       WINDOW_H - btnHeight, theme);
+    explorer[i] = createExplorer(
+        getDefaultPath(), font, charSize, i * WINDOW_W / explorers, 0,
+        WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
   }
 
   // useful for determining double clicks
-  Clock clock;           // a timer that is set between two clicks
+  Clock clock; // a timer that is set between two clicks
   Input *activeInput = nullptr;
   Explorer *activeExplorer =
       nullptr; // current active explorer will be the first one by default
   RectangleShape cursor; // cursor to display on inputs
-  Vector2i oldClick; // required for dragging the scrollbar
+  Vector2i oldClick;     // required for dragging the scrollbar
 
   while (window.isOpen()) {
     Event event;
     while (window.pollEvent(event)) {
       switch (event.type) {
       case Event::Closed:
+        for (int i = 0; i < explorers; i++) {
+          closeExplorer(explorer[i]);
+        }
+
         window.close();
         break;
       case Event::MouseWheelScrolled:
@@ -163,110 +169,44 @@ int main() {
           }
         }
 
-        // input related keys
         if (activeInput) {
           // move the cursor of the input to the left
           if (event.key.code == Keyboard::Left) {
-            // try moving the cursor first
-            if (activeInput->cursorLocation > 0) {
-              activeInput->cursorLocation--;
-            }
-            // if the cursor is at the start of the input, decrease start pos
-            else if (activeInput->startPosition > 0) {
-              activeInput->startPosition--;
-            }
+            moveCursor(activeInput, -1);
           }
           // move the cursor of the input to the right
           else if (event.key.code == Keyboard::Right) {
-            // try moving the cursor first
-            if (activeInput->cursorLocation < activeInput->displayLength) {
-              activeInput->cursorLocation++;
-            }
-            // if the cursor is at the end of the input, increase start pos
-            else if (activeInput->startPosition + activeInput->displayLength <
-                     activeInput->value.size()) {
-              activeInput->startPosition++;
-            }
+            moveCursor(activeInput, 1);
           }
         }
         break;
       case Event::TextEntered:
-        if (event.text.unicode < 128) {
-          if (activeInput) {
-            // check if key pressed is backspace
-            if (event.text.unicode == 8) {
-              // delete the character before the cursor position
-              if (activeInput->startPosition + activeInput->cursorLocation >
-                  0) {
-                activeInput->value.erase(activeInput->startPosition +
-                                             activeInput->cursorLocation - 1,
-                                         1);
+        if (activeInput) {
+          char enteredChar = event.text.unicode;
 
-                // first case: text is smaller than the input or equal
-                if (activeInput->displayLength ==
-                    activeInput->value.size() + 1) {
-                  // a: the cursor is not at the beginning of the text
-                  if (activeInput->cursorLocation > 0) {
-                    activeInput->displayLength--; // shrink displayed text
-                    activeInput->cursorLocation--;
-                  }
-                }
-                // second case: text is larger than the input
-                else {
-                  // a: there is no text to the right of the displayed text
-                  //    so try to expand the text from the left
-                  //
-                  //    being at this case implies that startPosition > 0
-                  if (activeInput->startPosition + activeInput->displayLength ==
-                      activeInput->value.size() + 1) {
-                    activeInput->startPosition--;
-                  }
-                  // b: there is text to the right of the displayed text
-                  //    so try to expand the input from the right
-                  else {
-                    // move cursor to the left if possible
-                    if (activeInput->cursorLocation > 0) {
-                      activeInput->cursorLocation--;
-                    }
-                    // move start position to the left if cursor can't be moved
-                    else {
-                      activeInput->startPosition--;
-                    }
-                  }
-                }
-              }
-              // else add the character entered at the cursor position
-            } else {
-              activeInput->value.insert(activeInput->startPosition +
-                                            activeInput->cursorLocation,
-                                        1, char(event.text.unicode));
+          // backspace
+          if (enteredChar == 8) {
+            eraseChar(activeInput);
+          }
+          // enter
+          else if (enteredChar == 13) {
+            // activeExplorer->path = activeInput->value;
+            // string filename = activeInput->value.substr(
+            //     activeInput->value.find_last_of(SEP) + 1);
 
-              // try to expand the displayed text if there is space in the
-              // input
-              if (activeInput->displayText.getGlobalBounds().width <
-                  activeInput->background.getGlobalBounds().width - charSize) {
-                activeInput->displayLength++;  // increse number of chars shown
-                activeInput->cursorLocation++; // advance cursor
+            string destinationPath = evalPath(activeInput->value);
 
-                activeInput->displayText.setString(activeInput->value.substr(
-                    activeInput->startPosition,
-                    activeInput->displayLength)); // update string
-              }
-              // if we can't expand the text, then we have to move it
-              else {
-                // if the cursor is at the end we need to advance the start
-                // position
-                if (activeInput->cursorLocation == activeInput->displayLength) {
-                  activeInput->startPosition++;
-                }
-                // else advance only the cursor
-                else {
-                  activeInput->cursorLocation++;
-                }
-              }
-
-              shrinkInput(*activeInput);
-            }
+            if (fs::is_directory(destinationPath)) {
+              activeExplorer->path = destinationPath;
+            refreshExplorer(*activeExplorer, activeExplorer, font, theme);
+            } else
+              createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
+                               "The given path is invalid.", font, charSize,
+                               theme);
+          }
+          // normal characters
+          else if (31 < enteredChar && enteredChar < 128) {
+            insertChar(activeInput, enteredChar);
           }
         }
         break;
@@ -295,79 +235,160 @@ int main() {
         for (int i = 0; i < buttons; i++) {
           updateButtonState(button[i], event, CLICK, oldClick);
 
-          if (button[i].state == B_CLICKED && activeExplorer &&
-              activeExplorer->activeFile[0]) {
+          string newPath = "";
+          string newName, currentEntryName, currentEntryExt, currentEntry;
 
-            currentEntryName = activeExplorer->activeFile[0]->data.filename;
-            currentEntryExt = activeExplorer->activeFile[0]->data.ext;
-
-            if (currentEntryExt.empty()) {
-              currentEntry = currentEntryName;
-            } else
-              currentEntry = currentEntryName + "." + currentEntryExt;
-
+          if (button[i].state == B_CLICKED && activeExplorer) {
             switch (i) {
-            case OPEN_ENTRY:
-              openEntry(activeExplorer->path, currentEntryName,
-                        currentEntryExt);
-              // add explorer refresh
-              break;
-
             case MKDIR:
-              newName =
-                  createPopUp(400, 150, GET_FILENAME, TITLE, "New name:", "OK",
-                              "insert text here", "", font, charSize, theme);
+              newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H,
+                                    GET_FILENAME, TITLE, "Folder name: ", "OK",
+                                    "Folder name", "", font, charSize, theme);
 
               if (!newName.empty()) {
                 createFolder(activeExplorer->path, newName);
               }
-              break;
 
+              break;
+            case OPEN_ENTRY:
+              if (activeExplorer->activeFile[0]) {
+                currentEntryName =
+                    activeExplorer->activeFile[0]->data.data.filename;
+                currentEntryExt = activeExplorer->activeFile[0]->data.data.ext;
+                currentEntry = currentEntryName;
+
+                // add the extension to the crt entry if it exists
+                if (!currentEntryExt.empty()) {
+                  currentEntry += "." + currentEntryExt;
+                }
+
+                openEntry(activeExplorer->path, currentEntryName,
+                          currentEntryExt);
+              }
+
+              break;
             case COPY_ENTRY:
-              newPath =
-                  createPopUp(400, 150, GET_PATH, TITLE, "Copy to:", "OK",
-                              "insert text here", "", font, charSize, theme);
+              if (activeExplorer->activeFile[0]) {
+                newPath =
+                    createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH,
+                                TITLE, "Copy to:", "OK", "Destination path",
+                                activeExplorer->path, font, charSize, theme);
 
-              if (!newPath.empty()) {
-                copyEntry(activeExplorer->path + SEP + currentEntry, newPath);
+                if (!newPath.empty()) {
+                  node *p = activeExplorer->files.head;
+
+                  while (p) {
+                    if (p->data.state == F_SELECTED && p->data.data.filename.compare("..")) {
+                      currentEntryName = p->data.data.filename;
+                      currentEntryExt = p->data.data.ext;
+                      currentEntry = currentEntryName;
+
+                      // add the extension to the crt entry if it exists
+                      if (!currentEntryExt.empty()) {
+                        currentEntry += "." + currentEntryExt;
+                      }
+
+                      copyEntry(activeExplorer->path + SEP + currentEntry,
+                                newPath);
+                    }
+
+                    p = p->next;
+                  }
+                }
               }
-              break;
 
+              break;
             case DELETE_ENTRY:
-              deleteEntry(activeExplorer->path + currentEntry);
-              break;
+              if (activeExplorer->activeFile[0]) {
+                node *p = activeExplorer->files.head;
 
-            case MOVE_ENTRY:
-              newPath =
-                  createPopUp(400, 150, GET_PATH, TITLE, "Copy to:", "OK",
-                              "insert text here", "", font, charSize, theme);
+                while (p) {
+                  if (p->data.state == F_SELECTED && p->data.data.filename.compare("..")) {
+                    currentEntryName = p->data.data.filename;
+                    currentEntryExt = p->data.data.ext;
+                    currentEntry = currentEntryName;
 
-              if (!newPath.empty()) {
-                moveEntry(activeExplorer->path + SEP + currentEntry, newPath);
+                    // add the extension to the crt entry if it exists
+                    if (!currentEntryExt.empty()) {
+                      currentEntry += "." + currentEntryExt;
+                    }
+
+                    deleteEntry(activeExplorer->path + SEP + currentEntry);
+                  }
+
+                  p = p->next;
+                }
               }
+
               break;
+            case MOVE_ENTRY:
+              if (activeExplorer->activeFile[0]) {
+                newPath =
+                    createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH,
+                                TITLE, "Move to:", "OK", "Destination path",
+                                activeExplorer->path, font, charSize, theme);
 
+                if (!newPath.empty()) {
+                  node *p = activeExplorer->files.head;
+
+                  while (p) {
+                    if (p->data.state == F_SELECTED && p->data.data.filename.compare("..")) {
+                      currentEntryName = p->data.data.filename;
+                      currentEntryExt = p->data.data.ext;
+                      currentEntry = currentEntryName;
+
+                      // add the extension to the crt entry if it exists
+                      if (!currentEntryExt.empty()) {
+                        currentEntry += "." + currentEntryExt;
+                      }
+
+                      moveEntry(activeExplorer->path + SEP + currentEntry,
+                                newPath);
+                    }
+
+                    p = p->next;
+                  }
+                }
+              }
+
+              break;
             case RENAME_ENTRY:
-              newName =
-                  createPopUp(400, 150, GET_FILENAME, TITLE, "New name:", "OK",
-                              "insert text here", "", font, charSize, theme);
+              if (activeExplorer->activeFile[0]) {
 
-              if (!newName.empty()) {
-                editEntryName(activeExplorer->path + SEP + currentEntry,
-                              newName);
+                newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H,
+                                      GET_FILENAME, TITLE, "Rename to: ", "OK",
+                                      "New name", "", font, charSize, theme);
+
+                if (!newName.empty()) {
+                  node *p = activeExplorer->files.head;
+
+                  while (p) {
+                    if (p->data.state == F_SELECTED && p->data.data.filename.compare("..")) {
+                      currentEntryName = p->data.data.filename;
+                      currentEntryExt = p->data.data.ext;
+                      currentEntry = currentEntryName;
+
+                      // add the extension to the crt entry if it exists
+                      if (!currentEntryExt.empty()) {
+                        currentEntry += "." + currentEntryExt;
+                      }
+
+                      editEntryName(activeExplorer->path + SEP + currentEntry,
+                                    newName);
+                    }
+
+                    p = p->next;
+                  }
+                }
               }
 
               break;
             }
-          } else if (activeExplorer) {
 
-            if (i == MKDIR && button[i].state == B_CLICKED) {
-              newName =
-                  createPopUp(400, 150, GET_FILENAME, TITLE, "New name:", "OK",
-                              "insert text here", "", font, charSize, theme);
-
-              if (!newName.empty()) {
-                createFolder(activeExplorer->path, newName);
+            for (int i = 0; i < explorers; i++) {
+              if (explorer[i].path == activeExplorer->path ||
+                  explorer[i].path == newPath) {
+                refreshExplorer(explorer[i], activeExplorer, font, theme);
               }
             }
           }
