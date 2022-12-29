@@ -139,6 +139,10 @@ int main() {
     while (window.pollEvent(event)) {
       switch (event.type) {
       case Event::Closed:
+        for (int i = 0; i < explorers; i++) {
+          closeExplorer(explorer[i]);
+        }
+
         window.close();
         break;
       case Event::MouseWheelScrolled:

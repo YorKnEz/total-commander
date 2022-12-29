@@ -484,3 +484,7 @@ void drawExplorer(RenderWindow &window, Explorer explorer) {
 
   drawScrollbar(window, explorer.scrollbar);
 }
+
+void closeExplorer(Explorer &explorer) {
+  free(explorer.files);
+}

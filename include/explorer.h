@@ -62,4 +62,6 @@ void drawFiles(RenderWindow &window, Explorer explorer);
 
 void drawExplorer(RenderWindow &window, Explorer explorer);
 
+void closeExplorer(Explorer &explorer);
+
 #endif
