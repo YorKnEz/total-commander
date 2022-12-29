@@ -87,7 +87,8 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   return explorer;
 }
 
-void refreshExplorer(Explorer &explorer, Font &font, ColorTheme theme) {
+void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
+                     ColorTheme theme) {
   // use the head of the old list to extract its props
   File file = explorer.files.head->data;
 
@@ -102,10 +103,12 @@ void refreshExplorer(Explorer &explorer, Font &font, ColorTheme theme) {
 
   // reset explorer related props
   explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
-  explorer.textbox[1].fullText.insert(0, "> ");
-  explorer.textbox[1].fullText.append(" <");
-  updateText(explorer.textbox[1].text, explorer.textbox[1].fullText,
-             explorer.textbox[1].background.getGlobalBounds());
+  if (activeExplorer == &explorer) {
+    explorer.textbox[1].fullText.insert(0, "> ");
+    explorer.textbox[1].fullText.append(" <");
+    updateText(explorer.textbox[1].text, explorer.textbox[1].fullText,
+               explorer.textbox[1].background.getGlobalBounds());
+  }
 
   // delete old files list
   free(explorer.files);
@@ -398,7 +401,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
       if (explorer.activeFile[0]->data.data.size == "<DIR>") {
         openFolder(explorer.path, explorer.activeFile[0]->data.data.filename);
 
-        refreshExplorer(explorer, font, theme);
+        refreshExplorer(explorer, activeExplorer, font, theme);
       } else {
         openFile(explorer.path, explorer.activeFile[0]->data.data.filename,
                  explorer.activeFile[0]->data.data.ext);
