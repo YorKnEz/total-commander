@@ -111,7 +111,7 @@ string getDefaultPath() {
 // generates a list of files containing data about the path's content
 void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
                       int y, int width, int height,
-                      FileStateColors stateColors[B_MAX_STATES]) {
+                      FileStateColors stateColors[F_MAX_STATES]) {
   // lastDir is used in order to separate files from directories in the list.
   // The directories are inserted after the last directory or at the beginning
   // of the list if there are none, and the files are always added at the end.
@@ -157,21 +157,24 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // the size accordingly (directory size = "<DIR>", file size is an
       // integer value)
 
-      int intSize, dimIterator, decimalValue;
+      double doubleSize;
+      uintmax_t intSize;
+      int dimIterator, decimalValue;
       string size;
 
       if (is_regular_file(entry.path())) {
-        intSize = file_size(entry.path());
+        doubleSize = file_size(entry.path());
+        intSize = 0;
         dimIterator = 0;
         decimalValue = 0;
 
-        while (intSize > 999) {
+        while (doubleSize > 999) {
+          doubleSize /= 1024;
+          intSize = (unsigned long long)(doubleSize * 10);
           dimIterator++;
-          decimalValue = (intSize / 100) % 10;
-          intSize /= 1000;
         }
 
-        size = int2str(intSize);
+        size = uint2str(intSize / 10);
         string dimLetter = "";
 
         if (dim[dimIterator] != ' ') {
@@ -179,7 +182,7 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
         }
 
         if (size != "<DIR>") {
-          size += "." + int2str(decimalValue) + " " + dimLetter + "B";
+          size += "." + int2str(intSize % 10) + " " + dimLetter + "B";
         }
       } else
         size = "<DIR>";
@@ -254,6 +257,11 @@ node *find(list l, string filename) {
 }
 
 string evalPath(string path) {
+  if (path == "" || (path.back() == ':' && path.size() == 2)) {
+    path.append(SEP);
+    return path;
+  }
+
   if (!isValidPath(path)) {
     return "invalid";
   }
@@ -286,9 +294,14 @@ string evalPath(string path) {
     firstSep = path.find(SEP + dotdot);
   }
 
-  if (path == "" || path.back() == ':') {
+  if (path.substr(path.size() - 1) == SEP) {
+    path.erase(path.size() - 1);
+  }
+
+  if (path == "" || (path.back() == ':' && path.size() == 2)) {
     path.append(SEP);
   }
+
   return path;
 }
 

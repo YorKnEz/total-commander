@@ -98,6 +98,8 @@ void refreshExplorer(Explorer &explorer, Font &font, ColorTheme theme) {
   explorer.input.cursorLocation = explorer.path.size();
   explorer.input.startPosition = 0;
 
+  shrinkInput(explorer.input);
+
   // reset explorer related props
   explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
   explorer.textbox[1].fullText.insert(0, "> ");

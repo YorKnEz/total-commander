@@ -2,10 +2,17 @@
 #define MENU_H
 
 #include "element.h"
+#include "button.h"
+#include "input.h"
+#include "textbox.h"
+
 #include "filetree.h"
 #include "theme.h"
 #include <string>
 #include <SFML/Graphics.hpp>
+
+#define POP_UP_DEFAULT_W 400
+#define POP_UP_DEFAULT_H 140
 
 using namespace sf;
 using namespace std;
