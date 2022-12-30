@@ -354,33 +354,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
 
     if (explorer.button[i].state == B_CLICKED ||
         explorer.button[i].state == B_DCLICKED) {
-      // remove the sort indicator from the last button
-      explorer.button[explorer.sortedBy].fullText.erase(
-          explorer.button[explorer.sortedBy].fullText.size() - 2);
-      updateText(
-          explorer.button[explorer.sortedBy].text,
-          explorer.button[explorer.sortedBy].fullText,
-          explorer.button[explorer.sortedBy].background.getGlobalBounds());
-
-      // update sortedBy and order indicators
-      if (explorer.sortedBy == sortBy(i)) {
-        explorer.order = explorer.order == ASC ? DESC : ASC;
-      } else {
-        explorer.order = ASC;
-      }
-      explorer.sortedBy = sortBy(i);
-
-      // append the sort indicator to the new sort button
-      explorer.button[explorer.sortedBy].fullText.append(
-          explorer.order == ASC ? " /" : " \\");
-      updateText(explorer.button[i].text, explorer.button[i].fullText,
-                 explorer.button[i].background.getGlobalBounds());
-
-      // sort and update the y of the files
-      sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
-      updateFilesY(explorer.files,
-                   explorer.background.getPosition().y + explorer.heightFile +
-                       2 * explorer.heightComp + explorer.scrollOffset);
+      sortFiles(explorer, sortBy(i));
 
       // turn off the button to avoid side effects (such as the event triggering
       // multipel times)
@@ -413,6 +387,35 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
 
   // update the state of the input
   updateInputState(explorer.input, event, type, activeInput);
+}
+
+void sortFiles(Explorer &explorer, sortBy criteria) {
+  // remove the sort indicator from the last button
+  explorer.button[explorer.sortedBy].fullText.erase(
+      explorer.button[explorer.sortedBy].fullText.size() - 2);
+  updateText(explorer.button[explorer.sortedBy].text,
+             explorer.button[explorer.sortedBy].fullText,
+             explorer.button[explorer.sortedBy].background.getGlobalBounds());
+
+  // update sortedBy and order indicators
+  if (explorer.sortedBy == criteria) {
+    explorer.order = explorer.order == ASC ? DESC : ASC;
+  } else {
+    explorer.order = ASC;
+  }
+  explorer.sortedBy = criteria;
+
+  // append the sort indicator to the new sort button
+  explorer.button[explorer.sortedBy].fullText.append(
+      explorer.order == ASC ? " /" : " \\");
+  updateText(explorer.button[criteria].text, explorer.button[criteria].fullText,
+             explorer.button[criteria].background.getGlobalBounds());
+
+  // sort and update the y of the files
+  sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
+  updateFilesY(explorer.files,
+               explorer.background.getPosition().y + explorer.heightFile +
+                   2 * explorer.heightComp + explorer.scrollOffset);
 }
 
 void scrollFiles(Explorer *activeExplorer, Direction d) {
