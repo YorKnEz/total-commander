@@ -173,3 +173,146 @@ void createErrorPopUp(int width, int height, string windowTitle,
     }
   }
 }
+
+void handleMenuButtons(Explorer *explorer, int explorers,
+                       Explorer *activeExplorer, MenuButtons button,
+                       string windowTitle, Font &font, int charSize,
+                       ColorTheme theme) {
+  string newPath = "";
+  string newName, currentEntryName, currentEntryExt, currentEntry;
+
+  switch (button) {
+  case MKDIR:
+    newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_FILENAME,
+                          windowTitle, "Folder name: ", "OK", "Folder name", "",
+                          font, charSize, theme);
+
+    if (!newName.empty()) {
+      createFolder(activeExplorer->path, newName);
+    }
+
+    break;
+  case COPY_ENTRY:
+    if (activeExplorer->activeFile[0]) {
+      newPath = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH,
+                            windowTitle, "Copy to:", "OK", "Destination path",
+                            activeExplorer->path, font, charSize, theme);
+
+      if (!newPath.empty()) {
+        node *p = activeExplorer->files.head;
+
+        while (p) {
+          if (p->data.state == F_SELECTED &&
+              p->data.data.filename.compare("..")) {
+            currentEntryName = p->data.data.filename;
+            currentEntryExt = p->data.data.ext;
+            currentEntry = currentEntryName;
+
+            // add the extension to the crt entry if it exists
+            if (!currentEntryExt.empty()) {
+              currentEntry += "." + currentEntryExt;
+            }
+
+            copyEntry(activeExplorer->path + SEP + currentEntry, newPath);
+          }
+
+          p = p->next;
+        }
+      }
+    }
+
+    break;
+  case DELETE_ENTRY:
+    if (activeExplorer->activeFile[0]) {
+      node *p = activeExplorer->files.head;
+
+      while (p) {
+        if (p->data.state == F_SELECTED &&
+            p->data.data.filename.compare("..")) {
+          currentEntryName = p->data.data.filename;
+          currentEntryExt = p->data.data.ext;
+          currentEntry = currentEntryName;
+
+          // add the extension to the crt entry if it exists
+          if (!currentEntryExt.empty()) {
+            currentEntry += "." + currentEntryExt;
+          }
+
+          deleteEntry(activeExplorer->path + SEP + currentEntry);
+        }
+
+        p = p->next;
+      }
+    }
+
+    break;
+  case MOVE_ENTRY:
+    if (activeExplorer->activeFile[0]) {
+      newPath = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH,
+                            windowTitle, "Move to:", "OK", "Destination path",
+                            activeExplorer->path, font, charSize, theme);
+
+      if (!newPath.empty()) {
+        node *p = activeExplorer->files.head;
+
+        while (p) {
+          if (p->data.state == F_SELECTED &&
+              p->data.data.filename.compare("..")) {
+            currentEntryName = p->data.data.filename;
+            currentEntryExt = p->data.data.ext;
+            currentEntry = currentEntryName;
+
+            // add the extension to the crt entry if it exists
+            if (!currentEntryExt.empty()) {
+              currentEntry += "." + currentEntryExt;
+            }
+
+            moveEntry(activeExplorer->path + SEP + currentEntry, newPath);
+          }
+
+          p = p->next;
+        }
+      }
+    }
+
+    break;
+  case RENAME_ENTRY:
+    if (activeExplorer->activeFile[0]) {
+
+      newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_FILENAME,
+                            windowTitle, "Rename to: ", "OK", "New name", "",
+                            font, charSize, theme);
+
+      if (!newName.empty()) {
+        node *p = activeExplorer->files.head;
+
+        while (p) {
+          if (p->data.state == F_SELECTED &&
+              p->data.data.filename.compare("..")) {
+            currentEntryName = p->data.data.filename;
+            currentEntryExt = p->data.data.ext;
+            currentEntry = currentEntryName;
+
+            // add the extension to the crt entry if it exists
+            if (!currentEntryExt.empty()) {
+              currentEntry += "." + currentEntryExt;
+            }
+
+            editEntryName(activeExplorer->path + SEP + currentEntry, newName);
+          }
+
+          p = p->next;
+        }
+      }
+    }
+
+    break;
+  }
+
+  for (int i = 0; i < explorers; i++) {
+    if (explorer[i].path == activeExplorer->path ||
+        explorer[i].path == newPath) {
+      refreshExplorer(explorer[i], activeExplorer, font, theme);
+    }
+  }
+}

@@ -385,12 +385,9 @@ int main() {
               break;
             }
 
-            for (int i = 0; i < explorers; i++) {
-              if (explorer[i].path == activeExplorer->path ||
-                  explorer[i].path == newPath) {
-                refreshExplorer(explorer[i], activeExplorer, font, theme);
-              }
-            }
+          if (button[i].state == B_CLICKED && activeExplorer) {
+            handleMenuButtons(explorer, explorers, activeExplorer,
+                              MenuButtons(i), TITLE, font, charSize, theme);
           }
         }
 

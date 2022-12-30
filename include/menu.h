@@ -28,4 +28,9 @@ void createErrorPopUp(int width, int height, string windowTitle,
                       string errorMessage, Font &font, int charSize,
                       ColorTheme theme);
 
+void handleMenuButtons(Explorer *explorer, int explorers,
+                       Explorer *activeExplorer, MenuButtons button,
+                       string windowTitle, Font &font, int charSize,
+                       ColorTheme theme);
+
 #endif
