@@ -157,21 +157,24 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // the size accordingly (directory size = "<DIR>", file size is an
       // integer value)
 
-      int intSize, dimIterator, decimalValue;
+      double doubleSize;
+      uintmax_t intSize;
+      int dimIterator, decimalValue;
       string size;
 
       if (is_regular_file(entry.path())) {
-        intSize = file_size(entry.path());
+        doubleSize = file_size(entry.path());
+        intSize = 0;
         dimIterator = 0;
         decimalValue = 0;
 
-        while (intSize > 999) {
+        while (doubleSize > 999) {
+          doubleSize /= 1024;
+          intSize = (unsigned long long)(doubleSize * 10);
           dimIterator++;
-          decimalValue = (intSize / 100) % 10;
-          intSize /= 1000;
         }
 
-        size = int2str(intSize);
+        size = uint2str(intSize / 10);
         string dimLetter = "";
 
         if (dim[dimIterator] != ' ') {
@@ -179,7 +182,7 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
         }
 
         if (size != "<DIR>") {
-          size += "." + int2str(decimalValue) + " " + dimLetter + "B";
+          size += "." + int2str(intSize % 10) + " " + dimLetter + "B";
         }
       } else
         size = "<DIR>";
@@ -254,6 +257,11 @@ node *find(list l, string filename) {
 }
 
 string evalPath(string path) {
+  if (path == "" || (path.back() == ':' && path.size() == 2)) {
+    path.append(SEP);
+    return path;
+  }
+
   if (!isValidPath(path)) {
     return "invalid";
   }
@@ -284,8 +292,12 @@ string evalPath(string path) {
     firstSep = path.find(string(SEP) + "..");
   }
 
+  if (path.substr(path.size() - 1) == SEP) {
+    path.erase(path.size() - 1);
+  }
+
   // if the final path is the root add a separator at the end
-  if (path == "" || path.back() == ':') {
+  if (path == "" || (path.back() == ':' && path.size() == 2)) {
     path.append(SEP);
   }
 
@@ -330,6 +342,37 @@ string getCurrentFolder(string path) {
   }
 
   return path;
+}
+
+void openEntry(string &path, string name, string ext) {
+  if (!ext.empty()) {
+    openFile(path, name, ext);
+  } else
+    openFolder(path, name);
+}
+
+void openFile(string path, string name, string ext) {
+  if (!isValidPath(path))
+    return;
+
+  string command;
+  string file = path;
+  string app;
+
+  if (file.back() != SEP[0])
+    file.append(SEP);
+
+  file += name;
+
+  // add extension only if there is one
+  if (ext.size() > 0) {
+    file += "." + ext;
+  }
+
+  command =
+      SEP == "\\" ? "start \"\" \"" + file + "\"" : "xdg-open \"" + file + "\"";
+
+  system(command.c_str());
 }
 
 // goes into the next folder
@@ -380,37 +423,6 @@ void openFolder(string &path, string name) {
 
   // update path to new path
   path = newPath;
-}
-
-void openEntry(string &path, string name, string ext) {
-  if (!ext.empty()) {
-    openFile(path, name, ext);
-  } else
-    openFolder(path, name);
-}
-
-void openFile(string path, string name, string ext) {
-  if (!isValidPath(path))
-    return;
-
-  string command;
-  string file = path;
-  string app;
-
-  if (file.back() != SEP[0])
-    file.append(SEP);
-
-  file += name;
-
-  // add extension only if there is one
-  if (ext.size() > 0) {
-    file += "." + ext;
-  }
-
-  command =
-      SEP == "\\" ? "start \"\" \"" + file + "\"" : "xdg-open \"" + file + "\"";
-
-  system(command.c_str());
 }
 
 // creates a new folder
@@ -471,7 +483,7 @@ void copyFile(string fromPath, string toPath) {
   string doesExist = toPath;
   int counter = 0;
 
-  while (fopen((toPath + extension).c_str(), "rb") != NULL) {
+  while (fs::exists((toPath + extension))) {
     toPath = doesExist + " (" + int2str(++counter) + ")";
   }
 
@@ -596,12 +608,24 @@ void moveEntry(string fromPath, string toPath) {
 }
 // moves a file from a path to another path
 void moveFile(string fromPath, string toPath) {
+  // checks if fromPath is equivalent to toPath (adding a SEP and using evalPath
+  // in case the given string in toPath ends in a separator)
+  if ((fromPath.substr(0, fromPath.find_last_of(SEP) + 1))
+          .compare(evalPath(toPath + SEP)) == 0) {
+    return;
+  }
+
   copyFile(fromPath, toPath);
   deleteFile(fromPath);
 }
 
 // moves a folder from a path to another path
 void moveFolder(string fromPath, string toPath) {
+  // checks if the path where the folder is to be moved is valid
+  if (toPath.find(fromPath) != string::npos) {
+    return;
+  }
+
   copyFolder(fromPath, toPath);
   deleteFolder(fromPath);
 }
@@ -615,6 +639,12 @@ void editEntryName(string path, string newName) {
 }
 // renames a file
 void editFileName(string path, string newName) {
+  // used for checking  if the name after the rename should stay the same as the
+  // old one
+  string oldFilename =
+      path.substr(path.find_last_of(SEP) + 1,
+                  path.find_last_of(".") - path.find_last_of(SEP) - 1);
+
   if (!isValidPath(path) || fs::is_directory(path)) {
     return;
   }
@@ -623,7 +653,7 @@ void editFileName(string path, string newName) {
   string ext = path.substr(path.find_last_of("."));
   string oldName = newName;
   int counter = 0;
-  while (isValidPath(folder + SEP + newName + ext)) {
+  while (isValidPath(folder + SEP + newName + ext) && oldFilename != newName) {
     newName = oldName + " (" + int2str(++counter) + ")";
   }
 
@@ -632,6 +662,10 @@ void editFileName(string path, string newName) {
 
 // renames a folder
 void editFolderName(string path, string newName) {
+  // used for checking if the name after the rename should stay the same as the
+  // old one
+  string oldFoldername = path.substr(path.find_last_of(SEP) + 1);
+
   if (!isValidPath(path) || !fs::is_directory(path)) {
     return;
   }
@@ -639,7 +673,7 @@ void editFolderName(string path, string newName) {
   string folder = path.substr(0, path.find_last_of(SEP) + 1);
   string oldName = newName;
   int counter = 0;
-  while (isValidPath(folder + SEP + newName)) {
+  while (isValidPath(folder + SEP + newName) && oldFoldername != newName) {
     newName = oldName + " (" + int2str(++counter) + ")";
   }
 
