@@ -128,7 +128,9 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
                file.background.getPosition().y - explorer.scrollOffset);
 
   // reset active file pointers
-  explorer.activeFile[0] = explorer.activeFile[1] = nullptr;
+  explorer.activeFile[0] = explorer.files.head;
+  explorer.activeFile[0]->data.state = F_SELECTED;
+  explorer.activeFile[1] = nullptr;
 
   // update scrollbar
   updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
@@ -491,6 +493,4 @@ void drawExplorer(RenderWindow &window, Explorer explorer) {
   drawScrollbar(window, explorer.scrollbar);
 }
 
-void closeExplorer(Explorer &explorer) {
-  free(explorer.files);
-}
+void closeExplorer(Explorer &explorer) { free(explorer.files); }

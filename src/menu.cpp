@@ -10,11 +10,6 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
       Vector2i(VideoMode::getDesktopMode().width / 2 - width / 2,
                VideoMode::getDesktopMode().height / 2 - height / 2));
 
-  Vector2i oldClick;     // the bounds of the last click
-  RectangleShape cursor; // cursor to display on inputs
-  string errorText;
-  Input *activeInput = nullptr;
-
   int compHeight = 30, btnWidth = 120, center = height / 2 - compHeight / 2;
 
   TextBox textbox = createTextBox(
@@ -30,6 +25,12 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
                    center + compHeight + 10, btnWidth, compHeight,
                    theme.buttonStateColors, 1);
 
+  Vector2i oldClick;     // the bounds of the last click
+  RectangleShape cursor; // cursor to display on inputs
+  string errorText, res;
+  Input *activeInput = &input;
+  activeInput->state = I_ACTIVE;
+
   while (window.isOpen()) {
     Event event;
     while (window.pollEvent(event)) {
@@ -38,31 +39,48 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
         window.close();
         return "";
       case Event::KeyPressed:
-        if (activeInput) {
-          // move the cursor of the input to the left
-          if (event.key.code == Keyboard::Left) {
+        switch (event.key.code) {
+        case Keyboard::Enter:
+          // store result in a variable
+          res = checkInput(input.value, type);
+
+          // check for errors
+          if (res != "") {
+            createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, windowTitle,
+                             res, font, charSize, theme);
+          }
+          // return value if no error has been found
+          else {
+            if (type == GET_FILENAME) {
+              return input.value;
+            } else if (type == GET_PATH) {
+              return evalPath(input.value);
+            }
+          }
+          break;
+        case Keyboard::Backspace:
+          if (activeInput) {
+            eraseChar(activeInput);
+          }
+          break;
+        case Keyboard::Left:
+          if (activeInput) {
             moveCursor(activeInput, -1);
           }
-          // move the cursor of the input to the right
-          else if (event.key.code == Keyboard::Right) {
+          break;
+        case Keyboard::Right:
+          if (activeInput) {
             moveCursor(activeInput, 1);
           }
+          break;
         }
         break;
       case Event::TextEntered:
         if (activeInput) {
           char enteredChar = event.text.unicode;
 
-          // backspace
-          if (enteredChar == 8) {
-            eraseChar(activeInput);
-          }
-          // enter
-          else if (enteredChar == 13) {
-            cout << activeInput->value << '\n';
-          }
           // normal characters
-          else if (31 < enteredChar && enteredChar < 128) {
+          if (31 < enteredChar && enteredChar < 128) {
             insertChar(activeInput, enteredChar);
           }
         }
@@ -81,42 +99,25 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
           activeInput->state = I_INACTIVE;
           activeInput = nullptr;
         }
-        // simple click
+
         updateInputState(input, event, CLICK, activeInput);
         updateButtonState(button, event, CLICK, oldClick);
 
         if (button.state == B_CLICKED) {
-          if (input.value == "") {
-            createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
-                             "The input cannot be empty.", font, charSize,
-                             theme);
-          } else if (type == GET_FILENAME) {
-            if (!isValidFilename(input.value) or input.value.size() > 100) {
-              createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
-                               "The input is invalid.", font, charSize, theme);
-            } else {
-              createErrorPopUp(
-                  POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Total Commander",
-                  "The operation was successful.", font, charSize, theme);
-              window.close();
+          // store result in a variable
+          res = checkInput(input.value, type);
+
+          // check for errors
+          if (res != "") {
+            createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, windowTitle,
+                             res, font, charSize, theme);
+          }
+          // return value if no error has been found
+          else {
+            if (type == GET_FILENAME) {
               return input.value;
-            }
-          } else {
-            if (evalPath(input.value) == "invalid") {
-              createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
-                               "The input is invalid.", font, charSize, theme);
-            } else {
-              if (!isValidPath(input.value)) {
-                createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
-                                 "The input is invalid.", font, charSize,
-                                 theme);
-              } else {
-                createErrorPopUp(
-                    POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Total Commander",
-                    "The operation was successful.", font, charSize, theme);
-                window.close();
-                return evalPath(input.value);
-              }
+            } else if (type == GET_PATH) {
+              return evalPath(input.value);
             }
           }
         }
@@ -150,10 +151,6 @@ void createErrorPopUp(int width, int height, string windowTitle,
       Vector2i(VideoMode::getDesktopMode().width / 2 - width / 2,
                VideoMode::getDesktopMode().height / 2 - height / 2));
 
-  FloatRect oldClick;    // the bounds of the last click
-  RectangleShape cursor; // cursor to display on inputs
-  Input *activeInput = nullptr;
-
   TextBox textbox = createTextBox(errorText, font, charSize, 0, 0, width,
                                   height, theme.textMediumContrast,
                                   theme.bgLowContrast, theme.border, 1);
@@ -165,6 +162,11 @@ void createErrorPopUp(int width, int height, string windowTitle,
       case Event::Closed:
         window.close();
         break;
+      case Event::KeyPressed:
+        // if (event.key.code == Keyboard::Enter) {
+        window.close();
+        // }
+        break;
       }
 
       window.clear(theme.bgBody);
@@ -172,6 +174,28 @@ void createErrorPopUp(int width, int height, string windowTitle,
       window.display();
     }
   }
+}
+
+string checkInput(string inputValue, PopUpType type) {
+  if (inputValue == "") {
+    return "The input cannot be empty.";
+  }
+
+  if (type == GET_FILENAME) {
+    if (!isValidFilename(inputValue)) {
+      return "The input is invalid.";
+    }
+
+    if (inputValue.size() > 100) {
+      return "The input is too long.";
+    }
+  } else if (type == GET_PATH) {
+    if (evalPath(inputValue) == "invalid") {
+      return "The path does not exist.";
+    }
+  }
+
+  return "";
 }
 
 void handleMenuButtons(Explorer *explorer, int explorers,

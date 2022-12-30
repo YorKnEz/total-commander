@@ -260,18 +260,16 @@ string evalPath(string path) {
 
   string initialPath = path;
 
-  // checks if the path is of format "F:\\\\\\\\\\test\\\\\\..\\\\\\\.."
-  // (multiple separators)
-  string doubleSeparators = SEP;
-  doubleSeparators.append(SEP);
+  // removes duplicate separators from the string
+  string doubleSeparators = string(SEP) + string(SEP);
   int doubleSep = path.find(doubleSeparators);
+
   while (doubleSep != string::npos) {
     path.erase(doubleSep, 1);
     doubleSep = path.find(doubleSeparators);
   }
-  string dotdot = "..";
-  int pos;
-  int firstSep = path.find(SEP + dotdot);
+
+  int pos, firstSep = path.find(string(SEP) + "..");
 
   // if we find ".." we go backwards in the path, for example "F:\test\.."
   // becomes "F:\"
@@ -283,12 +281,14 @@ string evalPath(string path) {
     }
 
     path.erase(pos, firstSep - pos + 3);
-    firstSep = path.find(SEP + dotdot);
+    firstSep = path.find(string(SEP) + "..");
   }
 
+  // if the final path is the root add a separator at the end
   if (path == "" || path.back() == ':') {
     path.append(SEP);
   }
+
   return path;
 }
 
