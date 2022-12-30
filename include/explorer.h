@@ -56,6 +56,8 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Input *&activeInput, Font &font,
                          ColorTheme theme = {});
 
+void sortFiles(Explorer &explorer, sortBy criteria);
+
 void scrollFiles(Explorer *activeExplorer, Direction d);
 
 void drawFiles(RenderWindow &window, Explorer explorer);
