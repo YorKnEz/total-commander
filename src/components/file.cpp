@@ -22,7 +22,7 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
   // initialize column sizes
   Text date("dd/mm/yyyy hh:mm xx", font, charSize);
 
-  file.dateColumn = date.getGlobalBounds().width + 10;
+  file.dateColumn = date.getGlobalBounds().width + 20;
   file.extColumn = (width - file.dateColumn) / 4;
   file.filenameColumn = (width - file.dateColumn) / 2;
   file.sizeColumn = (width - file.dateColumn) / 4;
@@ -32,15 +32,15 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
       sizeX = extX + file.extColumn, dateX = sizeX + file.sizeColumn;
 
   file.filename = createText(data.filename, font, charSize, nameX, y,
-                             file.filenameColumn - 10,
+                             file.filenameColumn - 20,
                              file.stateColors[file.state].textHighContrast);
-  file.ext = createText(data.ext, font, charSize, extX, y, file.extColumn - 10,
+  file.ext = createText(data.ext, font, charSize, extX, y, file.extColumn - 20,
                         file.stateColors[file.state].textLowContrast);
   file.size =
-      createText(data.size, font, charSize, sizeX, y, file.sizeColumn - 10,
+      createText(data.size, font, charSize, sizeX, y, file.sizeColumn - 20,
                  file.stateColors[file.state].textLowContrast);
   file.date =
-      createText(data.date, font, charSize, dateX, y, file.dateColumn - 10,
+      createText(data.date, font, charSize, dateX, y, file.dateColumn - 20,
                  file.stateColors[file.state].textLowContrast);
 
   return file;
