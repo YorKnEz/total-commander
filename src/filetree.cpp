@@ -92,6 +92,29 @@ bool byDate(node *a, node *b, sortOrder order) {
   return byName(a, b, order);
 }
 
+void searchFile(list &search, string path, string nameToSearch) {
+  path = evalPath(path);
+
+  if (!isValidPath(path) || !fs::is_directory(path)) {
+    return;
+  }
+  try {
+
+    for (const auto &entry : fs::directory_iterator(path)) {
+      string filename = (entry.path().filename()).generic_string();
+
+      if (filename.find(nameToSearch) != string::npos) {
+        // cout << filename << "\n"; (replace with list)
+      }
+
+      if (entry.is_directory()) {
+        searchFile(search, evalPath(path + SEP + filename), nameToSearch);
+      }
+    }
+  } catch (fs::filesystem_error) {
+  }
+}
+
 // returns a string with the default path depending on the OS
 string getDefaultPath() {
   string path;

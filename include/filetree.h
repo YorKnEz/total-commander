@@ -32,6 +32,8 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
                       int y, int width, int height,
                       FileStateColors stateColors[F_MAX_STATES]);
 
+void searchFile(list &search, string path, string nameToSearch);
+
 void sortFiletree(list &l, sortBy criteria, sortOrder order);
 
 node *find(list l, string filename);
