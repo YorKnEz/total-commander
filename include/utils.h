@@ -7,6 +7,8 @@ using namespace std;
 
 int str2int(string numberString);
 
+string compressSize(uintmax_t sizeToCompress);
+
 string uint2str(uintmax_t a);
 string int2str(int a);
 

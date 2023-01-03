@@ -42,6 +42,8 @@ bool isValidFilename(string path);
 
 bool isValidPath(string path);
 
+string getSizeOfDrive(string path);
+
 string getCurrentFolder(string path);
 
 void openEntry(string &path, string name, string ext);

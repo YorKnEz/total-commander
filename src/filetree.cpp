@@ -143,7 +143,7 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // converts filename path to string
       fs::path directoryPath = entry.path().filename();
       string filename = directoryPath.generic_string();
-      string dim = " KMGT";
+      string size;
 
       // gets the date at which the current file was last modified
       const auto fileTime = fs::last_write_time(entry.path());
@@ -157,33 +157,8 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // the size accordingly (directory size = "<DIR>", file size is an
       // integer value)
 
-      double doubleSize;
-      uintmax_t intSize;
-      int dimIterator, decimalValue;
-      string size;
-
       if (is_regular_file(entry.path())) {
-        doubleSize = file_size(entry.path());
-        intSize = 0;
-        dimIterator = 0;
-        decimalValue = 0;
-
-        while (doubleSize > 999) {
-          doubleSize /= 1024;
-          intSize = (unsigned long long)(doubleSize * 10);
-          dimIterator++;
-        }
-
-        size = uint2str(intSize / 10);
-        string dimLetter = "";
-
-        if (dim[dimIterator] != ' ') {
-          dimLetter = dim[dimIterator];
-        }
-
-        if (size != "<DIR>") {
-          size += "." + int2str(intSize % 10) + " " + dimLetter + "B";
-        }
+        size = compressSize(file_size(entry.path()));
       } else
         size = "<DIR>";
 
@@ -325,6 +300,11 @@ bool isValidPath(string path) {
   string folderName = path.erase(0, path.find_last_of(SEP) + 1);
 
   return isValidFilename(folderName);
+}
+
+string getSizeOfDrive(string path) {
+  fs::space_info size = fs::space(path);
+  return compressSize(size.free) + " free of " + compressSize(size.capacity);
 }
 
 string getCurrentFolder(string path) {

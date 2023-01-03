@@ -40,10 +40,10 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
              1; // used for setting the y of the file columns
 
   // set the drive size text box
-  explorer.textbox[0] =
-      createTextBox("Size of drive", font, charSize, x + 1, y + 1, width - 2,
-                    explorer.heightComp - 2, theme.textMediumContrast,
-                    theme.bgLowContrast, theme.border, 1);
+  explorer.textbox[0] = createTextBox(
+      getSizeOfDrive(explorer.path), font, charSize, x + 1, y + 1, width - 2,
+      explorer.heightComp - 2, theme.textMediumContrast, theme.bgLowContrast,
+      theme.border, 1);
 
   // set the input
   explorer.input =
@@ -100,6 +100,11 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
   explorer.input.startPosition = 0;
 
   shrinkInput(explorer.input);
+
+  // reset explorer drive size
+  explorer.textbox[0].fullText = getSizeOfDrive(explorer.path);
+  updateText(explorer.textbox[0].text, explorer.textbox[0].fullText,
+             explorer.textbox[0].background.getGlobalBounds());
 
   // reset explorer related props
   explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
