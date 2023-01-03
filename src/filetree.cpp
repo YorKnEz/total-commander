@@ -518,7 +518,8 @@ void copyFolder(string fromPath, string toPath) {
   }
 
   // checks if the path where the folder is to be copied is valid
-  if (toPath.find(fromPath) != string::npos) {
+  if (toLower(evalPath(toPath)).find(toLower(evalPath(fromPath))) !=
+      string::npos) {
     return;
   }
 
@@ -604,6 +605,10 @@ void deleteFolder(string path) {
 
 // checks which function should be called
 void moveEntry(string fromPath, string toPath) {
+  if ((fromPath.substr(0, fromPath.find_last_of(SEP)))
+          .compare(evalPath(toPath)) == 0) {
+    return;
+  }
   if (fs::is_directory(fromPath)) {
     moveFolder(fromPath, toPath);
   } else
@@ -611,12 +616,8 @@ void moveEntry(string fromPath, string toPath) {
 }
 // moves a file from a path to another path
 void moveFile(string fromPath, string toPath) {
-  // checks if fromPath is equivalent to toPath (adding a SEP and using evalPath
-  // in case the given string in toPath ends in a separator)
-  if ((fromPath.substr(0, fromPath.find_last_of(SEP) + 1))
-          .compare(evalPath(toPath + SEP)) == 0) {
-    return;
-  }
+  // checks if fromPath is equivalent to toPath (adding a SEP and using
+  // evalPath in case the given string in toPath ends in a separator)
 
   copyFile(fromPath, toPath);
   deleteFile(fromPath);
@@ -625,7 +626,8 @@ void moveFile(string fromPath, string toPath) {
 // moves a folder from a path to another path
 void moveFolder(string fromPath, string toPath) {
   // checks if the path where the folder is to be moved is valid
-  if (toPath.find(fromPath) != string::npos) {
+  if (toLower(evalPath(toPath)).find(toLower(evalPath(fromPath))) !=
+      string::npos) {
     return;
   }
 
@@ -642,8 +644,8 @@ void editEntryName(string path, string newName) {
 }
 // renames a file
 void editFileName(string path, string newName) {
-  // used for checking  if the name after the rename should stay the same as the
-  // old one
+  // used for checking  if the name after the rename should stay the same as
+  // the old one
   string oldFilename =
       path.substr(path.find_last_of(SEP) + 1,
                   path.find_last_of(".") - path.find_last_of(SEP) - 1);
@@ -665,8 +667,8 @@ void editFileName(string path, string newName) {
 
 // renames a folder
 void editFolderName(string path, string newName) {
-  // used for checking if the name after the rename should stay the same as the
-  // old one
+  // used for checking if the name after the rename should stay the same as
+  // the old one
   string oldFoldername = path.substr(path.find_last_of(SEP) + 1);
 
   if (!isValidPath(path) || !fs::is_directory(path)) {
