@@ -1,6 +1,7 @@
 #ifndef EXPLORER_H
 #define EXPLORER_H
 
+#include "dllist.h"
 #include "element.h"
 #include "button.h"
 #include "input.h"
@@ -38,29 +39,23 @@ struct Explorer {
   Scrollbar scrollbar;
 };
 
-Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
-                        int width, int height, ColorTheme theme);
-
-void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font, ColorTheme theme);
-
-void updateFilesY(list &files, int y);
-
-void updateFilesState(Explorer &explorer, Event event, MouseEventType type,
-                      Vector2i &oldClick);
-
 void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
                           Vector2i &oldClick);
-
-void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
-                         Explorer *&activeExplorer, Vector2i &oldClick,
-                         Input *&activeInput, Font &font,
-                         ColorTheme theme = {});
 
 void sortFiles(Explorer &explorer, sortBy criteria);
 
 void scrollFiles(Explorer *activeExplorer, Direction d);
 
-void drawFiles(RenderWindow &window, Explorer explorer);
+Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
+                        int width, int height, ColorTheme theme);
+
+void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
+                     ColorTheme theme);
+
+void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
+                         Explorer *&activeExplorer, Vector2i &oldClick,
+                         Input *&activeInput, Font &font,
+                         ColorTheme theme = {});
 
 void drawExplorer(RenderWindow &window, Explorer explorer);
 
