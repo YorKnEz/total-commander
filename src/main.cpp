@@ -337,7 +337,8 @@ int main() {
           }
         case Keyboard::F6:
           // menu buttons shortcuts
-          if (activeExplorer) {
+          // they get triggered only when in normal view
+          if (activeExplorer && !activeExplorer->forestView) {
             handleMenuButtons(explorer, explorers, activeExplorer,
                               MenuButtons(event.key.code - Keyboard::F2), TITLE,
                               font, charSize, theme);
@@ -381,7 +382,7 @@ int main() {
         for (int i = 0; i < buttons; i++) {
           updateButtonState(button[i], event, CLICK, oldClick);
 
-          if (button[i].state == B_CLICKED && activeExplorer) {
+          if (button[i].state == B_CLICKED && activeExplorer && !activeExplorer->forestView) {
             handleMenuButtons(explorer, explorers, activeExplorer,
                               MenuButtons(i), TITLE, font, charSize, theme);
           }

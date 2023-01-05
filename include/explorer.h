@@ -1,14 +1,14 @@
 #ifndef EXPLORER_H
 #define EXPLORER_H
 
+#include "button.h"
 #include "dllist.h"
 #include "element.h"
-#include "button.h"
+#include "forest.h"
 #include "input.h"
 #include "scrollbar.h"
 #include "textbox.h"
 
-#include "dllist.h"
 #include "filetree.h"
 #include "theme.h"
 #include <SFML/Graphics.hpp>
@@ -24,15 +24,22 @@ enum Direction { UP = 50, DOWN = -50 };
 
 struct Explorer {
   string path;
+
   list files;
   sortBy sortedBy = FILE_NAME;
   sortOrder order = ASC;
   node *activeFile[2] = {nullptr, nullptr};
+
+  bool forestView; // true when fileForest should be displayed
+  Forest fileForest;
+  string activeForestPath;
+  Forest *activeForest = nullptr;
+
   int scrollOffset;
   int heightFile; // height of the files on the screen
   int heightComp; // height of the other components
   RectangleShape background;
-  Button button[4];
+  Button button[5]; // 1-4: sorting, 5: toggle forestView
   Input input;
   TextBox textbox[2];
   ExplorerState state;
