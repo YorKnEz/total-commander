@@ -190,6 +190,30 @@ int main() {
             }
           }
           break;
+        case Keyboard::D:
+          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+            Node<File> *p = activeExplorer->files.head; // file list iterator
+
+            while (p) {
+              p->data.state = F_INACTIVE;
+
+              p = p->next;
+            }
+          }
+          break;
+        case Keyboard::I:
+          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+            Node<File> *p =
+                activeExplorer->files.head->next; // file list iterator
+
+            while (p) {
+              p->data.state =
+                  (p->data.state == F_SELECTED) ? F_INACTIVE : F_SELECTED;
+
+              p = p->next;
+            }
+          }
+          break;
         case Keyboard::R:
           // refresh current explorer
           if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
@@ -288,6 +312,31 @@ int main() {
         case Keyboard::Right:
           if (activeInput) {
             moveCursor(activeInput, 1);
+          }
+          break;
+        case Keyboard::Delete:
+          if (activeExplorer && activeExplorer->activeFile[0]) {
+            handleMenuButtons(explorer, explorers, activeExplorer, DELETE_ENTRY,
+                              TITLE, font, charSize, theme);
+          }
+
+          break;
+        case Keyboard::Tab:
+          if (activeExplorer) {
+            int increment = kbd.isKeyPressed(Keyboard::LShift) ? -1 : 1;
+
+            // disable the old active input
+            if (activeInput) {
+              activeInput->state = I_INACTIVE;
+              activeInput = nullptr;
+            }
+
+            // move the active indicator to the next explorer
+            updateExplorerIndicator(
+                &explorer[(explorers + (activeExplorer - explorer) +
+                           increment) %
+                          explorers],
+                activeExplorer);
           }
           break;
         case Keyboard::Up:
