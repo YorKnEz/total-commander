@@ -30,7 +30,7 @@ string getDefaultPath();
 
 void getFilesFromPath(List<File> &l, string path, Font &font, int charSize,
                       int x, int y, int width, int height,
-                      FileStateColors stateColors[F_MAX_STATES]);
+                      FileStateColors stateColors[F_MAX_STATES], bool ignoreBackwardsFolder = false);
 
 void searchFile(List<File> &search, string path, string nameToSearch);
 

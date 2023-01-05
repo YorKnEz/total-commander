@@ -40,10 +40,7 @@ Scrollbar createScrollbar(Font &font, int charSize, int x, int y, int width,
 }
 
 float getScrollbarRatio(Scrollbar scrollbar) {
-  float ratio =
-      scrollbar.track.getGlobalBounds().height / scrollbar.scrollableHeight;
-
-  return ratio;
+  return scrollbar.track.getGlobalBounds().height / scrollbar.scrollableHeight;
 }
 
 void updateScrollableHeight(Scrollbar &scrollbar, int scrollableHeight) {
