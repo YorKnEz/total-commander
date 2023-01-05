@@ -94,7 +94,7 @@ int main() {
   Font font;
   font.loadFromFile("assets/hack.ttf");
 
-  int charSize = 16;
+  int charSize = 12;
 
   int buttons = 5;
   int btnWidth = WINDOW_W / buttons, btnHeight = 32;
@@ -126,7 +126,7 @@ int main() {
   Vector2i oldClick;     // required for dragging the scrollbar
   string clipboardPath;
   bool cut = false;
-  list clipboard;
+  List<File> clipboard;
   init(clipboard);
 
   while (window.isOpen()) {
@@ -158,7 +158,7 @@ int main() {
         switch (event.key.code) {
         case Keyboard::A:
           if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
-            node *p = activeExplorer->files.head->next;
+            Node<File> *p = activeExplorer->files.head->next;
 
             while (p) {
               p->data.state = F_SELECTED;
@@ -178,13 +178,37 @@ int main() {
             init(clipboard);
             clipboardPath = activeExplorer->path;
 
-            node *p = activeExplorer->files.head;
+            Node<File> *p = activeExplorer->files.head;
 
             while (p) {
               if (p->data.state == F_SELECTED &&
                   p->data.data.filename.compare("..")) {
                 add(clipboard, p->data, clipboard.length);
               }
+
+              p = p->next;
+            }
+          }
+          break;
+        case Keyboard::D:
+          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+            Node<File> *p = activeExplorer->files.head; // file list iterator
+
+            while (p) {
+              p->data.state = F_INACTIVE;
+
+              p = p->next;
+            }
+          }
+          break;
+        case Keyboard::I:
+          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+            Node<File> *p =
+                activeExplorer->files.head->next; // file list iterator
+
+            while (p) {
+              p->data.state =
+                  (p->data.state == F_SELECTED) ? F_INACTIVE : F_SELECTED;
 
               p = p->next;
             }
@@ -200,7 +224,7 @@ int main() {
           // paste the clipboard's contents into the currently active explorer
           if (clipboard.length > 0 && activeExplorer &&
               kbd.isKeyPressed(Keyboard::LControl)) {
-            node *p = clipboard.head;
+            Node<File> *p = clipboard.head;
 
             while (p) {
               string currentEntryName = p->data.data.filename;
@@ -288,6 +312,31 @@ int main() {
         case Keyboard::Right:
           if (activeInput) {
             moveCursor(activeInput, 1);
+          }
+          break;
+        case Keyboard::Delete:
+          if (activeExplorer && activeExplorer->activeFile[0]) {
+            handleMenuButtons(explorer, explorers, activeExplorer, DELETE_ENTRY,
+                              TITLE, font, charSize, theme);
+          }
+
+          break;
+        case Keyboard::Tab:
+          if (activeExplorer) {
+            int increment = kbd.isKeyPressed(Keyboard::LShift) ? -1 : 1;
+
+            // disable the old active input
+            if (activeInput) {
+              activeInput->state = I_INACTIVE;
+              activeInput = nullptr;
+            }
+
+            // move the active indicator to the next explorer
+            updateExplorerIndicator(
+                &explorer[(explorers + (activeExplorer - explorer) +
+                           increment) %
+                          explorers],
+                activeExplorer);
           }
           break;
         case Keyboard::Up:

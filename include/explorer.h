@@ -24,17 +24,17 @@ enum Direction { UP = 50, DOWN = -50 };
 
 struct Explorer {
   string path;
-
-  list files;
+  
+  List<File> files;
   sortBy sortedBy = FILE_NAME;
   sortOrder order = ASC;
-  node *activeFile[2] = {nullptr, nullptr};
+  Node<File> *activeFile[2] = {nullptr, nullptr};
 
   bool forestView; // true when fileForest should be displayed
   Forest fileForest;
   string activeForestPath;
   Forest *activeForest = nullptr;
-
+  
   int scrollOffset;
   int heightFile; // height of the files on the screen
   int heightComp; // height of the other components
@@ -58,6 +58,8 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
 
 void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
                      ColorTheme theme);
+
+void updateExplorerIndicator(Explorer *explorer, Explorer *&activeExplorer);
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,

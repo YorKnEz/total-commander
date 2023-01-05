@@ -19,6 +19,27 @@ int str2int(string stringNumber) {
   return number;
 }
 
+string compressSize(uintmax_t sizeToCompress) {
+  string dim = " KMGT";
+  double doubleSize = sizeToCompress;
+  unsigned long long intSize = 0;
+  int dimIterator = 0;
+
+  while (doubleSize > 999) {
+    doubleSize /= 1024;
+    intSize = (unsigned long long)(doubleSize * 10);
+    dimIterator++;
+  }
+
+  string driveSize = uint2str(intSize / 10);
+  string dimLetter = "";
+
+  if (dim[dimIterator] != ' ') {
+    dimLetter = dim[dimIterator];
+  }
+  return driveSize + "." + uint2str(intSize % 10) + " " + dimLetter + "B";
+}
+
 // converts an integer to string
 string uint2str(uintmax_t a) {
   if (a == -1) {
@@ -76,7 +97,6 @@ string formatDate(string date) {
   string year = date.substr(16, 4);
   string months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-
 
   // if day is lower than 10, append a 0
   if (day[0] == ' ') {

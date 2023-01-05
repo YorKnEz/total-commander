@@ -223,7 +223,7 @@ void handleMenuButtons(Explorer *explorer, int explorers,
                             activeExplorer->path, font, charSize, theme);
 
       if (!newPath.empty()) {
-        node *p = activeExplorer->files.head;
+        Node<File> *p = activeExplorer->files.head;
 
         while (p) {
           if (p->data.state == F_SELECTED &&
@@ -248,7 +248,7 @@ void handleMenuButtons(Explorer *explorer, int explorers,
     break;
   case DELETE_ENTRY:
     if (activeExplorer->activeFile[0]) {
-      node *p = activeExplorer->files.head;
+      Node<File> *p = activeExplorer->files.head;
 
       while (p) {
         if (p->data.state == F_SELECTED &&
@@ -277,7 +277,7 @@ void handleMenuButtons(Explorer *explorer, int explorers,
                             activeExplorer->path, font, charSize, theme);
 
       if (!newPath.empty()) {
-        node *p = activeExplorer->files.head;
+        Node<File> *p = activeExplorer->files.head;
 
         while (p) {
           if (p->data.state == F_SELECTED &&
@@ -308,7 +308,7 @@ void handleMenuButtons(Explorer *explorer, int explorers,
                             font, charSize, theme);
 
       if (!newName.empty()) {
-        node *p = activeExplorer->files.head;
+        Node<File> *p = activeExplorer->files.head;
 
         while (p) {
           if (p->data.state == F_SELECTED &&

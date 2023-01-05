@@ -1,7 +1,7 @@
 #include "filetree.h"
 
 // sort nodes by extension
-bool byExt(node *a, node *b, sortOrder order) {
+bool byExt(Node<File> *a, Node<File> *b, sortOrder order) {
   // try to sort by extension
   return order *
              (toLower(a->data.data.ext).compare(toLower(b->data.data.ext))) <=
@@ -9,7 +9,7 @@ bool byExt(node *a, node *b, sortOrder order) {
 }
 
 // sort nodes by name
-bool byName(node *a, node *b, sortOrder order) {
+bool byName(Node<File> *a, Node<File> *b, sortOrder order) {
   // try to sort by filename
   int comp =
       order *
@@ -24,7 +24,7 @@ bool byName(node *a, node *b, sortOrder order) {
 }
 
 // sort nodes by size
-bool bySize(node *a, node *b, sortOrder order) {
+bool bySize(Node<File> *a, Node<File> *b, sortOrder order) {
   // try to sort by order of size (KB, MB, GB, TB)
   string sizeA = a->data.data.size, sizeB = b->data.data.size;
   string dim = " KMGT";
@@ -64,7 +64,7 @@ bool bySize(node *a, node *b, sortOrder order) {
 }
 
 // sort nodes by date
-bool byDate(node *a, node *b, sortOrder order) {
+bool byDate(Node<File> *a, Node<File> *b, sortOrder order) {
   // date is of format "dd/mm/yyyy hh:mm xx", where xx is AM or PM
   // we use the following struct to store the start and length of a token from
   // the string a token can be: dd, mm, yyyy etc.
@@ -92,6 +92,29 @@ bool byDate(node *a, node *b, sortOrder order) {
   return byName(a, b, order);
 }
 
+void searchFile(List<File> &search, string path, string nameToSearch) {
+  path = evalPath(path);
+
+  if (!isValidPath(path) || !fs::is_directory(path)) {
+    return;
+  }
+  try {
+
+    for (const auto &entry : fs::directory_iterator(path)) {
+      string filename = (entry.path().filename()).generic_string();
+
+      if (filename.find(nameToSearch) != string::npos) {
+        // cout << filename << "\n"; (replace with list)
+      }
+
+      if (entry.is_directory()) {
+        searchFile(search, evalPath(path + SEP + filename), nameToSearch);
+      }
+    }
+  } catch (fs::filesystem_error) {
+  }
+}
+
 // returns a string with the default path depending on the OS
 string getDefaultPath() {
   string path;
@@ -109,7 +132,7 @@ string getDefaultPath() {
 }
 
 // generates a list of files containing data about the path's content
-void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
+void getFilesFromPath(List<File> &l, string path, Font &font, int charSize, int x,
                       int y, int width, int height,
                       FileStateColors stateColors[F_MAX_STATES],
                       bool ignoreBackwardsFolder) {
@@ -146,7 +169,7 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // converts filename path to string
       fs::path directoryPath = entry.path().filename();
       string filename = directoryPath.generic_string();
-      string dim = " KMGT";
+      string size;
 
       // gets the date at which the current file was last modified
       const auto fileTime = fs::last_write_time(entry.path());
@@ -160,33 +183,8 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
       // the size accordingly (directory size = "<DIR>", file size is an
       // integer value)
 
-      double doubleSize;
-      uintmax_t intSize;
-      int dimIterator, decimalValue;
-      string size;
-
       if (is_regular_file(entry.path())) {
-        doubleSize = file_size(entry.path());
-        intSize = 0;
-        dimIterator = 0;
-        decimalValue = 0;
-
-        while (doubleSize > 999) {
-          doubleSize /= 1024;
-          intSize = (unsigned long long)(doubleSize * 10);
-          dimIterator++;
-        }
-
-        size = uint2str(intSize / 10);
-        string dimLetter = "";
-
-        if (dim[dimIterator] != ' ') {
-          dimLetter = dim[dimIterator];
-        }
-
-        if (size != "<DIR>") {
-          size += "." + int2str(intSize % 10) + " " + dimLetter + "B";
-        }
+        size = compressSize(file_size(entry.path()));
       } else
         size = "<DIR>";
 
@@ -225,7 +223,7 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
 
 // sorting keeps the directories before any files and sorts them separately
 // it also assumes that directories have been put before any files by default
-void sortFiletree(list &l, sortBy criteria, sortOrder order) {
+void sortFiletree(List<File> &l, sortBy criteria, sortOrder order) {
   switch (criteria) {
   case FILE_NAME:
     sort(l, order, byName);
@@ -245,8 +243,8 @@ void sortFiletree(list &l, sortBy criteria, sortOrder order) {
   }
 }
 
-node *find(list l, string filename) {
-  node *p = l.head;
+Node<File> *find(List<File> l, string filename) {
+  Node<File> *p = l.head;
 
   while (p) {
     if (!p->data.data.filename.compare(filename)) {
@@ -328,6 +326,11 @@ bool isValidPath(string path) {
   string folderName = path.erase(0, path.find_last_of(SEP) + 1);
 
   return isValidFilename(folderName);
+}
+
+string getSizeOfDrive(string path) {
+  fs::space_info size = fs::space(path);
+  return compressSize(size.free) + " free of " + compressSize(size.capacity);
 }
 
 string getCurrentFolder(string path) {
@@ -518,7 +521,8 @@ void copyFolder(string fromPath, string toPath) {
   }
 
   // checks if the path where the folder is to be copied is valid
-  if (toPath.find(fromPath) != string::npos) {
+  if (toLower(evalPath(toPath)).find(toLower(evalPath(fromPath))) !=
+      string::npos) {
     return;
   }
 
@@ -604,6 +608,10 @@ void deleteFolder(string path) {
 
 // checks which function should be called
 void moveEntry(string fromPath, string toPath) {
+  if ((fromPath.substr(0, fromPath.find_last_of(SEP)))
+          .compare(evalPath(toPath)) == 0) {
+    return;
+  }
   if (fs::is_directory(fromPath)) {
     moveFolder(fromPath, toPath);
   } else
@@ -611,12 +619,8 @@ void moveEntry(string fromPath, string toPath) {
 }
 // moves a file from a path to another path
 void moveFile(string fromPath, string toPath) {
-  // checks if fromPath is equivalent to toPath (adding a SEP and using evalPath
-  // in case the given string in toPath ends in a separator)
-  if ((fromPath.substr(0, fromPath.find_last_of(SEP) + 1))
-          .compare(evalPath(toPath + SEP)) == 0) {
-    return;
-  }
+  // checks if fromPath is equivalent to toPath (adding a SEP and using
+  // evalPath in case the given string in toPath ends in a separator)
 
   copyFile(fromPath, toPath);
   deleteFile(fromPath);
@@ -625,7 +629,8 @@ void moveFile(string fromPath, string toPath) {
 // moves a folder from a path to another path
 void moveFolder(string fromPath, string toPath) {
   // checks if the path where the folder is to be moved is valid
-  if (toPath.find(fromPath) != string::npos) {
+  if (toLower(evalPath(toPath)).find(toLower(evalPath(fromPath))) !=
+      string::npos) {
     return;
   }
 
@@ -642,8 +647,8 @@ void editEntryName(string path, string newName) {
 }
 // renames a file
 void editFileName(string path, string newName) {
-  // used for checking  if the name after the rename should stay the same as the
-  // old one
+  // used for checking  if the name after the rename should stay the same as
+  // the old one
   string oldFilename =
       path.substr(path.find_last_of(SEP) + 1,
                   path.find_last_of(".") - path.find_last_of(SEP) - 1);
@@ -665,8 +670,8 @@ void editFileName(string path, string newName) {
 
 // renames a folder
 void editFolderName(string path, string newName) {
-  // used for checking if the name after the rename should stay the same as the
-  // old one
+  // used for checking if the name after the rename should stay the same as
+  // the old one
   string oldFoldername = path.substr(path.find_last_of(SEP) + 1);
 
   if (!isValidPath(path) || !fs::is_directory(path)) {

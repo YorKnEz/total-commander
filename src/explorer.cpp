@@ -121,8 +121,8 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   Explorer explorer;
 
   int scrollbarWidth = 20;
-  explorer.heightFile = 32; // used for files and file sorting buttons
-  explorer.heightComp = 40; // used for anything else
+  explorer.heightFile = 27; // used for files and file sorting buttons
+  explorer.heightComp = 30; // used for anything else
 
   explorer.path = path; // set path
   explorer.scrollOffset = 0;
@@ -147,7 +147,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   updateFilesY(explorer.files, y + 2 * explorer.heightComp +
                                    explorer.heightFile + explorer.scrollOffset);
 
-  node *head = explorer.files.head; // head of the file list
+  Node<File> *head = explorer.files.head; // head of the file list
 
   int nameX = x + 1, extX = nameX + head->data.filenameColumn,
       sizeX = extX + head->data.extColumn,
@@ -158,10 +158,10 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
              1; // used for setting the y of the file columns
 
   // set the drive size text box
-  explorer.textbox[0] =
-      createTextBox("Size of drive", font, charSize, x + 1, y + 1, width - 2,
-                    explorer.heightComp - 2, theme.textMediumContrast,
-                    theme.bgLowContrast, theme.border, 1);
+  explorer.textbox[0] = createTextBox(
+      getSizeOfDrive(explorer.path), font, charSize, x + 1, y + 1, width - 2,
+      explorer.heightComp - 2, theme.textMediumContrast, theme.bgLowContrast,
+      theme.border, 1);
 
   // set the input
   explorer.input =
@@ -221,6 +221,11 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
   explorer.input.startPosition = 0;
 
   shrinkInput(explorer.input);
+
+  // reset explorer drive size
+  explorer.textbox[0].fullText = getSizeOfDrive(explorer.path);
+  updateText(explorer.textbox[0].text, explorer.textbox[0].fullText,
+             explorer.textbox[0].background.getGlobalBounds());
 
   // reset explorer related props
   explorer.textbox[1].fullText = getCurrentFolder(explorer.path);
@@ -295,6 +300,32 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
   }
 }
 
+void updateExplorerIndicator(Explorer *explorer, Explorer *&activeExplorer) {
+  if (activeExplorer) {
+    activeExplorer->state = E_INACTIVE; // set old explorer as inactive
+
+    // remove the focused explorer indicator
+    activeExplorer->textbox[1].fullText.erase(0, 2);
+    activeExplorer->textbox[1].fullText.erase(
+        activeExplorer->textbox[1].fullText.size() - 2, 2);
+
+    updateText(activeExplorer->textbox[1].text,
+               activeExplorer->textbox[1].fullText,
+               activeExplorer->textbox[1].background.getGlobalBounds());
+  }
+
+  activeExplorer = explorer;
+  activeExplorer->state = E_ACTIVE; // set current explorer as active
+
+  // add the focused explorer indicator
+  activeExplorer->textbox[1].fullText.insert(0, "> ");
+  activeExplorer->textbox[1].fullText.append(" <");
+
+  updateText(activeExplorer->textbox[1].text,
+             activeExplorer->textbox[1].fullText,
+             activeExplorer->textbox[1].background.getGlobalBounds());
+}
+
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,
                          Input *&activeInput, Font &font, ColorTheme theme) {
@@ -304,29 +335,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
     if (isHovered(explorer.background.getGlobalBounds(), event.mouseButton.x,
                   event.mouseButton.y) &&
         activeExplorer != &explorer) {
-      if (activeExplorer) {
-        activeExplorer->state = E_INACTIVE; // set old explorer as inactive
-
-        // remove the focused explorer indicator
-        activeExplorer->textbox[1].fullText.erase(0, 2);
-        activeExplorer->textbox[1].fullText.erase(
-            activeExplorer->textbox[1].fullText.size() - 2, 2);
-
-        updateText(activeExplorer->textbox[1].text,
-                   activeExplorer->textbox[1].fullText,
-                   activeExplorer->textbox[1].background.getGlobalBounds());
-      }
-
-      activeExplorer = &explorer;
-      activeExplorer->state = E_ACTIVE; // set current explorer as active
-
-      // add the focused explorer indicator
-      activeExplorer->textbox[1].fullText.insert(0, "> ");
-      activeExplorer->textbox[1].fullText.append(" <");
-
-      updateText(activeExplorer->textbox[1].text,
-                 activeExplorer->textbox[1].fullText,
-                 activeExplorer->textbox[1].background.getGlobalBounds());
+      updateExplorerIndicator(&explorer, activeExplorer);
     }
     break;
   }
