@@ -319,6 +319,32 @@ void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
   }
 }
 
+void updateExplorerIndicator(Explorer *explorer, Explorer *&activeExplorer) {
+  if (activeExplorer) {
+    activeExplorer->state = E_INACTIVE; // set old explorer as inactive
+
+    // remove the focused explorer indicator
+    activeExplorer->textbox[1].fullText.erase(0, 2);
+    activeExplorer->textbox[1].fullText.erase(
+        activeExplorer->textbox[1].fullText.size() - 2, 2);
+
+    updateText(activeExplorer->textbox[1].text,
+               activeExplorer->textbox[1].fullText,
+               activeExplorer->textbox[1].background.getGlobalBounds());
+  }
+
+  activeExplorer = explorer;
+  activeExplorer->state = E_ACTIVE; // set current explorer as active
+
+  // add the focused explorer indicator
+  activeExplorer->textbox[1].fullText.insert(0, "> ");
+  activeExplorer->textbox[1].fullText.append(" <");
+
+  updateText(activeExplorer->textbox[1].text,
+             activeExplorer->textbox[1].fullText,
+             activeExplorer->textbox[1].background.getGlobalBounds());
+}
+
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,
                          Input *&activeInput, Font &font, ColorTheme theme) {
@@ -328,29 +354,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
     if (isHovered(explorer.background.getGlobalBounds(), event.mouseButton.x,
                   event.mouseButton.y) &&
         activeExplorer != &explorer) {
-      if (activeExplorer) {
-        activeExplorer->state = E_INACTIVE; // set old explorer as inactive
-
-        // remove the focused explorer indicator
-        activeExplorer->textbox[1].fullText.erase(0, 2);
-        activeExplorer->textbox[1].fullText.erase(
-            activeExplorer->textbox[1].fullText.size() - 2, 2);
-
-        updateText(activeExplorer->textbox[1].text,
-                   activeExplorer->textbox[1].fullText,
-                   activeExplorer->textbox[1].background.getGlobalBounds());
-      }
-
-      activeExplorer = &explorer;
-      activeExplorer->state = E_ACTIVE; // set current explorer as active
-
-      // add the focused explorer indicator
-      activeExplorer->textbox[1].fullText.insert(0, "> ");
-      activeExplorer->textbox[1].fullText.append(" <");
-
-      updateText(activeExplorer->textbox[1].text,
-                 activeExplorer->textbox[1].fullText,
-                 activeExplorer->textbox[1].background.getGlobalBounds());
+      updateExplorerIndicator(&explorer, activeExplorer);
     }
     break;
   }

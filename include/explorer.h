@@ -52,6 +52,8 @@ void updateFilesState(Explorer &explorer, Event event, MouseEventType type,
 void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
                           Vector2i &oldClick);
 
+void updateExplorerIndicator(Explorer *explorer, Explorer *&activeExplorer);
+
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,
                          Input *&activeInput, Font &font,
