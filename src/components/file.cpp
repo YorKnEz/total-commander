@@ -46,19 +46,25 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
   return file;
 }
 
-void drawFile(RenderWindow &window, File file) {
+void drawFile(RenderWindow &window, File file, bool filenameOnly) {
   // update the color of the file depending on it's state
   file.filename.setFillColor(file.stateColors[file.state].textHighContrast);
-  file.ext.setFillColor(file.stateColors[file.state].textLowContrast);
-  file.size.setFillColor(file.stateColors[file.state].textLowContrast);
-  file.date.setFillColor(file.stateColors[file.state].textLowContrast);
+
+  if (!filenameOnly) {
+    file.ext.setFillColor(file.stateColors[file.state].textLowContrast);
+    file.size.setFillColor(file.stateColors[file.state].textLowContrast);
+    file.date.setFillColor(file.stateColors[file.state].textLowContrast);
+  }
 
   file.background.setFillColor(file.stateColors[file.state].background);
   file.background.setOutlineColor(file.stateColors[file.state].border);
 
   window.draw(file.background);
   drawText(window, file.filename);
-  drawText(window, file.ext);
-  drawText(window, file.size);
-  drawText(window, file.date);
+
+  if (!filenameOnly) {
+    drawText(window, file.ext);
+    drawText(window, file.size);
+    drawText(window, file.date);
+  }
 }

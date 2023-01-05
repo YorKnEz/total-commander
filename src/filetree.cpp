@@ -111,32 +111,35 @@ string getDefaultPath() {
 // generates a list of files containing data about the path's content
 void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
                       int y, int width, int height,
-                      FileStateColors stateColors[F_MAX_STATES]) {
+                      FileStateColors stateColors[F_MAX_STATES],
+                      bool ignoreBackwardsFolder) {
   // lastDir is used in order to separate files from directories in the list.
   // The directories are inserted after the last directory or at the beginning
   // of the list if there are none, and the files are always added at the end.
   int lastDir = 0;
 
   Filedata filedata;
+  File element;
 
-  // adds the special ".." folder to the list
-  const auto fileTime = fs::last_write_time("..");
-  const auto systemTime = chrono::file_clock::to_sys(fileTime);
-  const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
-  string date = asctime(gmtime(&time));
+  if (!ignoreBackwardsFolder) {
+    // adds the special ".." folder to the list
+    const auto fileTime = fs::last_write_time("..");
+    const auto systemTime = chrono::file_clock::to_sys(fileTime);
+    const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
+    string date = asctime(gmtime(&time));
 
-  // generates the filedata for the special folder
-  filedata.filename = "..";
-  filedata.size = "<DIR>";
-  filedata.date = formatDate(date);
-  filedata.ext = "";
+    // generates the filedata for the special folder
+    filedata.filename = "..";
+    filedata.size = "<DIR>";
+    filedata.date = formatDate(date);
+    filedata.ext = "";
 
-  File element =
-      createFile(filedata, font, charSize, x, y, width, height, stateColors);
+    element =
+        createFile(filedata, font, charSize, x, y, width, height, stateColors);
 
-  add(l, element, lastDir);
-  lastDir++;
-
+    add(l, element, lastDir);
+    lastDir++;
+  }
   // goes through the content of the current path
   for (const auto &entry : fs::directory_iterator(path)) {
     try {

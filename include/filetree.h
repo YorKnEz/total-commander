@@ -30,7 +30,7 @@ string getDefaultPath();
 
 void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
                       int y, int width, int height,
-                      FileStateColors stateColors[F_MAX_STATES]);
+                      FileStateColors stateColors[F_MAX_STATES], bool ignoreBackwardsFolder = false);
 
 void sortFiletree(list &l, sortBy criteria, sortOrder order);
 
