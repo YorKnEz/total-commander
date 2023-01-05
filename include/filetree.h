@@ -28,15 +28,15 @@ enum sortBy { FILE_NAME, FILE_EXT, FILE_SIZE, FILE_DATE };
 
 string getDefaultPath();
 
-void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
-                      int y, int width, int height,
+void getFilesFromPath(List<File> &l, string path, Font &font, int charSize,
+                      int x, int y, int width, int height,
                       FileStateColors stateColors[F_MAX_STATES]);
 
-void searchFile(list &search, string path, string nameToSearch);
+void searchFile(List<File> &search, string path, string nameToSearch);
 
-void sortFiletree(list &l, sortBy criteria, sortOrder order);
+void sortFiletree(List<File> &l, sortBy criteria, sortOrder order);
 
-node *find(list l, string filename);
+Node<File> *find(List<File> l, string filename);
 
 string evalPath(string path);
 

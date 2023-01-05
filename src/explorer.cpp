@@ -29,7 +29,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   updateFilesY(explorer.files, y + 2 * explorer.heightComp +
                                    explorer.heightFile + explorer.scrollOffset);
 
-  node *head = explorer.files.head; // head of the file list
+  Node<File> *head = explorer.files.head; // head of the file list
 
   int nameX = x + 1, extX = nameX + head->data.filenameColumn,
       sizeX = extX + head->data.extColumn,
@@ -146,8 +146,8 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
   explorer.scrollbar.scrollOffset = 0; // reset scroll offset of scrollbar
 }
 
-void updateFilesY(list &files, int y) {
-  node *p = files.head;
+void updateFilesY(List<File> &files, int y) {
+  Node<File> *p = files.head;
   int fileY = y;
   int offsetY = p->data.background.getGlobalBounds().height / 2 -
                 p->data.date.getGlobalBounds().height / 2 +
@@ -170,7 +170,7 @@ void updateFilesY(list &files, int y) {
 
 void updateFilesState(Explorer &explorer, Event event, MouseEventType type,
                       Vector2i &oldClick) {
-  node *p = explorer.files.head,        // file list iterator
+  Node<File> *p = explorer.files.head,  // file list iterator
       *start = nullptr, *end = nullptr; // used for going through the list
   Keyboard kbd;                         // used for checking combos
   bool shouldSelect = false;            // flag used for checking reselect
@@ -454,7 +454,7 @@ void scrollFiles(Explorer *activeExplorer, Direction d) {
 }
 
 void drawFiles(RenderWindow &window, Explorer explorer) {
-  node *p = explorer.files.head;
+  Node<File> *p = explorer.files.head;
 
   FloatRect explorerBounds = explorer.background.getGlobalBounds(),
             currentFileBounds;

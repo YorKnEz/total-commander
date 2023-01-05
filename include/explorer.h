@@ -1,8 +1,8 @@
 #ifndef EXPLORER_H
 #define EXPLORER_H
 
-#include "element.h"
 #include "button.h"
+#include "element.h"
 #include "input.h"
 #include "scrollbar.h"
 #include "textbox.h"
@@ -23,10 +23,10 @@ enum Direction { UP = 50, DOWN = -50 };
 
 struct Explorer {
   string path;
-  list files;
+  List<File> files;
   sortBy sortedBy = FILE_NAME;
   sortOrder order = ASC;
-  node *activeFile[2] = {nullptr, nullptr};
+  Node<File> *activeFile[2] = {nullptr, nullptr};
   int scrollOffset;
   int heightFile; // height of the files on the screen
   int heightComp; // height of the other components
@@ -41,9 +41,10 @@ struct Explorer {
 Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
                         int width, int height, ColorTheme theme);
 
-void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font, ColorTheme theme);
+void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
+                     ColorTheme theme);
 
-void updateFilesY(list &files, int y);
+void updateFilesY(List<File> &files, int y);
 
 void updateFilesState(Explorer &explorer, Event event, MouseEventType type,
                       Vector2i &oldClick);

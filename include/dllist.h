@@ -2,6 +2,7 @@
 #define DLLIST_H
 
 #include "file.h"
+#include "theme.h"
 #include <iostream>
 #include <string>
 
@@ -9,29 +10,30 @@ using namespace std;
 
 enum sortOrder { DESC = -1, ASC = 1 };
 
-struct node {
-  File data;
-  node *prev;
-  node *next;
+template <typename T> struct Node {
+  T data;
+  Node<T> *prev;
+  Node<T> *next;
 };
 
-struct list {
+template <typename T> struct List {
   unsigned int length;
-  node *head;
-  node *tail;
+  Node<T> *head;
+  Node<T> *tail;
 };
 
-void init(list &l);
+template <typename T> void init(List<T> &l);
 
-void add(list &l, File data, unsigned int index);
+template <typename T> void add(List<T> &l, T data, unsigned int index);
 
-void remove(list &l, unsigned int index);
+template <typename T> void remove(List<T> &l, unsigned int index);
 
-void printList(list l);
+void printList(List<File> l);
+void printList(List<ColorTheme> l);
 
-void free(list &l);
+template <typename T> void free(List<T> &l);
 
-void sort(list &l, sortOrder order,
-          bool (*sortCriteria)(node *a, node *b, sortOrder order));
+void sort(List<File> &l, sortOrder order,
+          bool (*sortCriteria)(Node<File> *a, Node<File> *b, sortOrder order));
 
 #endif

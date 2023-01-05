@@ -1,7 +1,7 @@
 #include "filetree.h"
 
 // sort nodes by extension
-bool byExt(node *a, node *b, sortOrder order) {
+bool byExt(Node<File> *a, Node<File> *b, sortOrder order) {
   // try to sort by extension
   return order *
              (toLower(a->data.data.ext).compare(toLower(b->data.data.ext))) <=
@@ -9,7 +9,7 @@ bool byExt(node *a, node *b, sortOrder order) {
 }
 
 // sort nodes by name
-bool byName(node *a, node *b, sortOrder order) {
+bool byName(Node<File> *a, Node<File> *b, sortOrder order) {
   // try to sort by filename
   int comp =
       order *
@@ -24,7 +24,7 @@ bool byName(node *a, node *b, sortOrder order) {
 }
 
 // sort nodes by size
-bool bySize(node *a, node *b, sortOrder order) {
+bool bySize(Node<File> *a, Node<File> *b, sortOrder order) {
   // try to sort by order of size (KB, MB, GB, TB)
   string sizeA = a->data.data.size, sizeB = b->data.data.size;
   string dim = " KMGT";
@@ -64,7 +64,7 @@ bool bySize(node *a, node *b, sortOrder order) {
 }
 
 // sort nodes by date
-bool byDate(node *a, node *b, sortOrder order) {
+bool byDate(Node<File> *a, Node<File> *b, sortOrder order) {
   // date is of format "dd/mm/yyyy hh:mm xx", where xx is AM or PM
   // we use the following struct to store the start and length of a token from
   // the string a token can be: dd, mm, yyyy etc.
@@ -92,7 +92,7 @@ bool byDate(node *a, node *b, sortOrder order) {
   return byName(a, b, order);
 }
 
-void searchFile(list &search, string path, string nameToSearch) {
+void searchFile(List<File> &search, string path, string nameToSearch) {
   path = evalPath(path);
 
   if (!isValidPath(path) || !fs::is_directory(path)) {
@@ -132,8 +132,8 @@ string getDefaultPath() {
 }
 
 // generates a list of files containing data about the path's content
-void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
-                      int y, int width, int height,
+void getFilesFromPath(List<File> &l, string path, Font &font, int charSize,
+                      int x, int y, int width, int height,
                       FileStateColors stateColors[F_MAX_STATES]) {
   // lastDir is used in order to separate files from directories in the list.
   // The directories are inserted after the last directory or at the beginning
@@ -220,7 +220,7 @@ void getFilesFromPath(list &l, string path, Font &font, int charSize, int x,
 
 // sorting keeps the directories before any files and sorts them separately
 // it also assumes that directories have been put before any files by default
-void sortFiletree(list &l, sortBy criteria, sortOrder order) {
+void sortFiletree(List<File> &l, sortBy criteria, sortOrder order) {
   switch (criteria) {
   case FILE_NAME:
     sort(l, order, byName);
@@ -240,8 +240,8 @@ void sortFiletree(list &l, sortBy criteria, sortOrder order) {
   }
 }
 
-node *find(list l, string filename) {
-  node *p = l.head;
+Node<File> *find(List<File> l, string filename) {
+  Node<File> *p = l.head;
 
   while (p) {
     if (!p->data.data.filename.compare(filename)) {

@@ -126,7 +126,7 @@ int main() {
   Vector2i oldClick;     // required for dragging the scrollbar
   string clipboardPath;
   bool cut = false;
-  list clipboard;
+  List<File> clipboard;
   init(clipboard);
 
   while (window.isOpen()) {
@@ -158,7 +158,7 @@ int main() {
         switch (event.key.code) {
         case Keyboard::A:
           if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
-            node *p = activeExplorer->files.head->next;
+            Node<File> *p = activeExplorer->files.head->next;
 
             while (p) {
               p->data.state = F_SELECTED;
@@ -178,7 +178,7 @@ int main() {
             init(clipboard);
             clipboardPath = activeExplorer->path;
 
-            node *p = activeExplorer->files.head;
+            Node<File> *p = activeExplorer->files.head;
 
             while (p) {
               if (p->data.state == F_SELECTED &&
@@ -200,7 +200,7 @@ int main() {
           // paste the clipboard's contents into the currently active explorer
           if (clipboard.length > 0 && activeExplorer &&
               kbd.isKeyPressed(Keyboard::LControl)) {
-            node *p = clipboard.head;
+            Node<File> *p = clipboard.head;
 
             while (p) {
               string currentEntryName = p->data.data.filename;
