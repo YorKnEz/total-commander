@@ -94,7 +94,7 @@ int main() {
   Font font;
   font.loadFromFile("assets/hack.ttf");
 
-  int charSize = 16;
+  int charSize = 12;
 
   int buttons = 5;
   int btnWidth = WINDOW_W / buttons, btnHeight = 32;

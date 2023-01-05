@@ -5,8 +5,8 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   Explorer explorer;
 
   int scrollbarWidth = 20;
-  explorer.heightFile = 32; // used for files and file sorting buttons
-  explorer.heightComp = 40; // used for anything else
+  explorer.heightFile = 27; // used for files and file sorting buttons
+  explorer.heightComp = 30; // used for anything else
 
   explorer.path = path; // set path
   explorer.scrollOffset = 0;
