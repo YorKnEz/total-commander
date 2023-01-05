@@ -16,7 +16,7 @@ struct Forest {
 };
 
 // init the files and length props of the Forest
-void init(Forest &forest, list l, int width);
+void init(Forest &forest, List<File> l, int width);
 
 void printForest(Forest forest, int indent);
 

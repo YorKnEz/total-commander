@@ -274,7 +274,7 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
   explorer.scrollOffset = 0; // reset scroll offset
 
   if (explorer.forestView) {
-    node *oldHead = explorer.files.head;
+    Node<File> *oldHead = explorer.files.head;
     explorer.files.head = oldHead->next;
     explorer.files.length--;
 
@@ -363,7 +363,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
 
     // initialize the file forest
     if (explorer.forestView) {
-      node *oldHead = explorer.files.head;
+      Node<File> *oldHead = explorer.files.head;
       explorer.files.head = oldHead->next;
       explorer.files.length--;
 
@@ -422,7 +422,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
         if (explorer.activeForest->data.data.size == "<DIR>") {
           // if the forest is empty, add its contents
           if (explorer.activeForest->length == 0) {
-            list newFiles; // for storing the content of the opened folder
+            List<File> newFiles; // for storing the content of the opened folder
             init(newFiles);
 
             File file = explorer.fileForest.files[0].data;

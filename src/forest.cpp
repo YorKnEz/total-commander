@@ -1,11 +1,11 @@
 #include "forest.h"
 
-void init(Forest &forest, list l, int width) {
+void init(Forest &forest, List<File> l, int width) {
   forest.length = l.length;
 
   forest.files = new Forest[forest.length];
 
-  node *p = l.head;
+  Node<File> *p = l.head;
 
   for (int i = 0; i < forest.length; i++) {
     forest.files[i].data = p->data;

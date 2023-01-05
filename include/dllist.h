@@ -39,14 +39,14 @@ void sort(List<File> &l, sortOrder order,
 // graphics related functions
 
 // updates the y screen position of each file
-void updateFilesY(list &files, int y);
+void updateFilesY(List<File> &files, int y);
 
 // checks if any of the files has been clicked and stores it in
 // `activeFile`
-void updateFilesState(list &files, node *activeFile[2], Event event,
+void updateFilesState(List<File> &files, Node<File> *activeFile[2], Event event,
                       MouseEventType type, Vector2i &oldClick);
 
 // draws the files on the screen
-void drawFiles(RenderWindow &window, list list, int miny, int maxy);
+void drawFiles(RenderWindow &window, List<File> list, int miny, int maxy);
 
 #endif
