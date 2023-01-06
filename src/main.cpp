@@ -295,32 +295,82 @@ int main() {
           }
           break;
         case Keyboard::Up:
-          // if (activeExplorer) {
-          //   if (activeExplorer->activeFile[0]) {
-          //     if (activeExplorer->activeFile[0]->prev) {
-          //       activeExplorer->activeFile[0]->data.state = F_INACTIVE;
-          //       activeExplorer->activeFile[0] =
-          //           activeExplorer->activeFile[0]->prev;
-          //       activeExplorer->activeFile[0]->data.state = F_SELECTED;
-          //     }
-          //   } else {
-          //     scrollFiles(activeExplorer, UP);
-          //   }
-          // }
+          if (activeExplorer) {
+            if (activeExplorer->activeFile[0]) {
+              Node<File> *p = activeExplorer->files.head; // file list iterator
+
+              while (p) {
+                p->data.state = F_INACTIVE;
+
+                p = p->next;
+              }
+              if (activeExplorer->activeFile[0]->prev) {
+                activeExplorer->activeFile[0]->data.state = F_INACTIVE;
+                activeExplorer->activeFile[0] =
+                    activeExplorer->activeFile[0]->prev;
+              }
+              activeExplorer->activeFile[0]->data.state = F_SELECTED;
+              // get  bounds of the area in which the files are displayed
+              int displayStartY =
+                  2 * activeExplorer->heightComp + activeExplorer->heightFile;
+
+              // get the bounds of the currently active file
+              FloatRect fileBounds = activeExplorer->activeFile[0]
+                                         ->data.background.getGlobalBounds();
+
+              // calculate offset for scroll
+              int offset = displayStartY - fileBounds.top;
+
+              // scroll if the currently active file is outside the screen
+              if (offset > 0) {
+                scrollFiles(activeExplorer, Direction(offset));
+              }
+            } else {
+              scrollFiles(activeExplorer, UP);
+            }
+          }
           break;
         case Keyboard::Down:
-          // if (activeExplorer) {
-          //   if (activeExplorer->activeFile[0]) {
-          //     if (activeExplorer->activeFile[0]->next) {
-          //       activeExplorer->activeFile[0]->data.state = F_INACTIVE;
-          //       activeExplorer->activeFile[0] =
-          //           activeExplorer->activeFile[0]->next;
-          //       activeExplorer->activeFile[0]->data.state = F_SELECTED;
-          //     }
-          //   } else {
-          //     scrollFiles(activeExplorer, DOWN);
-          //   }
-          // }
+          if (activeExplorer) {
+            if (activeExplorer->activeFile[0]) {
+              Node<File> *p = activeExplorer->files.tail; // file list iterator
+
+              // deselect all files
+              while (p) {
+                p->data.state = F_INACTIVE;
+
+                p = p->prev;
+              }
+
+              if (activeExplorer->activeFile[0]->next) {
+                // move to the next file
+                activeExplorer->activeFile[0] =
+                    activeExplorer->activeFile[0]->next;
+              }
+              activeExplorer->activeFile[0]->data.state = F_SELECTED;
+              // get  bounds of the area in which the files are displayed
+              int displayStartY =
+                  2 * activeExplorer->heightComp + activeExplorer->heightFile;
+              int displayHeight =
+                  activeExplorer->background.getGlobalBounds().height -
+                  3 * activeExplorer->heightComp - activeExplorer->heightFile;
+
+              // get the bounds of the currently active file
+              FloatRect fileBounds = activeExplorer->activeFile[0]
+                                         ->data.background.getGlobalBounds();
+
+              // calculate offset for scroll
+              int offset = displayStartY + displayHeight - fileBounds.top - 1;
+
+              // scroll if the currently active file is outside the screen
+              if (fileBounds.height > offset) {
+                scrollFiles(activeExplorer,
+                            Direction(offset - fileBounds.height));
+              }
+            } else {
+              scrollFiles(activeExplorer, DOWN);
+            }
+          }
           break;
         case Keyboard::F1: {
           string projectLink = "https://github.com/YorKnEz/total-commander";
