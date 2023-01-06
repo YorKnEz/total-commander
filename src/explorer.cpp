@@ -506,6 +506,29 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
   updateInputState(explorer.input, event, type, activeInput);
 }
 
+void updateExplorerTheme(Explorer &explorer, ColorTheme theme) {
+  explorer.background.setFillColor(theme.bgBody);
+
+  for (int i = 0; i < 2; i++) {
+    updateTextBoxTheme(explorer.textbox[i], theme.textMediumContrast,
+                       theme.bgLowContrast, theme.border);
+  }
+
+  updateInputTheme(explorer.input, theme.inputStateColors);
+
+  updateFilesTheme(explorer.files, theme.fileStateColors);
+
+  if (explorer.forestView) {
+    updateFileForestTheme(explorer.fileForest, theme.fileStateColors);
+  }
+
+  for (int i = 0; i < 5; i++) {
+    updateButtonTheme(explorer.button[i], theme.buttonStateColors);
+  }
+
+  updateScrollbarTheme(explorer.scrollbar, theme.buttonStateColors);
+}
+
 void drawExplorer(RenderWindow &window, Explorer explorer) {
   window.draw(explorer.background);
 

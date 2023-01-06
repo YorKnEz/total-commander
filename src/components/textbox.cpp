@@ -33,6 +33,13 @@ TextBox createTextBox(string textString, Font &font, int charSize, int x, int y,
   return textbox;
 }
 
+void updateTextBoxTheme(TextBox &textbox, Color text, Color bg, Color border) {
+  textbox.background.setFillColor(bg);
+  textbox.background.setOutlineColor(border);
+
+  textbox.text.setFillColor(text);
+}
+
 void drawTextBox(RenderWindow &window, TextBox textbox) {
   window.draw(textbox.background);
   window.draw(textbox.text);

@@ -36,6 +36,9 @@ void updateFileForestState(Forest forest, string &activeForestPath,
                            Forest *&activeForest, string path, Event event,
                            MouseEventType type, Vector2i &oldClick);
 
+void updateFileForestTheme(Forest &forest,
+                           FileStateColors fileStateColors[F_MAX_STATES]);
+
 // draws the files on the screen recursively
 void drawFileForest(RenderWindow &window, Forest forest, int miny, int maxy);
 

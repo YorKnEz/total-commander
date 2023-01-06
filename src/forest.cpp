@@ -133,6 +133,15 @@ void updateFileForestState(Forest forest, string &activeForestPath,
   }
 }
 
+void updateFileForestTheme(Forest &forest,
+                           FileStateColors fileStateColors[F_MAX_STATES]) {
+
+  for (int i = 0; i < forest.length; i++) {
+    updateFileTheme(forest.files[i].data, fileStateColors);
+    updateFileForestTheme(forest.files[i], fileStateColors);
+  }
+}
+
 void drawFileForest(RenderWindow &window, Forest forest, int miny, int maxy) {
   for (int i = 0; i < forest.length; i++) {
     // get bounds of the current file to check if it's outside of the screen
