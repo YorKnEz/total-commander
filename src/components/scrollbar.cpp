@@ -1,7 +1,8 @@
 #include "scrollbar.h"
 
-Scrollbar createScrollbar(Font &font, int charSize, int x, int y, int width,
-                          int height, int btnHeight, int scrollableHeight,
+Scrollbar createScrollbar(Texture *upIcon, Texture *downIcon, Font &font,
+                          int charSize, int x, int y, int width, int height,
+                          int btnHeight, int scrollableHeight,
                           StateColors stateColors[B_MAX_STATES],
                           unsigned int borderThickness) {
   Scrollbar scrollbar;
@@ -10,11 +11,11 @@ Scrollbar createScrollbar(Font &font, int charSize, int x, int y, int width,
   scrollbar.scrollableHeight = scrollableHeight;
   scrollbar.scrollOffset = 0;
 
-  scrollbar.up = createButton("/\\", font, charSize, x, y, width, btnHeight,
-                              stateColors, borderThickness);
-  scrollbar.down = createButton("\\/", font, charSize, x,
-                                y + height - btnHeight + 2 * borderThickness,
-                                width, btnHeight, stateColors, borderThickness);
+  scrollbar.up = createButton("", font, charSize, x, y, width, btnHeight,
+                              stateColors, borderThickness, upIcon);
+  scrollbar.down = createButton(
+      "", font, charSize, x, y + height - btnHeight + 2 * borderThickness,
+      width, btnHeight, stateColors, borderThickness, downIcon);
 
   int trackHeight = height - 2 * btnHeight;
 

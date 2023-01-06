@@ -203,18 +203,28 @@ void sort(List<File> &l, sortOrder order,
 void updateFilesY(List<File> &files, int y) {
   Node<File> *p = files.head;
   int fileY = y;
-  int offsetY = p->data.background.getGlobalBounds().height / 2 -
-                p->data.date.getGlobalBounds().height / 2 +
-                p->data.date.getPosition().y -
-                p->data.date.getGlobalBounds().top;
+
+  int offsetYText, offsetYIcon;
+
+  if (p) {
+    // calculate the offsets for the text and icon
+    FloatRect backgroundBounds = p->data.background.getGlobalBounds();
+    FloatRect iconBounds = p->data.icon.getGlobalBounds();
+    int charSize = p->data.filename.getCharacterSize();
+
+    offsetYText = (backgroundBounds.height - charSize) / 2;
+    offsetYIcon = (backgroundBounds.height - iconBounds.height) / 2;
+  }
 
   while (p) {
     p->data.background.setPosition(p->data.background.getPosition().x, fileY);
+
+    p->data.icon.setPosition(p->data.icon.getPosition().x, fileY + offsetYIcon);
     p->data.filename.setPosition(p->data.filename.getPosition().x,
-                                 fileY + offsetY);
-    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetY);
-    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
-    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
+                                 fileY + offsetYText);
+    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetYText);
+    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetYText);
+    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetYText);
 
     fileY += p->data.background.getGlobalBounds().height + 1;
 
@@ -224,7 +234,7 @@ void updateFilesY(List<File> &files, int y) {
 
 void updateFilesState(List<File> &files, Node<File> *activeFile[2], Event event,
                       MouseEventType type, Vector2i &oldClick) {
-  Node<File> *p = files.head,                 // file list iterator
+  Node<File> *p = files.head,           // file list iterator
       *start = nullptr, *end = nullptr; // used for going through the list
   Keyboard kbd;                         // used for checking combos
   bool shouldSelect = false;            // flag used for checking reselect

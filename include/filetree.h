@@ -28,9 +28,9 @@ enum sortBy { FILE_NAME, FILE_EXT, FILE_SIZE, FILE_DATE };
 
 string getDefaultPath();
 
-void getFilesFromPath(List<File> &l, string path, Font &font, int charSize,
-                      int x, int y, int width, int height,
-                      FileStateColors stateColors[F_MAX_STATES], bool ignoreBackwardsFolder = false);
+void getFilesFromPath(List<File> &l, string path, int x, int y, int width,
+                      int height, Theme &theme,
+                      bool ignoreBackwardsFolder = false);
 
 void searchFile(List<File> &search, string path, string nameToSearch);
 

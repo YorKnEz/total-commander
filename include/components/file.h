@@ -18,10 +18,15 @@ struct FileStateColors {
   Color textHighContrast, textLowContrast, background, border;
 };
 
+struct FileIcons {
+  Texture file, folder, image, pdf, txt;
+};
+
 struct File {
   FileStateColors stateColors[F_MAX_STATES];
   RectangleShape background;
   Filedata data;
+  Sprite icon;
   int filenameColumn, extColumn, sizeColumn, dateColumn;
   Text filename, ext, size, date;
   FileState state;
@@ -29,7 +34,7 @@ struct File {
 
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 int width, int height,
-                FileStateColors stateColors[F_MAX_STATES],
+                FileStateColors stateColors[F_MAX_STATES], FileIcons &icons,
                 int borderThickness = 0);
 
 void drawFile(RenderWindow &window, File file, bool filenameOnly = false);

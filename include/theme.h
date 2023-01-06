@@ -19,7 +19,9 @@ struct ColorTheme {
 struct Theme {
   int charSize;
   Font font;
-extern ColorTheme dark;
+  // icons
+  Texture diagram, downArrow, search, upArrow;
+  FileIcons fileIcons;
   ColorTheme colors;
 };
 

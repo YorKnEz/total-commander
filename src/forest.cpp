@@ -6,6 +6,7 @@ void init(Forest &forest, List<File> l, int width) {
   forest.files = new Forest[forest.length];
 
   Node<File> *p = l.head;
+  FloatRect iconBounds = forest.files[0].data.icon.getGlobalBounds();
 
   for (int i = 0; i < forest.length; i++) {
     forest.files[i].data = p->data;
@@ -20,12 +21,14 @@ void init(Forest &forest, List<File> l, int width) {
     string filename = forest.files[i].data.data.filename;
 
     // shrink the filename according to the new width
-    if (forest.files[i].data.filename.getGlobalBounds().width > width - 20) {
+    if (forest.files[i].data.filename.getGlobalBounds().width >
+        width - 20 - iconBounds.width - 4) {
       filename.append("..");
       forest.files[i].data.filename.setString(filename);
     }
 
-    while (forest.files[i].data.filename.getGlobalBounds().width > width - 20) {
+    while (forest.files[i].data.filename.getGlobalBounds().width >
+           width - 20 - iconBounds.width - 4) {
       filename.erase(filename.size() - 3, 1);
       forest.files[i].data.filename.setString(filename);
     }
@@ -83,16 +86,18 @@ int getFileForestHeight(Forest forest, int fileHeight) {
 
 void updateFileForestXY(Forest &forest, int x, int &y) {
   for (int i = 0; i < forest.length; i++) {
-    int offsetX = forest.files[i].data.filename.getPosition().x -
-                  forest.files[i].data.background.getPosition().x;
+    FloatRect backgroundBounds =
+        forest.files[i].data.background.getGlobalBounds();
+    FloatRect iconBounds = forest.files[i].data.icon.getGlobalBounds();
+    int charSize = forest.files[i].data.filename.getCharacterSize();
 
-    int offsetY = forest.files[i].data.background.getGlobalBounds().height / 2 -
-                  forest.files[i].data.date.getGlobalBounds().height / 2 +
-                  forest.files[i].data.date.getPosition().y -
-                  forest.files[i].data.date.getGlobalBounds().top;
+    int offsetYText = (backgroundBounds.height - charSize) / 2;
+    int offsetYIcon = (backgroundBounds.height - iconBounds.height) / 2;
 
     forest.files[i].data.background.setPosition(x, y);
-    forest.files[i].data.filename.setPosition(x + offsetX, y + offsetY);
+    forest.files[i].data.icon.setPosition(x + 10, y + offsetYIcon);
+    forest.files[i].data.filename.setPosition(x + 10 + iconBounds.width + 4,
+                                              y + offsetYText);
 
     y += forest.files[i].data.background.getGlobalBounds().height + 1;
 

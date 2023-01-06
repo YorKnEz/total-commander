@@ -49,14 +49,16 @@ struct Explorer {
 void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
                           Vector2i &oldClick);
 
-void sortFiles(Explorer &explorer, sortBy criteria);
+void sortFiles(Explorer &explorer, sortBy criteria, Texture *sortIndicatorAsc,
+               Texture *sortIndicatorDesc);
 
 void scrollFiles(Explorer *activeExplorer, Direction d);
 
 Explorer createExplorer(string path, int x, int y, int width, int height,
                         Theme &theme);
 
-void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Theme &theme);
+void refreshExplorer(Explorer &explorer, Explorer *activeExplorer,
+                     Theme &theme);
 
 void updateExplorerIndicator(Explorer *explorer, Explorer *&activeExplorer);
 

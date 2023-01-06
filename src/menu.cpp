@@ -151,9 +151,9 @@ void createErrorPopUp(int width, int height, string windowTitle,
                VideoMode::getDesktopMode().height / 2 - height / 2));
 
   TextBox textbox =
-      createTextBox(errorMessage, theme.font, theme.charSize, 0, 0, width, height,
-                    theme.colors.textMediumContrast, theme.colors.bgLowContrast,
-                    theme.colors.border, 1);
+      createTextBox(errorMessage, theme.font, theme.charSize, 0, 0, width,
+                    height, theme.colors.textMediumContrast,
+                    theme.colors.bgLowContrast, theme.colors.border, 1);
 
   while (window.isOpen()) {
     Event event;

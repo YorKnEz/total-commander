@@ -1,8 +1,8 @@
 #ifndef SCROLLBAR_H
 #define SCROLLBAR_H
 
-#include "element.h"
 #include "button.h"
+#include "element.h"
 
 struct Scrollbar {
   Button up, down;
@@ -11,10 +11,11 @@ struct Scrollbar {
   ButtonState state;
 };
 
-Scrollbar createScrollbar(Font &font, int charSize, int x, int y, int width,
-                          int height, int scrollableHeight, int btnHeight,
+Scrollbar createScrollbar(Texture *upIcon, Texture *downIcon, Font &font,
+                          int charSize, int x, int y, int width, int height,
+                          int btnHeight, int scrollableHeight,
                           StateColors stateColors[B_MAX_STATES],
-                          unsigned int borderThickness = 0);
+                          unsigned int borderThickness);
 
 float getScrollbarRatio(Scrollbar scrollbar);
 

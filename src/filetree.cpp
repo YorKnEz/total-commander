@@ -132,10 +132,8 @@ string getDefaultPath() {
 }
 
 // generates a list of files containing data about the path's content
-void getFilesFromPath(List<File> &l, string path, Font &font, int charSize, int x,
-                      int y, int width, int height,
-                      FileStateColors stateColors[F_MAX_STATES],
-                      bool ignoreBackwardsFolder) {
+void getFilesFromPath(List<File> &l, string path, int x, int y, int width,
+                      int height, Theme &theme, bool ignoreBackwardsFolder) {
   // lastDir is used in order to separate files from directories in the list.
   // The directories are inserted after the last directory or at the beginning
   // of the list if there are none, and the files are always added at the end.
@@ -157,8 +155,8 @@ void getFilesFromPath(List<File> &l, string path, Font &font, int charSize, int 
     filedata.date = formatDate(date);
     filedata.ext = "";
 
-    element =
-        createFile(filedata, font, charSize, x, y, width, height, stateColors);
+    element = createFile(filedata, theme.font, theme.charSize, x, y, width,
+                         height, theme.colors.fileStateColors, theme.fileIcons);
 
     add(l, element, lastDir);
     lastDir++;
@@ -206,8 +204,9 @@ void getFilesFromPath(List<File> &l, string path, Font &font, int charSize, int 
       } else
         filedata.ext = "";
 
-      element = createFile(filedata, font, charSize, x, y, width, height,
-                           stateColors);
+      element =
+          createFile(filedata, theme.font, theme.charSize, x, y, width, height,
+                     theme.colors.fileStateColors, theme.fileIcons);
 
       if (!size.compare("<DIR>")) {
         add(l, element, lastDir);

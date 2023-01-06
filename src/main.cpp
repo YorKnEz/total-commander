@@ -92,11 +92,20 @@ int main() {
   Theme theme;
 
   theme.charSize = 12;
+  // load font
   theme.font.loadFromFile("assets/hack.ttf");
-  // theme.folder.loadFromFile("assets/icons/folder.png");
+  // load theme icons
+  theme.diagram.loadFromFile("assets/icons/dark/diagram.png");
+  theme.downArrow.loadFromFile("assets/icons/dark/down-arrow.png");
+  theme.search.loadFromFile("assets/icons/dark/search.png");
+  theme.upArrow.loadFromFile("assets/icons/dark/up-arrow.png");
   theme.colors = dark;
 
-  cout << theme.charSize << "\n";
+  theme.fileIcons.file.loadFromFile("assets/icons/dark/file.png");
+  theme.fileIcons.folder.loadFromFile("assets/icons/dark/folder.png");
+  theme.fileIcons.image.loadFromFile("assets/icons/dark/image.png");
+  theme.fileIcons.pdf.loadFromFile("assets/icons/dark/pdf.png");
+  theme.fileIcons.txt.loadFromFile("assets/icons/dark/txt.png");
 
   int buttons = 5;
   int btnWidth = WINDOW_W / buttons, btnHeight = 32;
@@ -383,7 +392,8 @@ int main() {
         case Keyboard::F5:
           // sorting shortcuts
           if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
-            sortFiles(*activeExplorer, sortBy(event.key.code - Keyboard::F2));
+            sortFiles(*activeExplorer, sortBy(event.key.code - Keyboard::F2),
+                      &theme.upArrow, &theme.downArrow);
             break;
           }
         case Keyboard::F6:
