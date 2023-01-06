@@ -436,7 +436,8 @@ int main() {
         for (int i = 0; i < buttons; i++) {
           updateButtonState(button[i], event, CLICK, oldClick);
 
-          if (button[i].state == B_CLICKED && activeExplorer && !activeExplorer->forestView) {
+          if (button[i].state == B_CLICKED && activeExplorer &&
+              !activeExplorer->forestView) {
             handleMenuButtons(explorer, explorers, activeExplorer,
                               MenuButtons(i), TITLE, font, charSize,
                               theme->data);

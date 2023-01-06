@@ -132,8 +132,8 @@ string getDefaultPath() {
 }
 
 // generates a list of files containing data about the path's content
-void getFilesFromPath(List<File> &l, string path, Font &font, int charSize, int x,
-                      int y, int width, int height,
+void getFilesFromPath(List<File> &l, string path, Font &font, int charSize,
+                      int x, int y, int width, int height,
                       FileStateColors stateColors[F_MAX_STATES],
                       bool ignoreBackwardsFolder) {
   // lastDir is used in order to separate files from directories in the list.
