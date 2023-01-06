@@ -46,6 +46,20 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
   return file;
 }
 
+void updateFileTheme(File &file, FileStateColors stateColors[F_MAX_STATES]) {
+  for (int i = 0; i < F_MAX_STATES; i++) {
+    file.stateColors[i] = stateColors[i];
+  }
+
+  file.background.setFillColor(stateColors[file.state].background);
+  file.background.setOutlineColor(stateColors[file.state].border);
+
+  file.filename.setFillColor(stateColors[file.state].textHighContrast);
+  file.ext.setFillColor(stateColors[file.state].textLowContrast);
+  file.size.setFillColor(stateColors[file.state].textLowContrast);
+  file.date.setFillColor(stateColors[file.state].textLowContrast);
+}
+
 void drawFile(RenderWindow &window, File file, bool filenameOnly) {
   // update the color of the file depending on it's state
   file.filename.setFillColor(file.stateColors[file.state].textHighContrast);

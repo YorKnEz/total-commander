@@ -69,6 +69,18 @@ void updateScrollbar(Scrollbar &scrollbar, int scrollOffset) {
       Vector2f(position.x, position.y + scrollbar.scrollOffset));
 }
 
+void updateScrollbarTheme(Scrollbar &scrollbar,
+                          StateColors stateColors[B_MAX_STATES]) {
+  updateButtonTheme(scrollbar.up, stateColors);
+  updateButtonTheme(scrollbar.down, stateColors);
+
+  scrollbar.track.setFillColor(stateColors[scrollbar.state].background);
+  scrollbar.track.setOutlineColor(stateColors[scrollbar.state].border);
+
+  scrollbar.thumb.setFillColor(stateColors[scrollbar.state].text);
+  scrollbar.thumb.setOutlineColor(stateColors[scrollbar.state].border);
+}
+
 void drawScrollbar(RenderWindow &window, Scrollbar scrollbar) {
   drawButton(window, scrollbar.up);
   drawButton(window, scrollbar.down);

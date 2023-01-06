@@ -85,6 +85,16 @@ void updateButtonState(Button &button, Event event, MouseEventType type,
   }
 }
 
+void updateButtonTheme(Button &button, StateColors stateColors[B_MAX_STATES]) {
+  // copy the state colors
+  for (int i = 0; i < B_MAX_STATES; i++) {
+    button.stateColors[i] = stateColors[i];
+  }
+  button.background.setFillColor(stateColors[button.state].background);
+  button.background.setOutlineColor(stateColors[button.state].border);
+  button.text.setFillColor(stateColors[button.state].text);
+}
+
 void drawButton(RenderWindow &window, Button button) {
   // update the color of the button depending on it's state
   button.text.setFillColor(button.stateColors[button.state].text);

@@ -2,7 +2,7 @@
 #define EXPLORER_H
 
 #include "button.h"
-#include "dllist.h"
+#include "dllist-file.h"
 #include "element.h"
 #include "forest.h"
 #include "input.h"
@@ -24,7 +24,7 @@ enum Direction { UP = 50, DOWN = -50 };
 
 struct Explorer {
   string path;
-  
+
   List<File> files;
   sortBy sortedBy = FILE_NAME;
   sortOrder order = ASC;
@@ -34,7 +34,7 @@ struct Explorer {
   Forest fileForest;
   string activeForestPath;
   Forest *activeForest = nullptr;
-  
+
   int scrollOffset;
   int heightFile; // height of the files on the screen
   int heightComp; // height of the other components
@@ -65,6 +65,8 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,
                          Input *&activeInput, Font &font,
                          ColorTheme theme = {});
+
+void updateExplorerTheme(Explorer &explorer, ColorTheme theme);
 
 void drawExplorer(RenderWindow &window, Explorer explorer);
 

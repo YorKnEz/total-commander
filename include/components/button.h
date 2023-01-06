@@ -20,9 +20,10 @@ Button createButton(string text, Font &font, int charSize, int x, int y,
                     StateColors stateColors[B_MAX_STATES],
                     unsigned int borderThickness = 0);
 
-void drawButton(RenderWindow &window, Button button);
-
 void updateButtonState(Button &button, Event event, MouseEventType type,
                        Vector2i &oldClick);
 
+void updateButtonTheme(Button &button, StateColors stateColors[B_MAX_STATES]);
+
+void drawButton(RenderWindow &window, Button button);
 #endif

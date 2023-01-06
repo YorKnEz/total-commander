@@ -26,70 +26,9 @@ int main() {
       Vector2i(VideoMode::getDesktopMode().width / 2 - WINDOW_W / 2,
                VideoMode::getDesktopMode().height / 2 - WINDOW_H / 2));
 
-  ColorTheme dark = {
-      Color(0xFFFFFFFF), // text with high contrast
-      Color(0x999995FF), // text with medium contrast
-      Color(0x5B5C55FF), // text with low contrast
-      Color(0x32332BFF), // background of body
-      Color(0x191A16FF), // background with low contrast
-      Color(0x0A0A09FF), // border
-      {{Color(0x848580FF), Color(0x282922FF), Color(0x0A0A09FF)},
-       {Color(0xC2C2BFFF), Color(0x282922FF), Color(0x191A16FF)},
-       {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)},
-       {Color(0xFFFFFFFF), Color(0x282922FF), Color(0x0A0A09FF)}},
-      {{Color(0x999995FF), Color(0x5B5C55FF), Color(0x32332BFF),
-        Color(0x0A0A09FF)},
-       {Color(0x999995FF), Color(0x5B5C55FF), Color(0x00FF0032),
-        Color(0x0A0A09FF)},
-       {Color(0x999995FF), Color(0x5B5C55FF), Color(0x0000FF32),
-        Color(0x0A0A09FF)}},
-      {{Color(0x848580FF), Color(0x191A16FF), Color(0x0A0A09FF)},
-       {Color(0xC2C2BFFF), Color(0x191A16FF), Color(0x191A16FF)},
-       {Color(0xFFFFFFFF), Color(0x191A16FF), Color(0x0A0A09FF)}}};
-
-  ColorTheme yellow = {
-      Color(0xffffffff), // text with high contrast
-      Color(0xfedd81ff), // text with medium contrast
-      Color(0xfdc835ff), // text with low contrast
-      Color(0xfcba03ff), // background of body
-      Color(0x7e5d02ff), // background with low contrast
-      Color(0x322501ff), // border
-      {{Color(0xfdd668ff), Color(0xca9502ff), Color(0x322501ff)},
-       {Color(0x4c3801ff), Color(0xca9502ff), Color(0x7e5d02ff)},
-       {Color(0xffffffff), Color(0xca9502ff), Color(0x322501ff)},
-       {Color(0xffffffff), Color(0xca9502ff), Color(0x322501ff)}},
-      {{Color(0xfedd81ff), Color(0xca9502ff), Color(0xfcba03),
-        Color(0x322501ff)},
-       {Color(0xfedd81ff), Color(0xca9502ff), Color(0x00FF0032),
-        Color(0x322501ff)},
-       {Color(0xfedd81ff), Color(0xca9502ff), Color(0x0000FF32),
-        Color(0x322501ff)}},
-      {{Color(0xfdd668ff), Color(0x7e5d02ff), Color(0x322501ff)},
-       {Color(0x4c3801ff), Color(0x7e5d02ff), Color(0x7e5d02ff)},
-       {Color(0xffffffff), Color(0x7e5d02ff), Color(0x322501ff)}}};
-
-  ColorTheme green = {
-      Color(0xffffffff), // text with high contrast
-      Color(0x8dbd96ff), // text with medium contrast
-      Color(0x499556ff), // text with low contrast
-      Color(0x1b7a2cff), // background of body
-      Color(0x0e3d16ff), // background with low contrast
-      Color(0x051809ff), // border
-      {{Color(0x76af80ff), Color(0x166223ff), Color(0x051809ff)},
-       {Color(0xbbd7c0ff), Color(0x166223ff), Color(0x0e3d16ff)},
-       {Color(0xffffffff), Color(0x166223ff), Color(0x051809ff)},
-       {Color(0xffffffff), Color(0x166223ff), Color(0x051809ff)}},
-      {{Color(0x8dbd96ff), Color(0x499556ff), Color(0x1b7a2cff),
-        Color(0x051809ff)},
-       {Color(0x8dbd96ff), Color(0x499556ff), Color(0xFF000032),
-        Color(0x051809ff)},
-       {Color(0x8dbd96ff), Color(0x499556ff), Color(0x0000FF32),
-        Color(0x051809ff)}},
-      {{Color(0x76af80ff), Color(0x0e3d16ff), Color(0x051809ff)},
-       {Color(0xbbd7c0ff), Color(0x0e3d16ff), Color(0x0e3d16ff)},
-       {Color(0xffffffff), Color(0x0e3d16ff), Color(0x051809ff)}}};
-
-  ColorTheme theme = dark;
+  List<ColorTheme> themes;
+  loadThemes(themes);
+  Node<ColorTheme> *theme = themes.head;
 
   Font font;
   font.loadFromFile("assets/hack.ttf");
@@ -105,7 +44,7 @@ int main() {
   for (int i = 0; i < buttons; i++) {
     button[i] = createButton(buttonString[i], font, charSize, i * btnWidth + 2,
                              WINDOW_H - btnHeight + 1, btnWidth - 2,
-                             btnHeight - 2, theme.buttonStateColors, 1);
+                             btnHeight - 2, theme->data.buttonStateColors, 1);
   }
 
   int explorers = 2;
@@ -114,7 +53,7 @@ int main() {
   for (int i = 0; i < explorers; i++) {
     explorer[i] = createExplorer(
         getDefaultPath(), font, charSize, i * WINDOW_W / explorers, 0,
-        WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
+        WINDOW_W / explorers, WINDOW_H - btnHeight, theme->data);
   }
 
   // useful for determining double clicks
@@ -127,7 +66,7 @@ int main() {
   string clipboardPath;
   bool cut = false;
   List<File> clipboard;
-  init(clipboard);
+  clipboard.init();
 
   while (window.isOpen()) {
     Event event;
@@ -174,8 +113,8 @@ int main() {
         case Keyboard::C:
           // copy currently selected files into the clipboard
           if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
-            free(clipboard);
-            init(clipboard);
+            clipboard.free();
+            clipboard.init();
             clipboardPath = activeExplorer->path;
 
             Node<File> *p = activeExplorer->files.head;
@@ -183,7 +122,7 @@ int main() {
             while (p) {
               if (p->data.state == F_SELECTED &&
                   p->data.data.filename.compare("..")) {
-                add(clipboard, p->data, clipboard.length);
+                clipboard.add(p->data, clipboard.length);
               }
 
               p = p->next;
@@ -217,7 +156,21 @@ int main() {
         case Keyboard::R:
           // refresh current explorer
           if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
-            refreshExplorer(*activeExplorer, activeExplorer, font, theme);
+            refreshExplorer(*activeExplorer, activeExplorer, font, theme->data);
+          }
+          break;
+        case Keyboard::T:
+          if (kbd.isKeyPressed(Keyboard::LControl)) {
+            theme = (kbd.isKeyPressed(Keyboard::LShift)) ? theme->prev
+                                                         : theme->next;
+
+            for (int i = 0; i < explorers; i++) {
+              updateExplorerTheme(explorer[i], theme->data);
+            }
+
+            for (int i = 0; i < buttons; i++) {
+              updateButtonTheme(button[i], theme->data.buttonStateColors);
+            }
           }
           break;
         case Keyboard::V:
@@ -252,7 +205,7 @@ int main() {
             for (int i = 0; i < explorers; i++) {
               if (explorer[i].path == clipboardPath ||
                   explorer[i].path == activeExplorer->path) {
-                refreshExplorer(explorer[i], activeExplorer, font, theme);
+                refreshExplorer(explorer[i], activeExplorer, font, theme->data);
               }
             }
           }
@@ -264,11 +217,12 @@ int main() {
 
             if (fs::is_directory(destinationPath)) {
               activeExplorer->path = destinationPath;
-              refreshExplorer(*activeExplorer, activeExplorer, font, theme);
+              refreshExplorer(*activeExplorer, activeExplorer, font,
+                              theme->data);
             } else {
               createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
                                "The given path is invalid.", font, charSize,
-                               theme);
+                               theme->data);
             }
           }
           // open currently selected file
@@ -288,7 +242,8 @@ int main() {
 
             // refresh the explorer if the user opened a folder
             if (activeExplorer->activeFile[0]->data.data.size == "<DIR>") {
-              refreshExplorer(*activeExplorer, activeExplorer, font, theme);
+              refreshExplorer(*activeExplorer, activeExplorer, font,
+                              theme->data);
             }
           }
           break;
@@ -301,7 +256,7 @@ int main() {
           else if (activeExplorer) {
             openFolder(activeExplorer->path, "..");
 
-            refreshExplorer(*activeExplorer, activeExplorer, font, theme);
+            refreshExplorer(*activeExplorer, activeExplorer, font, theme->data);
           }
           break;
         case Keyboard::Left:
@@ -317,7 +272,7 @@ int main() {
         case Keyboard::Delete:
           if (activeExplorer && activeExplorer->activeFile[0]) {
             handleMenuButtons(explorer, explorers, activeExplorer, DELETE_ENTRY,
-                              TITLE, font, charSize, theme);
+                              TITLE, font, charSize, theme->data);
           }
 
           break;
@@ -340,32 +295,82 @@ int main() {
           }
           break;
         case Keyboard::Up:
-          // if (activeExplorer) {
-          //   if (activeExplorer->activeFile[0]) {
-          //     if (activeExplorer->activeFile[0]->prev) {
-          //       activeExplorer->activeFile[0]->data.state = F_INACTIVE;
-          //       activeExplorer->activeFile[0] =
-          //           activeExplorer->activeFile[0]->prev;
-          //       activeExplorer->activeFile[0]->data.state = F_SELECTED;
-          //     }
-          //   } else {
-          //     scrollFiles(activeExplorer, UP);
-          //   }
-          // }
+          if (activeExplorer) {
+            if (activeExplorer->activeFile[0]) {
+              Node<File> *p = activeExplorer->files.head; // file list iterator
+
+              while (p) {
+                p->data.state = F_INACTIVE;
+
+                p = p->next;
+              }
+              if (activeExplorer->activeFile[0]->prev) {
+                activeExplorer->activeFile[0]->data.state = F_INACTIVE;
+                activeExplorer->activeFile[0] =
+                    activeExplorer->activeFile[0]->prev;
+              }
+              activeExplorer->activeFile[0]->data.state = F_SELECTED;
+              // get  bounds of the area in which the files are displayed
+              int displayStartY =
+                  2 * activeExplorer->heightComp + activeExplorer->heightFile;
+
+              // get the bounds of the currently active file
+              FloatRect fileBounds = activeExplorer->activeFile[0]
+                                         ->data.background.getGlobalBounds();
+
+              // calculate offset for scroll
+              int offset = displayStartY - fileBounds.top;
+
+              // scroll if the currently active file is outside the screen
+              if (offset > 0) {
+                scrollFiles(activeExplorer, Direction(offset));
+              }
+            } else {
+              scrollFiles(activeExplorer, UP);
+            }
+          }
           break;
         case Keyboard::Down:
-          // if (activeExplorer) {
-          //   if (activeExplorer->activeFile[0]) {
-          //     if (activeExplorer->activeFile[0]->next) {
-          //       activeExplorer->activeFile[0]->data.state = F_INACTIVE;
-          //       activeExplorer->activeFile[0] =
-          //           activeExplorer->activeFile[0]->next;
-          //       activeExplorer->activeFile[0]->data.state = F_SELECTED;
-          //     }
-          //   } else {
-          //     scrollFiles(activeExplorer, DOWN);
-          //   }
-          // }
+          if (activeExplorer) {
+            if (activeExplorer->activeFile[0]) {
+              Node<File> *p = activeExplorer->files.tail; // file list iterator
+
+              // deselect all files
+              while (p) {
+                p->data.state = F_INACTIVE;
+
+                p = p->prev;
+              }
+
+              if (activeExplorer->activeFile[0]->next) {
+                // move to the next file
+                activeExplorer->activeFile[0] =
+                    activeExplorer->activeFile[0]->next;
+              }
+              activeExplorer->activeFile[0]->data.state = F_SELECTED;
+              // get  bounds of the area in which the files are displayed
+              int displayStartY =
+                  2 * activeExplorer->heightComp + activeExplorer->heightFile;
+              int displayHeight =
+                  activeExplorer->background.getGlobalBounds().height -
+                  3 * activeExplorer->heightComp - activeExplorer->heightFile;
+
+              // get the bounds of the currently active file
+              FloatRect fileBounds = activeExplorer->activeFile[0]
+                                         ->data.background.getGlobalBounds();
+
+              // calculate offset for scroll
+              int offset = displayStartY + displayHeight - fileBounds.top - 1;
+
+              // scroll if the currently active file is outside the screen
+              if (fileBounds.height > offset) {
+                scrollFiles(activeExplorer,
+                            Direction(offset - fileBounds.height));
+              }
+            } else {
+              scrollFiles(activeExplorer, DOWN);
+            }
+          }
           break;
         case Keyboard::F1: {
           string projectLink = "https://github.com/YorKnEz/total-commander";
@@ -390,7 +395,7 @@ int main() {
           if (activeExplorer && !activeExplorer->forestView) {
             handleMenuButtons(explorer, explorers, activeExplorer,
                               MenuButtons(event.key.code - Keyboard::F2), TITLE,
-                              font, charSize, theme);
+                              font, charSize, theme->data);
           }
           break;
         }
@@ -431,9 +436,11 @@ int main() {
         for (int i = 0; i < buttons; i++) {
           updateButtonState(button[i], event, CLICK, oldClick);
 
-          if (button[i].state == B_CLICKED && activeExplorer && !activeExplorer->forestView) {
+          if (button[i].state == B_CLICKED && activeExplorer &&
+              !activeExplorer->forestView) {
             handleMenuButtons(explorer, explorers, activeExplorer,
-                              MenuButtons(i), TITLE, font, charSize, theme);
+                              MenuButtons(i), TITLE, font, charSize,
+                              theme->data);
           }
         }
 
@@ -441,7 +448,7 @@ int main() {
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, DCLICK, activeExplorer,
-                                oldClick, activeInput, font, theme);
+                                oldClick, activeInput, font, theme->data);
           }
 
         }
@@ -471,7 +478,7 @@ int main() {
       }
     }
 
-    window.clear(theme.bgBody);
+    window.clear(theme->data.bgBody);
     for (int i = 0; i < explorers; i++) {
       drawExplorer(window, explorer[i]);
     }

@@ -1,9 +1,8 @@
 #ifndef DLLIST_H
 #define DLLIST_H
 
-#include "file.h"
-#include "theme.h"
 #include <iostream>
+#include <stdio.h>
 #include <string>
 
 using namespace std;
@@ -20,33 +19,99 @@ template <typename T> struct List {
   unsigned int length;
   Node<T> *head;
   Node<T> *tail;
+
+  // initializez an empty double linked list
+  void init() {
+    length = 0;
+    head = tail = NULL;
+  }
+
+  // adds an element of type File at index
+  void add(T data, unsigned int index) {
+    if (index > length)
+      return;
+
+    Node<T> *n = new Node<T>;
+    n->next = n->prev = NULL;
+    n->data = data;
+
+    if (length == 0) {
+      head = tail = n;
+    } else if (index == 0) {
+      n->next = head;
+      head->prev = n;
+      head = n;
+    } else if (index == length) {
+      n->prev = tail;
+      tail->next = n;
+      tail = n;
+    } else {
+      Node<T> *p = head;
+      unsigned int cIndex = 0;
+
+      while (cIndex < index) {
+        p = p->next;
+        cIndex++;
+      }
+
+      n->next = p;
+      n->prev = p->prev;
+
+      p->prev->next = n;
+      p->prev = n;
+    }
+
+    length++;
+  }
+
+  // remove an element at index
+  void remove(unsigned int index) {
+    if (index >= length)
+      return;
+
+    if (length == 1) {
+      head = tail = NULL;
+    } else if (index == 0) {
+      head = head->next;
+      delete head->prev;
+      head->prev = 0;
+    } else if (index == length - 1) {
+      tail = tail->prev;
+      delete tail->next;
+      tail->next = 0;
+    } else {
+      Node<T> *p = head;
+      unsigned int cIndex = 0;
+
+      while (cIndex < index) {
+        p = p->next;
+        cIndex++;
+      }
+
+      p->prev->next = p->next;
+      p->next->prev = p->prev;
+
+      delete p;
+    }
+
+    length--;
+  }
+
+  void free() {
+    Node<T> *p = head->next;
+
+    if (length == 0) {
+      return;
+    }
+
+    while (p) {
+      delete p->prev;
+
+      p = p->next;
+    }
+
+    delete p;
+  }
 };
-
-template <typename T> void init(List<T> &l);
-
-template <typename T> void add(List<T> &l, T data, unsigned int index);
-
-template <typename T> void remove(List<T> &l, unsigned int index);
-
-void printList(List<File> l);
-void printList(List<ColorTheme> l);
-
-template <typename T> void free(List<T> &l);
-
-void sort(List<File> &l, sortOrder order,
-          bool (*sortCriteria)(Node<File> *a, Node<File> *b, sortOrder order));
-
-// graphics related functions
-
-// updates the y screen position of each file
-void updateFilesY(List<File> &files, int y);
-
-// checks if any of the files has been clicked and stores it in
-// `activeFile`
-void updateFilesState(List<File> &files, Node<File> *activeFile[2], Event event,
-                      MouseEventType type, Vector2i &oldClick);
-
-// draws the files on the screen
-void drawFiles(RenderWindow &window, List<File> list, int miny, int maxy);
 
 #endif

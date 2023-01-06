@@ -2,11 +2,14 @@
 #define THEME_H
 
 #include "button.h"
+#include "dllist.h"
 #include "element.h"
 #include "file.h"
 #include "input.h"
 #include <SFML/Graphics.hpp>
-
+#include <filesystem>
+#include <stdio.h>
+#include <string>
 
 struct ColorTheme {
   Color textHighContrast, textMediumContrast, textLowContrast;
@@ -17,6 +20,11 @@ struct ColorTheme {
   StateColors inputStateColors[I_MAX_STATES];
 };
 
-extern ColorTheme dark;
+void printList(List<ColorTheme> l);
+
+void readColor(Color &color);
+
+// reads the themes file
+void loadThemes(List<ColorTheme> &themes);
 
 #endif

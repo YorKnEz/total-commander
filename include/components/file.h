@@ -32,6 +32,8 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 FileStateColors stateColors[F_MAX_STATES],
                 int borderThickness = 0);
 
+void updateFileTheme(File &file, FileStateColors stateColors[F_MAX_STATES]);
+
 void drawFile(RenderWindow &window, File file, bool filenameOnly = false);
 
 #endif
