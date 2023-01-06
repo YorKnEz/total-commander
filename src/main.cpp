@@ -159,6 +159,18 @@ int main() {
             refreshExplorer(*activeExplorer, activeExplorer, font, theme->data);
           }
           break;
+        case Keyboard::T:
+          if (kbd.isKeyPressed(Keyboard::LControl)) {
+            theme = (kbd.isKeyPressed(Keyboard::LShift)) ? theme->prev
+                                                         : theme->next;
+
+            for (int i = 0; i < explorers; i++) {
+              updateExplorerTheme(explorer[i], theme->data);
+            }
+
+            for (int i = 0; i < buttons; i++) {
+              updateButtonTheme(button[i], theme->data.buttonStateColors);
+            }
           }
           break;
         case Keyboard::V:
