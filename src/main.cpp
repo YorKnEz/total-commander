@@ -89,12 +89,14 @@ int main() {
        {Color(0xbbd7c0ff), Color(0x0e3d16ff), Color(0x0e3d16ff)},
        {Color(0xffffffff), Color(0x0e3d16ff), Color(0x051809ff)}}};
 
-  ColorTheme theme = dark;
+  Theme theme;
 
-  Font font;
-  font.loadFromFile("assets/hack.ttf");
+  theme.charSize = 12;
+  theme.font.loadFromFile("assets/hack.ttf");
+  // theme.folder.loadFromFile("assets/icons/folder.png");
+  theme.colors = dark;
 
-  int charSize = 12;
+  cout << theme.charSize << "\n";
 
   int buttons = 5;
   int btnWidth = WINDOW_W / buttons, btnHeight = 32;
@@ -103,18 +105,19 @@ int main() {
                                   "F5 Delete", "F6 Move"};
 
   for (int i = 0; i < buttons; i++) {
-    button[i] = createButton(buttonString[i], font, charSize, i * btnWidth + 2,
-                             WINDOW_H - btnHeight + 1, btnWidth - 2,
-                             btnHeight - 2, theme.buttonStateColors, 1);
+    button[i] =
+        createButton(buttonString[i], theme.font, theme.charSize,
+                     i * btnWidth + 2, WINDOW_H - btnHeight + 1, btnWidth - 2,
+                     btnHeight - 2, theme.colors.buttonStateColors, 1);
   }
 
   int explorers = 2;
   Explorer explorer[explorers];
 
   for (int i = 0; i < explorers; i++) {
-    explorer[i] = createExplorer(
-        getDefaultPath(), font, charSize, i * WINDOW_W / explorers, 0,
-        WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
+    explorer[i] =
+        createExplorer(getDefaultPath(), i * WINDOW_W / explorers, 0,
+                       WINDOW_W / explorers, WINDOW_H - btnHeight, theme);
   }
 
   // useful for determining double clicks
@@ -217,7 +220,7 @@ int main() {
         case Keyboard::R:
           // refresh current explorer
           if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
-            refreshExplorer(*activeExplorer, activeExplorer, font, theme);
+            refreshExplorer(*activeExplorer, activeExplorer, theme);
           }
           break;
         case Keyboard::V:
@@ -252,7 +255,7 @@ int main() {
             for (int i = 0; i < explorers; i++) {
               if (explorer[i].path == clipboardPath ||
                   explorer[i].path == activeExplorer->path) {
-                refreshExplorer(explorer[i], activeExplorer, font, theme);
+                refreshExplorer(explorer[i], activeExplorer, theme);
               }
             }
           }
@@ -264,11 +267,10 @@ int main() {
 
             if (fs::is_directory(destinationPath)) {
               activeExplorer->path = destinationPath;
-              refreshExplorer(*activeExplorer, activeExplorer, font, theme);
+              refreshExplorer(*activeExplorer, activeExplorer, theme);
             } else {
               createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
-                               "The given path is invalid.", font, charSize,
-                               theme);
+                               "The given path is invalid.", theme);
             }
           }
           // open currently selected file
@@ -288,7 +290,7 @@ int main() {
 
             // refresh the explorer if the user opened a folder
             if (activeExplorer->activeFile[0]->data.data.size == "<DIR>") {
-              refreshExplorer(*activeExplorer, activeExplorer, font, theme);
+              refreshExplorer(*activeExplorer, activeExplorer, theme);
             }
           }
           break;
@@ -301,7 +303,7 @@ int main() {
           else if (activeExplorer) {
             openFolder(activeExplorer->path, "..");
 
-            refreshExplorer(*activeExplorer, activeExplorer, font, theme);
+            refreshExplorer(*activeExplorer, activeExplorer, theme);
           }
           break;
         case Keyboard::Left:
@@ -317,7 +319,7 @@ int main() {
         case Keyboard::Delete:
           if (activeExplorer && activeExplorer->activeFile[0]) {
             handleMenuButtons(explorer, explorers, activeExplorer, DELETE_ENTRY,
-                              TITLE, font, charSize, theme);
+                              TITLE, theme);
           }
 
           break;
@@ -390,7 +392,7 @@ int main() {
           if (activeExplorer && !activeExplorer->forestView) {
             handleMenuButtons(explorer, explorers, activeExplorer,
                               MenuButtons(event.key.code - Keyboard::F2), TITLE,
-                              font, charSize, theme);
+                              theme);
           }
           break;
         }
@@ -409,7 +411,7 @@ int main() {
       case Event::MouseButtonReleased:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, RELEASE, activeExplorer,
-                              oldClick, activeInput, font);
+                              oldClick, activeInput, theme);
         }
 
         for (int i = 0; i < buttons; i++) {
@@ -431,9 +433,10 @@ int main() {
         for (int i = 0; i < buttons; i++) {
           updateButtonState(button[i], event, CLICK, oldClick);
 
-          if (button[i].state == B_CLICKED && activeExplorer && !activeExplorer->forestView) {
+          if (button[i].state == B_CLICKED && activeExplorer &&
+              !activeExplorer->forestView) {
             handleMenuButtons(explorer, explorers, activeExplorer,
-                              MenuButtons(i), TITLE, font, charSize, theme);
+                              MenuButtons(i), TITLE, theme);
           }
         }
 
@@ -441,7 +444,7 @@ int main() {
         if (clock.getElapsedTime().asMilliseconds() <= DCLICK_MAX_DELAY) {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, DCLICK, activeExplorer,
-                                oldClick, activeInput, font, theme);
+                                oldClick, activeInput, theme);
           }
 
         }
@@ -449,7 +452,7 @@ int main() {
         else {
           for (int i = 0; i < explorers; i++) {
             updateExplorerState(explorer[i], event, CLICK, activeExplorer,
-                                oldClick, activeInput, font);
+                                oldClick, activeInput, theme);
           }
         }
 
@@ -460,7 +463,7 @@ int main() {
       case Event::MouseMoved:
         for (int i = 0; i < explorers; i++) {
           updateExplorerState(explorer[i], event, MOVE, activeExplorer,
-                              oldClick, activeInput, font);
+                              oldClick, activeInput, theme);
         }
 
         for (int i = 0; i < buttons; i++) {
@@ -471,7 +474,7 @@ int main() {
       }
     }
 
-    window.clear(theme.bgBody);
+    window.clear(theme.colors.bgBody);
     for (int i = 0; i < explorers; i++) {
       drawExplorer(window, explorer[i]);
     }

@@ -2,8 +2,7 @@
 
 string createPopUp(int width, int height, PopUpType type, string windowTitle,
                    string textBoxString, string buttonString,
-                   string inputPlaceholder, string inputValue, Font &font,
-                   int charSize, ColorTheme theme) {
+                   string inputPlaceholder, string inputValue, Theme &theme) {
   RenderWindow window(VideoMode(width, height), windowTitle);
   // center window on the screen
   window.setPosition(
@@ -12,18 +11,19 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
 
   int compHeight = 30, btnWidth = 120, center = height / 2 - compHeight / 2;
 
-  TextBox textbox = createTextBox(
-      textBoxString, font, charSize, 20, center - 10 - compHeight, width - 40,
-      compHeight, theme.textMediumContrast, theme.bgBody, theme.border, 0);
+  TextBox textbox = createTextBox(textBoxString, theme.font, theme.charSize, 20,
+                                  center - 10 - compHeight, width - 40,
+                                  compHeight, theme.colors.textMediumContrast,
+                                  theme.colors.bgBody, theme.colors.border, 0);
 
-  Input input =
-      createInput(inputPlaceholder, inputValue, font, charSize, 20, center,
-                  width - 40 - 2, compHeight - 2, theme.inputStateColors, 1);
+  Input input = createInput(inputPlaceholder, inputValue, theme.font,
+                            theme.charSize, 20, center, width - 40 - 2,
+                            compHeight - 2, theme.colors.inputStateColors, 1);
 
   Button button =
-      createButton(buttonString, font, charSize, width / 2 - btnWidth / 2,
-                   center + compHeight + 10, btnWidth, compHeight,
-                   theme.buttonStateColors, 1);
+      createButton(buttonString, theme.font, theme.charSize,
+                   width / 2 - btnWidth / 2, center + compHeight + 10, btnWidth,
+                   compHeight, theme.colors.buttonStateColors, 1);
 
   Vector2i oldClick;     // the bounds of the last click
   RectangleShape cursor; // cursor to display on inputs
@@ -47,7 +47,7 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
           // check for errors
           if (res != "") {
             createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, windowTitle,
-                             res, font, charSize, theme);
+                             res, theme);
           }
           // return value if no error has been found
           else {
@@ -110,7 +110,7 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
           // check for errors
           if (res != "") {
             createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, windowTitle,
-                             res, font, charSize, theme);
+                             res, theme);
           }
           // return value if no error has been found
           else {
@@ -131,7 +131,7 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
       }
     }
 
-    window.clear(theme.bgBody);
+    window.clear(theme.colors.bgBody);
     drawTextBox(window, textbox);
     drawInput(window, input);
     drawButton(window, button);
@@ -143,17 +143,17 @@ string createPopUp(int width, int height, PopUpType type, string windowTitle,
 }
 
 void createErrorPopUp(int width, int height, string windowTitle,
-                      string errorText, Font &font, int charSize,
-                      ColorTheme theme) {
+                      string errorMessage, Theme &theme) {
   RenderWindow window(VideoMode(width, height), windowTitle);
   // center window on the screen
   window.setPosition(
       Vector2i(VideoMode::getDesktopMode().width / 2 - width / 2,
                VideoMode::getDesktopMode().height / 2 - height / 2));
 
-  TextBox textbox = createTextBox(errorText, font, charSize, 0, 0, width,
-                                  height, theme.textMediumContrast,
-                                  theme.bgLowContrast, theme.border, 1);
+  TextBox textbox =
+      createTextBox(errorMessage, theme.font, theme.charSize, 0, 0, width, height,
+                    theme.colors.textMediumContrast, theme.colors.bgLowContrast,
+                    theme.colors.border, 1);
 
   while (window.isOpen()) {
     Event event;
@@ -163,13 +163,11 @@ void createErrorPopUp(int width, int height, string windowTitle,
         window.close();
         break;
       case Event::KeyPressed:
-        // if (event.key.code == Keyboard::Enter) {
         window.close();
-        // }
         break;
       }
 
-      window.clear(theme.bgBody);
+      window.clear(theme.colors.bgBody);
       drawTextBox(window, textbox);
       window.display();
     }
@@ -200,8 +198,7 @@ string checkInput(string inputValue, PopUpType type) {
 
 void handleMenuButtons(Explorer *explorer, int explorers,
                        Explorer *activeExplorer, MenuButtons button,
-                       string windowTitle, Font &font, int charSize,
-                       ColorTheme theme) {
+                       string windowTitle, Theme &theme) {
   string newPath = "";
   string newName, currentEntryName, currentEntryExt, currentEntry;
 
@@ -209,7 +206,7 @@ void handleMenuButtons(Explorer *explorer, int explorers,
   case MKDIR:
     newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_FILENAME,
                           windowTitle, "Folder name: ", "OK", "Folder name", "",
-                          font, charSize, theme);
+                          theme);
 
     if (!newName.empty()) {
       createFolder(activeExplorer->path, newName);
@@ -220,7 +217,7 @@ void handleMenuButtons(Explorer *explorer, int explorers,
     if (activeExplorer->activeFile[0]) {
       newPath = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH,
                             windowTitle, "Copy to:", "OK", "Destination path",
-                            activeExplorer->path, font, charSize, theme);
+                            activeExplorer->path, theme);
 
       if (!newPath.empty()) {
         Node<File> *p = activeExplorer->files.head;
@@ -274,7 +271,7 @@ void handleMenuButtons(Explorer *explorer, int explorers,
     if (activeExplorer->activeFile[0]) {
       newPath = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_PATH,
                             windowTitle, "Move to:", "OK", "Destination path",
-                            activeExplorer->path, font, charSize, theme);
+                            activeExplorer->path, theme);
 
       if (!newPath.empty()) {
         Node<File> *p = activeExplorer->files.head;
@@ -303,9 +300,9 @@ void handleMenuButtons(Explorer *explorer, int explorers,
   case RENAME_ENTRY:
     if (activeExplorer->activeFile[0]) {
 
-      newName = createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_FILENAME,
-                            windowTitle, "Rename to: ", "OK", "New name", "",
-                            font, charSize, theme);
+      newName =
+          createPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, GET_FILENAME,
+                      windowTitle, "Rename to: ", "OK", "New name", "", theme);
 
       if (!newName.empty()) {
         Node<File> *p = activeExplorer->files.head;
@@ -336,7 +333,7 @@ void handleMenuButtons(Explorer *explorer, int explorers,
   for (int i = 0; i < explorers; i++) {
     if (explorer[i].path == activeExplorer->path ||
         explorer[i].path == newPath) {
-      refreshExplorer(explorer[i], activeExplorer, font, theme);
+      refreshExplorer(explorer[i], activeExplorer, theme);
     }
   }
 }

@@ -7,7 +7,6 @@
 #include "input.h"
 #include <SFML/Graphics.hpp>
 
-
 struct ColorTheme {
   Color textHighContrast, textMediumContrast, textLowContrast;
   Color bgBody, bgLowContrast;
@@ -17,6 +16,11 @@ struct ColorTheme {
   StateColors inputStateColors[I_MAX_STATES];
 };
 
+struct Theme {
+  int charSize;
+  Font font;
 extern ColorTheme dark;
+  ColorTheme colors;
+};
 
 #endif

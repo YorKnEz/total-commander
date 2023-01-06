@@ -24,7 +24,7 @@ enum Direction { UP = 50, DOWN = -50 };
 
 struct Explorer {
   string path;
-  
+
   List<File> files;
   sortBy sortedBy = FILE_NAME;
   sortOrder order = ASC;
@@ -34,7 +34,7 @@ struct Explorer {
   Forest fileForest;
   string activeForestPath;
   Forest *activeForest = nullptr;
-  
+
   int scrollOffset;
   int heightFile; // height of the files on the screen
   int heightComp; // height of the other components
@@ -53,18 +53,16 @@ void sortFiles(Explorer &explorer, sortBy criteria);
 
 void scrollFiles(Explorer *activeExplorer, Direction d);
 
-Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
-                        int width, int height, ColorTheme theme);
+Explorer createExplorer(string path, int x, int y, int width, int height,
+                        Theme &theme);
 
-void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
-                     ColorTheme theme);
+void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Theme &theme);
 
 void updateExplorerIndicator(Explorer *explorer, Explorer *&activeExplorer);
 
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,
-                         Input *&activeInput, Font &font,
-                         ColorTheme theme = {});
+                         Input *&activeInput, Theme &theme);
 
 void drawExplorer(RenderWindow &window, Explorer explorer);
 
