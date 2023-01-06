@@ -160,7 +160,7 @@ void getFilesFromPath(List<File> &l, string path, Font &font, int charSize, int 
     element =
         createFile(filedata, font, charSize, x, y, width, height, stateColors);
 
-    add(l, element, lastDir);
+    l.add(element, lastDir);
     lastDir++;
   }
   // goes through the content of the current path
@@ -210,11 +210,11 @@ void getFilesFromPath(List<File> &l, string path, Font &font, int charSize, int 
                            stateColors);
 
       if (!size.compare("<DIR>")) {
-        add(l, element, lastDir);
+        l.add(element, lastDir);
 
         lastDir++;
       } else {
-        add(l, element, l.length);
+        l.add(element, l.length);
       }
     } catch (fs::filesystem_error) {
     }

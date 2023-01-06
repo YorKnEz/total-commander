@@ -135,7 +135,7 @@ Explorer createExplorer(string path, Font &font, int charSize, int x, int y,
   explorer.forestView = false;
 
   // initialize the files list
-  init(explorer.files);
+  explorer.files.init();
 
   getFilesFromPath(explorer.files, path, font, charSize, x,
                    y + 2 * explorer.heightComp + explorer.heightFile,
@@ -241,8 +241,8 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer, Font &font,
   File file = explorer.files.head->data;
 
   // delete old files list
-  free(explorer.files);
-  init(explorer.files);
+  explorer.files.free();
+  explorer.files.init();
 
   // get the new files from the new path
   getFilesFromPath(
@@ -423,7 +423,7 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
           // if the forest is empty, add its contents
           if (explorer.activeForest->length == 0) {
             List<File> newFiles; // for storing the content of the opened folder
-            init(newFiles);
+            newFiles.init();
 
             File file = explorer.fileForest.files[0].data;
 
@@ -537,6 +537,6 @@ void drawExplorer(RenderWindow &window, Explorer explorer) {
 }
 
 void closeExplorer(Explorer &explorer) {
-  free(explorer.files);
+  explorer.files.free();
   free(explorer.fileForest);
 }

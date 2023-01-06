@@ -127,7 +127,7 @@ int main() {
   string clipboardPath;
   bool cut = false;
   List<File> clipboard;
-  init(clipboard);
+  clipboard.init();
 
   while (window.isOpen()) {
     Event event;
@@ -174,8 +174,8 @@ int main() {
         case Keyboard::C:
           // copy currently selected files into the clipboard
           if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
-            free(clipboard);
-            init(clipboard);
+            clipboard.free();
+            clipboard.init();
             clipboardPath = activeExplorer->path;
 
             Node<File> *p = activeExplorer->files.head;
@@ -183,7 +183,7 @@ int main() {
             while (p) {
               if (p->data.state == F_SELECTED &&
                   p->data.data.filename.compare("..")) {
-                add(clipboard, p->data, clipboard.length);
+                clipboard.add(p->data, clipboard.length);
               }
 
               p = p->next;

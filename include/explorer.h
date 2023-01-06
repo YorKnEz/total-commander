@@ -2,7 +2,7 @@
 #define EXPLORER_H
 
 #include "button.h"
-#include "dllist.h"
+#include "dllist-file.h"
 #include "element.h"
 #include "forest.h"
 #include "input.h"
