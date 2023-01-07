@@ -138,7 +138,7 @@ void loadThemes(List<Theme> &themes) {
 
   // de citit din file de pus in variabila si de adaugat variabila in lista
   while (cin >> entry) {
-    cin >> currentTheme.charSize; // read char size
+    cin >> std::dec >> currentTheme.charSize; // read char size
     cin.get();
     getline(cin, path); // get path of the font
 
