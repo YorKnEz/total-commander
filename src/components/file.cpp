@@ -85,6 +85,10 @@ void updateFileTheme(File &file, FileStateColors stateColors[F_MAX_STATES]) {
   file.ext.setFillColor(stateColors[file.state].textLowContrast);
   file.size.setFillColor(stateColors[file.state].textLowContrast);
   file.date.setFillColor(stateColors[file.state].textLowContrast);
+
+  if (file.data.path.size() > 0) {
+    file.path.setFillColor(stateColors[file.state].textLowContrast);
+  }
 }
 
 void drawFile(RenderWindow &window, File file, bool filenameOnly) {
@@ -108,5 +112,10 @@ void drawFile(RenderWindow &window, File file, bool filenameOnly) {
     drawText(window, file.ext);
     drawText(window, file.size);
     drawText(window, file.date);
+  }
+
+  if (file.data.path.size() > 0) {
+    file.path.setFillColor(file.stateColors[file.state].textLowContrast);
+    drawText(window, file.path);
   }
 }

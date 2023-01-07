@@ -173,7 +173,8 @@ int main() {
             }
 
             for (int i = 0; i < buttons; i++) {
-              updateButtonTheme(button[i], theme->data.colors.buttonStateColors);
+              updateButtonTheme(button[i],
+                                theme->data.colors.buttonStateColors);
             }
           }
           break;
@@ -216,35 +217,54 @@ int main() {
           break;
         case Keyboard::Enter: {
           // submit input
-          if (activeInput) {
-            string destinationPath = evalPath(activeInput->value);
+          if (activeExplorer) {
+            if (activeInput) {
+              if (activeExplorer->search) {
+                // get current head of the file to exctract it's props
+                FloatRect fileBounds = activeExplorer->files.head->data
+                                           .background.getGlobalBounds();
 
-            if (fs::is_directory(destinationPath)) {
-              activeExplorer->path = destinationPath;
-              refreshExplorer(*activeExplorer, activeExplorer, theme->data);
-            } else {
-              createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
-                               "The given path is invalid.", theme->data);
+                // get rid of the old files
+                activeExplorer->files.free();
+                activeExplorer->files.init();
+
+                searchFile(activeExplorer->files, activeExplorer->path,
+                           activeInput->value, theme->data, fileBounds.left,
+                           fileBounds.top, fileBounds.width, fileBounds.height);
+
+                refreshExplorer(*activeExplorer, activeExplorer, theme->data);
+              } else {
+                string destinationPath = evalPath(activeInput->value);
+
+                if (fs::is_directory(destinationPath)) {
+                  activeExplorer->path = destinationPath;
+                  refreshExplorer(*activeExplorer, activeExplorer, theme->data);
+                } else {
+                  createErrorPopUp(POP_UP_DEFAULT_W, POP_UP_DEFAULT_H, "Error",
+                                   "The given path is invalid.", theme->data);
+                }
+              }
             }
-          }
-          // open currently selected file
-          else if (activeExplorer && activeExplorer->activeFile[0]) {
-            string currentEntryName =
-                activeExplorer->activeFile[0]->data.data.filename;
-            string currentEntryExt =
-                activeExplorer->activeFile[0]->data.data.ext;
-            string currentEntry = currentEntryName;
+            // open currently selected file
+            else if (activeExplorer->activeFile[0]) {
+              string currentEntryName =
+                  activeExplorer->activeFile[0]->data.data.filename;
+              string currentEntryExt =
+                  activeExplorer->activeFile[0]->data.data.ext;
+              string currentEntry = currentEntryName;
 
-            // add the extension to the crt entry if it exists
-            if (!currentEntryExt.empty()) {
-              currentEntry += "." + currentEntryExt;
-            }
+              // add the extension to the crt entry if it exists
+              if (!currentEntryExt.empty()) {
+                currentEntry += "." + currentEntryExt;
+              }
 
-            openEntry(activeExplorer->path, currentEntryName, currentEntryExt);
+              openEntry(activeExplorer->path, currentEntryName,
+                        currentEntryExt);
 
-            // refresh the explorer if the user opened a folder
-            if (activeExplorer->activeFile[0]->data.data.size == "<DIR>") {
-              refreshExplorer(*activeExplorer, activeExplorer, theme->data);
+              // refresh the explorer if the user opened a folder
+              if (activeExplorer->activeFile[0]->data.data.size == "<DIR>") {
+                refreshExplorer(*activeExplorer, activeExplorer, theme->data);
+              }
             }
           }
           break;

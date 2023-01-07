@@ -92,26 +92,34 @@ bool byDate(Node<File> *a, Node<File> *b, sortOrder order) {
   return byName(a, b, order);
 }
 
-void searchFile(List<File> &search, string path, string nameToSearch) {
-  path = evalPath(path);
-
-  if (!isValidPath(path) || !fs::is_directory(path)) {
-    return;
-  }
-  try {
-
-    for (const auto &entry : fs::directory_iterator(path)) {
+void searchFile(List<File> &results, string path, string searchQuery,
+                Theme &theme, int x, int y, int width, int height) {
+  for (const auto &entry : fs::directory_iterator(path)) {
+    try {
       string filename = (entry.path().filename()).generic_string();
 
-      if (filename.find(nameToSearch) != string::npos) {
-        // cout << filename << "\n"; (replace with list)
+      if (filename.find(searchQuery) != string::npos) {
+        File result = getFileFromEntry(entry, theme, x, y, width, height + 8);
+
+        result.data.path = path;
+
+        result.path = createText(
+            path, theme.font, theme.charSize,
+            result.filename.getGlobalBounds().left,
+            result.filename.getGlobalBounds().top,
+            result.filenameColumn - result.icon.getGlobalBounds().width - 4,
+            result.stateColors[result.state].textLowContrast);
+
+        results.add(result, results.length);
       }
 
-      if (entry.is_directory()) {
-        searchFile(search, evalPath(path + SEP + filename), nameToSearch);
+      string newPath = path + SEP + filename;
+
+      if (fs::is_directory(newPath)) {
+        searchFile(results, newPath, searchQuery, theme, x, y, width, height);
       }
+    } catch (fs::filesystem_error) {
     }
-  } catch (fs::filesystem_error) {
   }
 }
 
@@ -131,10 +139,56 @@ string getDefaultPath() {
   return path;
 }
 
+File getFileFromEntry(const auto entry, Theme &theme, int x, int y, int width,
+                      int height) {
+  // converts filename path to string
+  fs::path directoryPath = entry.path().filename();
+  string filename = directoryPath.generic_string();
+  string size;
+
+  // gets the date at which the current file was last modified
+  const auto fileTime = fs::last_write_time(entry.path());
+  // converts the result to system time
+  const auto systemTime = chrono::file_clock::to_sys(fileTime);
+  // converts the new result to time_t (seconds that have passed since
+  // epoch time - 1 January 1970 00:00:00) / to UNIX timestamp
+  const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
+
+  // checks whether the current entry is a file or a directory and sets
+  // the size accordingly (directory size = "<DIR>", file size is an
+  // integer value)
+  if (is_regular_file(entry.path())) {
+    size = compressSize(file_size(entry.path()));
+  } else
+    size = "<DIR>";
+
+  // generates a converted string from timestamp to GMT
+  string date = asctime(gmtime(&time));
+  Filedata filedata;
+
+  // generates the filedata with the previously obtained strings and adds
+  // them to the list
+  filedata.filename = filename;
+  filedata.size = size;
+  filedata.date = formatDate(date);
+
+  int lastDotPos = filedata.filename.find_last_of('.');
+
+  if (lastDotPos != string::npos && lastDotPos != 0 &&
+      filedata.size.compare("<DIR>")) {
+    filedata.ext = filedata.filename.substr(lastDotPos + 1);
+    filedata.filename.erase(filedata.filename.find_last_of('.'));
+  } else {
+    filedata.ext = "";
+  }
+
+  return createFile(filedata, theme.font, theme.charSize, x, y, width, height,
+                    theme.colors.fileStateColors, theme.fileIcons);
+}
+
 // generates a list of files containing data about the path's content
 void getFilesFromPath(List<File> &l, string path, int x, int y, int width,
-                      int height, Theme &theme,
-                      bool ignoreBackwardsFolder) {
+                      int height, Theme &theme, bool ignoreBackwardsFolder) {
   // lastDir is used in order to separate files from directories in the list.
   // The directories are inserted after the last directory or at the beginning
   // of the list if there are none, and the files are always added at the end.
@@ -143,7 +197,7 @@ void getFilesFromPath(List<File> &l, string path, int x, int y, int width,
   Filedata filedata;
   File element;
 
-  if (!ignoreBackwardsFolder) {
+  if (path != getDefaultPath() && !ignoreBackwardsFolder) {
     // adds the special ".." folder to the list
     const auto fileTime = fs::last_write_time("..");
     const auto systemTime = chrono::file_clock::to_sys(fileTime);
@@ -165,51 +219,9 @@ void getFilesFromPath(List<File> &l, string path, int x, int y, int width,
   // goes through the content of the current path
   for (const auto &entry : fs::directory_iterator(path)) {
     try {
-      // converts filename path to string
-      fs::path directoryPath = entry.path().filename();
-      string filename = directoryPath.generic_string();
-      string size;
+      element = getFileFromEntry(entry, theme, x, y, width, height);
 
-      // gets the date at which the current file was last modified
-      const auto fileTime = fs::last_write_time(entry.path());
-      // converts the result to system time
-      const auto systemTime = chrono::file_clock::to_sys(fileTime);
-      // converts the new result to time_t (seconds that have passed since
-      // epoch time - 1 January 1970 00:00:00) / to UNIX timestamp
-      const auto time = chrono::system_clock::to_time_t(systemTime) + 7200;
-
-      // checks whether the current entry is a file or a directory and sets
-      // the size accordingly (directory size = "<DIR>", file size is an
-      // integer value)
-
-      if (is_regular_file(entry.path())) {
-        size = compressSize(file_size(entry.path()));
-      } else
-        size = "<DIR>";
-
-      // generates a converted string from timestamp to GMT
-      string date = asctime(gmtime(&time));
-      Filedata filedata;
-
-      // generates the filedata with the previously obtained strings and adds
-      // them to the list
-      filedata.filename = filename;
-      filedata.size = size;
-      filedata.date = formatDate(date);
-      int lastDotPos = filedata.filename.find_last_of('.');
-
-      if (lastDotPos != string::npos && lastDotPos != 0 &&
-          filedata.size.compare("<DIR>")) {
-        filedata.ext = filedata.filename.substr(lastDotPos + 1);
-        filedata.filename.erase(filedata.filename.find_last_of('.'));
-      } else
-        filedata.ext = "";
-
-      element =
-          createFile(filedata, theme.font, theme.charSize, x, y, width, height,
-                     theme.colors.fileStateColors, theme.fileIcons);
-
-      if (!size.compare("<DIR>")) {
+      if (!element.data.size.compare("<DIR>")) {
         l.add(element, lastDir);
 
         lastDir++;

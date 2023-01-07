@@ -12,6 +12,7 @@ struct Filedata {
   string ext;
   string size;
   string date;
+  string path = ""; // for searching
 };
 
 struct FileStateColors {
@@ -28,7 +29,7 @@ struct File {
   Filedata data;
   Sprite icon;
   int filenameColumn, extColumn, sizeColumn, dateColumn;
-  Text filename, ext, size, date;
+  Text filename, ext, size, date, path;
   FileState state;
 };
 

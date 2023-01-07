@@ -36,14 +36,17 @@ struct Explorer {
   string activeForestPath;
   Forest *activeForest = nullptr;
 
+  bool search; // search toggle
+  Input input;
+
   int scrollOffset;
   int heightFile; // height of the files on the screen
   int heightComp; // height of the other components
   RectangleShape background;
   Button button[MAX_BUTTONS]; // 0-3: sorting, 4: toggle forestView, 5: toggle search
   TextBox textbox[2];
-  ExplorerState state;
   Scrollbar scrollbar;
+  ExplorerState state;
 };
 
 void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
