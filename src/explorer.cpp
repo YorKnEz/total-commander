@@ -339,70 +339,64 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
   }
 
   // update the state of the sort buttons
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < MAX_BUTTONS; i++) {
     updateButtonState(explorer.button[i], event, type, oldClick);
 
     if (explorer.button[i].state == B_CLICKED ||
         explorer.button[i].state == B_DCLICKED) {
-      sortFiles(explorer, sortBy(i), &theme.upArrow, &theme.downArrow);
+      if (i < 4) {
+        sortFiles(explorer, sortBy(i), &theme.upArrow, &theme.downArrow);
+      } else if (i == 4) {
+        explorer.forestView = !explorer.forestView;
+
+        // initialize the file forest
+        if (explorer.forestView) {
+          Node<File> *oldHead = explorer.files.head;
+          explorer.files.head = oldHead->next;
+          explorer.files.length--;
+
+          init(explorer.fileForest, explorer.files,
+               explorer.files.head->data.background.getGlobalBounds().width);
+
+          explorer.files.head = oldHead;
+          explorer.files.length++;
+
+          // get scrollable height
+          int scrollableHeight =
+              getFileForestHeight(explorer.fileForest, explorer.heightFile);
+
+          // update the scrollable height
+          updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
+          updateScrollableHeight(explorer.scrollbar, scrollableHeight);
+
+          // update the coords of the files draw on the screen
+          int x = explorer.files.head->data.background.getPosition().x;
+          int y = explorer.files.head->data.background.getPosition().y;
+
+          updateFileForestXY(explorer.fileForest, x, y);
+        }
+        // free the file forest and restore the file list
+        else {
+          free(explorer.fileForest);
+
+          // update the scrollable height
+          int scrollableHeight =
+              (explorer.heightFile + 1) * explorer.files.length;
+
+          // update the scrollable height
+          updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
+          updateScrollableHeight(explorer.scrollbar, scrollableHeight);
+
+          // update the coords of the files draw on the screen
+          int y = explorer.files.head->data.background.getPosition().y;
+
+          updateFilesY(explorer.files, y);
+        }
 
       // turn off the button to avoid side effects (such as the event triggering
       // multipel times)
       explorer.button[i].state = B_INACTIVE;
     }
-  }
-
-  // update the state of the other buttons
-  updateButtonState(explorer.button[4], event, type, oldClick);
-
-  if (explorer.button[4].state == B_CLICKED ||
-      explorer.button[4].state == B_DCLICKED) {
-    explorer.forestView = !explorer.forestView;
-
-    // initialize the file forest
-    if (explorer.forestView) {
-      Node<File> *oldHead = explorer.files.head;
-      explorer.files.head = oldHead->next;
-      explorer.files.length--;
-
-      init(explorer.fileForest, explorer.files,
-           explorer.files.head->data.background.getGlobalBounds().width);
-
-      explorer.files.head = oldHead;
-      explorer.files.length++;
-
-      // get scrollable height
-      int scrollableHeight =
-          getFileForestHeight(explorer.fileForest, explorer.heightFile);
-
-      // update the scrollable height
-      updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
-      updateScrollableHeight(explorer.scrollbar, scrollableHeight);
-
-      // update the coords of the files draw on the screen
-      int x = explorer.files.head->data.background.getPosition().x;
-      int y = explorer.files.head->data.background.getPosition().y;
-
-      updateFileForestXY(explorer.fileForest, x, y);
-    }
-    // free the file forest and restore the file list
-    else {
-      free(explorer.fileForest);
-
-      // update the scrollable height
-      int scrollableHeight = (explorer.heightFile + 1) * explorer.files.length;
-
-      // update the scrollable height
-      updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
-      updateScrollableHeight(explorer.scrollbar, scrollableHeight);
-
-      // update the coords of the files draw on the screen
-      int y = explorer.files.head->data.background.getPosition().y;
-
-      updateFilesY(explorer.files, y);
-    }
-
-    explorer.button[4].state = B_INACTIVE;
   }
 
   updateScrollbarState(explorer, event, type, oldClick);
@@ -521,7 +515,7 @@ void updateExplorerTheme(Explorer &explorer, Theme &theme) {
     updateFileForestTheme(explorer.fileForest, theme.colors.fileStateColors);
   }
 
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < MAX_BUTTONS; i++) {
     updateButtonTheme(explorer.button[i], theme.colors.buttonStateColors);
   }
 
@@ -543,17 +537,15 @@ void drawExplorer(RenderWindow &window, Explorer explorer) {
     drawFiles(window, explorer.files, miny, maxy);
   }
 
-  for (int i = 0; i < 4; i++) {
-    drawButton(window, explorer.button[i]);
-  }
-
   drawInput(window, explorer.input);
 
   for (int i = 0; i < 2; i++) {
     drawTextBox(window, explorer.textbox[i]);
   }
 
-  drawButton(window, explorer.button[4]);
+  for (int i = 0; i < MAX_BUTTONS; i++) {
+    drawButton(window, explorer.button[i]);
+  }
 
   drawScrollbar(window, explorer.scrollbar);
 }
