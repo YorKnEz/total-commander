@@ -132,9 +132,8 @@ string getDefaultPath() {
 }
 
 // generates a list of files containing data about the path's content
-void getFilesFromPath(List<File> &l, string path, Font &font, int charSize,
-                      int x, int y, int width, int height,
-                      FileStateColors stateColors[F_MAX_STATES],
+void getFilesFromPath(List<File> &l, string path, int x, int y, int width,
+                      int height, Theme &theme,
                       bool ignoreBackwardsFolder) {
   // lastDir is used in order to separate files from directories in the list.
   // The directories are inserted after the last directory or at the beginning
@@ -157,8 +156,8 @@ void getFilesFromPath(List<File> &l, string path, Font &font, int charSize,
     filedata.date = formatDate(date);
     filedata.ext = "";
 
-    element =
-        createFile(filedata, font, charSize, x, y, width, height, stateColors);
+    element = createFile(filedata, theme.font, theme.charSize, x, y, width,
+                         height, theme.colors.fileStateColors, theme.fileIcons);
 
     l.add(element, lastDir);
     lastDir++;
@@ -206,8 +205,9 @@ void getFilesFromPath(List<File> &l, string path, Font &font, int charSize,
       } else
         filedata.ext = "";
 
-      element = createFile(filedata, font, charSize, x, y, width, height,
-                           stateColors);
+      element =
+          createFile(filedata, theme.font, theme.charSize, x, y, width, height,
+                     theme.colors.fileStateColors, theme.fileIcons);
 
       if (!size.compare("<DIR>")) {
         l.add(element, lastDir);
@@ -241,20 +241,6 @@ void sortFiletree(List<File> &l, sortBy criteria, sortOrder order) {
     cout << "Invalid sort option\n";
     break;
   }
-}
-
-Node<File> *find(List<File> l, string filename) {
-  Node<File> *p = l.head;
-
-  while (p) {
-    if (!p->data.data.filename.compare(filename)) {
-      return p;
-    }
-
-    p = p->next;
-  }
-
-  return NULL;
 }
 
 string evalPath(string path) {

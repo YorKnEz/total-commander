@@ -1,0 +1,49 @@
+themeName:
+// char size
+charSize
+// font location
+fontPath
+// icons location
+iconsPath
+// colors of the theme
+textHighContrast
+textMediumContrast
+textLowContrast
+bgBody
+bgLowContrast
+border
+// button state colors
+text background border // B_INACTIVE
+text background border // B_HOVERED
+text background border // B_CLICKED
+text background border // B_DCLICKED
+// file state colors
+textHighContrast textLowContrast background border // F_INACTIVE
+textHighContrast textLowContrast background border // F_SELECTED
+textHighContrast textLowContrast background border // F_DCLICKED
+// input state colors
+text background border // I_INACTIVE
+text background border // I_HOVERED
+text background border // I_CLICKED
+
+// as an example, here is the default dark theme:
+dark:
+12
+assets/hack.ttf
+assets/icons/dark
+FFFFFFFF
+999995FF
+5B5C55FF
+32332BFF
+191A16FF
+0A0A09FF
+848580FF 282922FF 0A0A09FF
+C2C2BFFF 282922FF 191A16FF
+FFFFFFFF 282922FF 0A0A09FF
+FFFFFFFF 282922FF 0A0A09FF
+999995FF 5B5C55FF 32332BFF 0A0A09FF
+999995FF 5B5C55FF 00FF0032 0A0A09FF
+999995FF 5B5C55FF 0000FF32 0A0A09FF
+848580FF 191A16FF 0A0A09FF
+C2C2BFFF 191A16FF 191A16FF
+FFFFFFFF 191A16FF 0A0A09FF

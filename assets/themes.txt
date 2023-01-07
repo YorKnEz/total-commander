@@ -1,4 +1,7 @@
 dark:
+12
+assets/hack.ttf
+assets/icons/dark
 FFFFFFFF
 999995FF
 5B5C55FF
@@ -16,6 +19,9 @@ FFFFFFFF 282922FF 0A0A09FF
 C2C2BFFF 191A16FF 191A16FF
 FFFFFFFF 191A16FF 0A0A09FF
 yellow:
+12
+assets/hack.ttf
+assets/icons/dark
 ffffffff
 fedd81ff
 fdc835ff
@@ -33,6 +39,9 @@ fdd668ff 7e5d02ff 322501ff
 4c3801ff 7e5d02ff 7e5d02ff
 ffffffff 7e5d02ff 322501ff
 green:
+12
+assets/hack.ttf
+assets/icons/dark
 ffffffff
 8dbd96ff
 499556ff

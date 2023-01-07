@@ -1,7 +1,7 @@
 #include "theme.h"
 
-void printList(List<ColorTheme> l) {
-  Node<ColorTheme> *p = l.head;
+void printList(List<Theme> l) {
+  Node<Theme> *p = l.head;
   unsigned int index = 0;
 
   if (l.length == 0) {
@@ -9,26 +9,32 @@ void printList(List<ColorTheme> l) {
   }
 
   do {
-    cout << "Text High Contrast: " << std::hex
-         << p->data.textHighContrast.toInteger() << "\n";
-    cout << "Text Medium Contrast: " << std::hex
-         << p->data.textMediumContrast.toInteger() << "\n";
-    cout << "Text Low Contrast: " << std::hex
-         << p->data.textLowContrast.toInteger() << "\n\n";
+    cout << "Char Size: " << p->data.charSize << "\n\n";
 
-    cout << "Background Body : " << std::hex << p->data.bgBody.toInteger()
+    ColorTheme currentColors = p->data.colors;
+
+    cout << "Text High Contrast: " << std::hex
+         << currentColors.textHighContrast.toInteger() << "\n";
+    cout << "Text Medium Contrast: " << std::hex
+         << currentColors.textMediumContrast.toInteger() << "\n";
+    cout << "Text Low Contrast: " << std::hex
+         << currentColors.textLowContrast.toInteger() << "\n\n";
+
+    cout << "Background Body : " << std::hex << currentColors.bgBody.toInteger()
          << "\n";
     cout << "Background Low Contrast: " << std::hex
-         << p->data.bgLowContrast.toInteger() << "\n\n";
+         << currentColors.bgLowContrast.toInteger() << "\n\n";
 
-    cout << "Border: " << std::hex << p->data.border.toInteger() << "\n\n";
+    cout << "Border: " << std::hex << currentColors.border.toInteger()
+         << "\n\n";
 
     for (int i = 0; i < B_MAX_STATES; i++) {
       cout << "Button State " << i << " Colors " << std::hex
-           << p->data.buttonStateColors[i].text.toInteger() << " | ";
-      cout << std::hex << p->data.buttonStateColors[i].background.toInteger()
+           << currentColors.buttonStateColors[i].text.toInteger() << " | ";
+      cout << std::hex
+           << currentColors.buttonStateColors[i].background.toInteger()
            << " | ";
-      cout << std::hex << p->data.buttonStateColors[i].border.toInteger()
+      cout << std::hex << currentColors.buttonStateColors[i].border.toInteger()
            << "\n";
     }
 
@@ -36,22 +42,25 @@ void printList(List<ColorTheme> l) {
 
     for (int i = 0; i < F_MAX_STATES; i++) {
       cout << "Input State " << i << " Colors " << std::hex
-           << p->data.fileStateColors[i].textHighContrast.toInteger() << " | ";
-      cout << std::hex << p->data.fileStateColors[i].textLowContrast.toInteger()
+           << currentColors.fileStateColors[i].textHighContrast.toInteger()
            << " | ";
-      cout << std::hex << p->data.fileStateColors[i].background.toInteger()
+      cout << std::hex
+           << currentColors.fileStateColors[i].textLowContrast.toInteger()
            << " | ";
-      cout << std::hex << p->data.fileStateColors[i].border.toInteger() << "\n";
+      cout << std::hex
+           << currentColors.fileStateColors[i].background.toInteger() << " | ";
+      cout << std::hex << currentColors.fileStateColors[i].border.toInteger()
+           << "\n";
     }
 
     cout << "\n";
 
     for (int i = 0; i < I_MAX_STATES; i++) {
       cout << "Input State " << i << " Colors " << std::hex
-           << p->data.inputStateColors[i].text.toInteger() << " | ";
-      cout << std::hex << p->data.inputStateColors[i].background.toInteger()
-           << " | ";
-      cout << std::hex << p->data.inputStateColors[i].border.toInteger()
+           << currentColors.inputStateColors[i].text.toInteger() << " | ";
+      cout << std::hex
+           << currentColors.inputStateColors[i].background.toInteger() << " | ";
+      cout << std::hex << currentColors.inputStateColors[i].border.toInteger()
            << "\n";
     }
 
@@ -67,47 +76,87 @@ void readColor(Color &color) {
   color = Color(colorCode);
 }
 
-void loadThemes(List<ColorTheme> &themes) {
+void readColorTheme(ColorTheme &colors) {
+  readColor(colors.textHighContrast);
+  readColor(colors.textMediumContrast);
+  readColor(colors.textLowContrast);
+
+  readColor(colors.bgBody);
+  readColor(colors.bgLowContrast);
+
+  readColor(colors.border);
+
+  for (int i = 0; i < B_MAX_STATES; i++) {
+    readColor(colors.buttonStateColors[i].text);
+    readColor(colors.buttonStateColors[i].background);
+    readColor(colors.buttonStateColors[i].border);
+  }
+
+  for (int i = 0; i < F_MAX_STATES; i++) {
+    readColor(colors.fileStateColors[i].textHighContrast);
+    readColor(colors.fileStateColors[i].textLowContrast);
+    readColor(colors.fileStateColors[i].background);
+    readColor(colors.fileStateColors[i].border);
+  }
+
+  for (int i = 0; i < I_MAX_STATES; i++) {
+    readColor(colors.inputStateColors[i].text);
+    readColor(colors.inputStateColors[i].background);
+    readColor(colors.inputStateColors[i].border);
+  }
+}
+
+void loadIcons(Theme &theme, string path) {
+  // load theme icons
+  theme.diagram.loadFromFile(path + "/diagram.png");
+  theme.downArrow.loadFromFile(path + "/down-arrow.png");
+  theme.search.loadFromFile(path + "/search.png");
+  theme.upArrow.loadFromFile(path + "/up-arrow.png");
+
+  // load file icons
+  theme.fileIcons.file.loadFromFile(path + "/file.png");
+  theme.fileIcons.folder.loadFromFile(path + "/folder.png");
+  theme.fileIcons.image.loadFromFile(path + "/image.png");
+  theme.fileIcons.pdf.loadFromFile(path + "/pdf.png");
+  theme.fileIcons.txt.loadFromFile(path + "/txt.png");
+}
+
+void loadThemes(List<Theme> &themes) {
   themes.init();
 
   string entry;
 
   FILE *themesPtr = freopen("assets/themes.txt", "r", stdin);
 
-  if (themesPtr == NULL) {
+  if (!themesPtr) {
     return;
   }
 
-  ColorTheme currentTheme;
+  Theme currentTheme;
+  ColorTheme currentColors;
+  string path;
+
   // de citit din file de pus in variabila si de adaugat variabila in lista
   while (cin >> entry) {
-    readColor(currentTheme.textHighContrast);
-    readColor(currentTheme.textMediumContrast);
-    readColor(currentTheme.textLowContrast);
+    cin >> currentTheme.charSize; // read char size
+    cin.get();
+    getline(cin, path); // get path of the font
 
-    readColor(currentTheme.bgBody);
-    readColor(currentTheme.bgLowContrast);
-
-    readColor(currentTheme.border);
-
-    for (int i = 0; i < B_MAX_STATES; i++) {
-      readColor(currentTheme.buttonStateColors[i].text);
-      readColor(currentTheme.buttonStateColors[i].background);
-      readColor(currentTheme.buttonStateColors[i].border);
+    // if loading the font fails, load the default one
+    if (!currentTheme.font.loadFromFile(path)) {
+      currentTheme.font.loadFromFile("assets/hack.ttf");
     }
 
-    for (int i = 0; i < F_MAX_STATES; i++) {
-      readColor(currentTheme.fileStateColors[i].textHighContrast);
-      readColor(currentTheme.fileStateColors[i].textLowContrast);
-      readColor(currentTheme.fileStateColors[i].background);
-      readColor(currentTheme.fileStateColors[i].border);
+    getline(cin, path); // get path of the icons
+
+    // if loading the icons fails, load the default ones
+    if (!currentTheme.diagram.loadFromFile(path + "/diagram.png")) {
+      loadIcons(currentTheme, "assets/icons/dark");
+    } else {
+      loadIcons(currentTheme, path);
     }
 
-    for (int i = 0; i < I_MAX_STATES; i++) {
-      readColor(currentTheme.inputStateColors[i].text);
-      readColor(currentTheme.inputStateColors[i].background);
-      readColor(currentTheme.inputStateColors[i].border);
-    }
+    readColorTheme(currentTheme.colors); // read the color theme
 
     themes.add(currentTheme, themes.length);
   }
@@ -135,9 +184,22 @@ void loadThemes(List<ColorTheme> &themes) {
          {Color(0xC2C2BFFF), Color(0x191A16FF), Color(0x191A16FF)},
          {Color(0xFFFFFFFF), Color(0x191A16FF), Color(0x0A0A09FF)}}};
 
-    themes.add(dark, 0);
+    Theme theme;
+
+    theme.charSize = 12;
+
+    // load font
+    theme.font.loadFromFile("assets/hack.ttf");
+
+    loadIcons(theme, "assets/icons/dark");
+
+    // load theme colors
+    theme.colors = dark;
+
+    themes.add(theme, 0);
   }
 
+  // make the theme list cyclable
   themes.head->prev = themes.tail;
   themes.tail->next = themes.head;
 

@@ -1,12 +1,6 @@
 #ifndef DLLIST_H
 #define DLLIST_H
 
-#include <iostream>
-#include <stdio.h>
-#include <string>
-
-using namespace std;
-
 enum sortOrder { DESC = -1, ASC = 1 };
 
 template <typename T> struct Node {
@@ -23,7 +17,7 @@ template <typename T> struct List {
   // initializez an empty double linked list
   void init() {
     length = 0;
-    head = tail = NULL;
+    head = tail = nullptr;
   }
 
   // adds an element of type File at index
@@ -32,7 +26,7 @@ template <typename T> struct List {
       return;
 
     Node<T> *n = new Node<T>;
-    n->next = n->prev = NULL;
+    n->next = n->prev = nullptr;
     n->data = data;
 
     if (length == 0) {
@@ -70,7 +64,7 @@ template <typename T> struct List {
       return;
 
     if (length == 1) {
-      head = tail = NULL;
+      head = tail = nullptr;
     } else if (index == 0) {
       head = head->next;
       delete head->prev;

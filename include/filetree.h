@@ -2,6 +2,7 @@
 #define FILE_TREE_H
 
 #include "dllist-file.h"
+#include "theme.h"
 #include "utils.h"
 #include <chrono>
 #include <filesystem>
@@ -28,16 +29,13 @@ enum sortBy { FILE_NAME, FILE_EXT, FILE_SIZE, FILE_DATE };
 
 string getDefaultPath();
 
-void getFilesFromPath(List<File> &l, string path, Font &font, int charSize,
-                      int x, int y, int width, int height,
-                      FileStateColors stateColors[F_MAX_STATES],
+void getFilesFromPath(List<File> &l, string path, int x, int y, int width,
+                      int height, Theme &theme,
                       bool ignoreBackwardsFolder = false);
 
 void searchFile(List<File> &search, string path, string nameToSearch);
 
 void sortFiletree(List<File> &l, sortBy criteria, sortOrder order);
-
-Node<File> *find(List<File> l, string filename);
 
 string evalPath(string path);
 

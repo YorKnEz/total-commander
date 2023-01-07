@@ -2,7 +2,7 @@
 
 File createFile(Filedata data, Font &font, int charSize, int x, int y,
                 int width, int height,
-                FileStateColors stateColors[F_MAX_STATES],
+                FileStateColors stateColors[F_MAX_STATES], FileIcons &fileIcons,
                 int borderThickness) {
   File file;
   file.state = F_INACTIVE; // set the state of the button
@@ -10,6 +10,22 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
   for (int i = 0; i < F_MAX_STATES; i++) {
     file.stateColors[i] = stateColors[i];
   }
+
+  // set the file icon
+  if (data.size == "<DIR>") {
+    file.icon.setTexture(fileIcons.folder);
+  } else if (data.ext == "png" || data.ext == "jpg" || data.ext == "jpeg" ||
+             data.ext == "svg" || data.ext == "gif") {
+    file.icon.setTexture(fileIcons.image);
+  } else if (data.ext == "pdf") {
+    file.icon.setTexture(fileIcons.pdf);
+  } else if (data.ext == "txt") {
+    file.icon.setTexture(fileIcons.txt);
+  } else {
+    file.icon.setTexture(fileIcons.file);
+  }
+
+  FloatRect iconBounds = file.icon.getGlobalBounds();
 
   // initialize background
   file.background =
@@ -32,7 +48,7 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
       sizeX = extX + file.extColumn, dateX = sizeX + file.sizeColumn;
 
   file.filename = createText(data.filename, font, charSize, nameX, y,
-                             file.filenameColumn - 20,
+                             file.filenameColumn - 20 - 4 - iconBounds.width,
                              file.stateColors[file.state].textHighContrast);
   file.ext = createText(data.ext, font, charSize, extX, y, file.extColumn - 20,
                         file.stateColors[file.state].textLowContrast);
@@ -42,6 +58,16 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
   file.date =
       createText(data.date, font, charSize, dateX, y, file.dateColumn - 20,
                  file.stateColors[file.state].textLowContrast);
+
+  FloatRect backgroundBounds = file.background.getGlobalBounds();
+  FloatRect textBounds = file.filename.getLocalBounds();
+
+  int offsetYText = (backgroundBounds.height - charSize) / 2;
+  int offsetYIcon = (backgroundBounds.height - iconBounds.height) / 2;
+
+  file.filename.setPosition(x + iconBounds.width + 14, y + offsetYText);
+
+  file.icon.setPosition(x + 10, y + offsetYIcon);
 
   return file;
 }
@@ -74,6 +100,7 @@ void drawFile(RenderWindow &window, File file, bool filenameOnly) {
   file.background.setOutlineColor(file.stateColors[file.state].border);
 
   window.draw(file.background);
+  window.draw(file.icon);
   drawText(window, file.filename);
 
   if (!filenameOnly) {

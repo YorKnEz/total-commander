@@ -45,7 +45,7 @@ void printList(List<File> l) {
   Node<File> *p = l.head;
   unsigned int index = 0;
 
-  while (p != NULL) {
+  while (p) {
     cout << "Name: " << p->data.data.filename << " | ";
     cout << "Extension: " << p->data.data.ext << " | ";
     cout << "Size: " << p->data.data.size << " | ";
@@ -60,18 +60,28 @@ void printList(List<File> l) {
 void updateFilesY(List<File> &files, int y) {
   Node<File> *p = files.head;
   int fileY = y;
-  int offsetY = p->data.background.getGlobalBounds().height / 2 -
-                p->data.date.getGlobalBounds().height / 2 +
-                p->data.date.getPosition().y -
-                p->data.date.getGlobalBounds().top;
+
+  int offsetYText, offsetYIcon;
+
+  if (p) {
+    // calculate the offsets for the text and icon
+    FloatRect backgroundBounds = p->data.background.getGlobalBounds();
+    FloatRect iconBounds = p->data.icon.getGlobalBounds();
+    int charSize = p->data.filename.getCharacterSize();
+
+    offsetYText = (backgroundBounds.height - charSize) / 2;
+    offsetYIcon = (backgroundBounds.height - iconBounds.height) / 2;
+  }
 
   while (p) {
     p->data.background.setPosition(p->data.background.getPosition().x, fileY);
+
+    p->data.icon.setPosition(p->data.icon.getPosition().x, fileY + offsetYIcon);
     p->data.filename.setPosition(p->data.filename.getPosition().x,
-                                 fileY + offsetY);
-    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetY);
-    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetY);
-    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetY);
+                                 fileY + offsetYText);
+    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetYText);
+    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetYText);
+    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetYText);
 
     fileY += p->data.background.getGlobalBounds().height + 1;
 

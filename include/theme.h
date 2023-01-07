@@ -20,11 +20,22 @@ struct ColorTheme {
   StateColors inputStateColors[I_MAX_STATES];
 };
 
-void printList(List<ColorTheme> l);
+struct Theme {
+  int charSize;
+  Font font;
+  // icons
+  Texture diagram, downArrow, search, upArrow;
+  FileIcons fileIcons;
+  ColorTheme colors;
+};
+
+void printList(List<Theme> l);
 
 void readColor(Color &color);
 
+void readColorTheme(ColorTheme &colors);
+
 // reads the themes file
-void loadThemes(List<ColorTheme> &themes);
+void loadThemes(List<Theme> &themes);
 
 #endif
