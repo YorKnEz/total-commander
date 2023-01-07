@@ -67,6 +67,22 @@ void updateInputState(Input &input, Event event, MouseEventType type,
   }
 }
 
+void updateInputText(Input &input, string newValue, string newPlaceholder) {
+  // update the input of the explorer
+  input.value = newValue;
+
+  if (newPlaceholder.size() > 0) {
+    input.placeholder = newPlaceholder;
+  }
+
+  input.displayText.setString(input.value == "" ? input.placeholder
+                                                : input.value);
+  input.displayLength = input.value.size();
+  input.cursorLocation = input.value.size();
+  input.startPosition = 0;
+
+  shrinkInput(input);
+}
 void insertChar(Input *activeInput, char c) {
   activeInput->value.insert(
       activeInput->startPosition + activeInput->cursorLocation, 1, c);
