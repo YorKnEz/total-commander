@@ -37,11 +37,12 @@ File createFile(Filedata data, Font &font, int charSize, int x, int y,
 
   // initialize column sizes
   Text date("dd/mm/yyyy hh:mm xx", font, charSize);
+  Text size("999.9 GB", font, charSize);
 
   file.dateColumn = date.getGlobalBounds().width + 20;
-  file.extColumn = (width - file.dateColumn) / 4;
-  file.filenameColumn = (width - file.dateColumn) / 2;
-  file.sizeColumn = (width - file.dateColumn) / 4;
+  file.sizeColumn = size.getGlobalBounds().width + 20;
+  file.extColumn = (width - file.dateColumn - file.sizeColumn) * (1.0 / 4);
+  file.filenameColumn = (width - file.dateColumn - file.sizeColumn) * (3.0 / 4);
 
   // initialize text fields
   int nameX = x + 10, extX = nameX + file.filenameColumn,
