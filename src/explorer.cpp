@@ -158,10 +158,12 @@ Explorer createExplorer(string path, int x, int y, int width, int height,
       width - 2, explorer.heightComp - 2, theme.colors.textMediumContrast,
       theme.colors.bgLowContrast, theme.colors.border, 1);
 
+  explorer.search = false;
+
   // set the input
   explorer.input =
       createInput("Enter path here", path, theme.font, theme.charSize, x + 1,
-                  y + explorer.heightComp + 1, width - 2,
+                  y + explorer.heightComp + 1, width - 2 - explorer.heightComp,
                   explorer.heightComp - 2, theme.colors.inputStateColors, 1);
 
   // set the sorting buttons
@@ -181,12 +183,17 @@ Explorer createExplorer(string path, int x, int y, int width, int height,
                    head->data.dateColumn - 2, explorer.heightFile - 2,
                    theme.colors.buttonStateColors, 1);
   // set the toggle forest view button
-  explorer.button[4] =
-      createButton("", theme.font, theme.charSize,
-                   x + width - explorer.heightComp + 1,
-                   y + height - explorer.heightComp + 1,
-                   explorer.heightComp - 2, explorer.heightComp - 2,
-                   theme.colors.buttonStateColors, 1, &theme.diagram);
+  explorer.button[4] = createButton(
+      "", theme.font, theme.charSize, x + width - explorer.heightComp + 1,
+      y + height - explorer.heightComp + 1, explorer.heightComp - 2,
+      explorer.heightComp - 2, theme.colors.buttonStateColors, 1,
+      &theme.diagram);
+  // set the toggle search button
+  explorer.button[5] = createButton(
+      "", theme.font, theme.charSize, x + width - explorer.heightComp + 1,
+      y + explorer.heightComp + 1, explorer.heightComp - 2,
+      explorer.heightComp - 2, theme.colors.buttonStateColors, 1,
+      &theme.search);
 
   // set the current folder text box
   explorer.textbox[1] =
@@ -209,13 +216,11 @@ Explorer createExplorer(string path, int x, int y, int width, int height,
 void refreshExplorer(Explorer &explorer, Explorer *activeExplorer,
                      Theme &theme) {
   // update the input of the explorer
-  explorer.input.value = explorer.path;
-  explorer.input.displayText.setString(explorer.path);
-  explorer.input.displayLength = explorer.path.size();
-  explorer.input.cursorLocation = explorer.path.size();
-  explorer.input.startPosition = 0;
-
-  shrinkInput(explorer.input);
+  if (explorer.search) {
+    updateInputText(explorer.input, "", "Enter search query");
+  } else {
+    updateInputText(explorer.input, explorer.path, "Enter path here");
+  }
 
   // reset explorer drive size
   explorer.textbox[0].fullText = getSizeOfDrive(explorer.path);
@@ -231,9 +236,24 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer,
                explorer.textbox[1].background.getGlobalBounds());
   }
 
-  // refresh file list
-  // use the head of the old list to extract its props
-  File file = explorer.files.head->data;
+  // get the new files from the new path only if search mode is off
+  // in order to avoid losing the search results
+  if (!explorer.search) {
+    // use the head of the old list to extract its props
+    File file = explorer.files.head->data;
+
+    // delete old files list
+    explorer.files.free();
+    explorer.files.init();
+
+    getFilesFromPath(
+        explorer.files, explorer.path, file.background.getPosition().x,
+        file.background.getPosition().y,
+        file.background.getGlobalBounds().width, explorer.heightFile, theme);
+  }
+
+  // re-sort and update the y of the files
+  sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
 
   // get the bounds of the area in which files can be drawn
   FloatRect filelistBounds = explorer.background.getGlobalBounds();
@@ -242,19 +262,6 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer,
 
   // get the position from which to start drawing the files
   int y = filelistBounds.top;
-
-  // delete old files list
-  explorer.files.free();
-  explorer.files.init();
-
-  // get the new files from the new path
-  getFilesFromPath(
-      explorer.files, explorer.path, file.background.getPosition().x,
-      file.background.getPosition().y, file.background.getGlobalBounds().width,
-      explorer.heightFile, theme);
-
-  // re-sort and update the y of the files
-  sortFiletree(explorer.files, explorer.sortedBy, explorer.order);
 
   if (explorer.forestView) {
     Node<File> *oldHead = explorer.files.head;
@@ -278,7 +285,6 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer,
     // update the coords of the files drawn on the screen
     updateFileForestXY(explorer.fileForest, filelistBounds.left, y);
   } else {
-
     // reset active file pointers
     explorer.activeFile[0] = explorer.files.head;
     explorer.activeFile[0]->data.state = F_SELECTED;
@@ -339,70 +345,71 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
   }
 
   // update the state of the sort buttons
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < MAX_BUTTONS; i++) {
     updateButtonState(explorer.button[i], event, type, oldClick);
 
     if (explorer.button[i].state == B_CLICKED ||
         explorer.button[i].state == B_DCLICKED) {
-      sortFiles(explorer, sortBy(i), &theme.upArrow, &theme.downArrow);
+      if (i < 4) {
+        sortFiles(explorer, sortBy(i), &theme.upArrow, &theme.downArrow);
+      } else if (i == 4) {
+        explorer.forestView = !explorer.forestView;
+
+        // initialize the file forest
+        if (explorer.forestView) {
+          Node<File> *oldHead = explorer.files.head;
+          explorer.files.head = oldHead->next;
+          explorer.files.length--;
+
+          init(explorer.fileForest, explorer.files,
+               explorer.files.head->data.background.getGlobalBounds().width);
+
+          explorer.files.head = oldHead;
+          explorer.files.length++;
+
+          // get scrollable height
+          int scrollableHeight =
+              getFileForestHeight(explorer.fileForest, explorer.heightFile);
+
+          // update the scrollable height
+          updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
+          updateScrollableHeight(explorer.scrollbar, scrollableHeight);
+
+          // update the coords of the files draw on the screen
+          int x = explorer.files.head->data.background.getPosition().x;
+          int y = explorer.files.head->data.background.getPosition().y;
+
+          updateFileForestXY(explorer.fileForest, x, y);
+        }
+        // free the file forest and restore the file list
+        else {
+          free(explorer.fileForest);
+
+          // update the scrollable height
+          int scrollableHeight =
+              (explorer.heightFile + 1) * explorer.files.length;
+
+          // update the scrollable height
+          updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
+          updateScrollableHeight(explorer.scrollbar, scrollableHeight);
+
+          // update the coords of the files draw on the screen
+          int y = explorer.files.head->data.background.getPosition().y;
+
+          updateFilesY(explorer.files, y);
+        }
+      } else if (i == 5) {
+        if (!explorer.forestView) {
+          explorer.search = !explorer.search;
+
+          refreshExplorer(explorer, activeExplorer, theme);
+        }
+      }
 
       // turn off the button to avoid side effects (such as the event triggering
       // multipel times)
       explorer.button[i].state = B_INACTIVE;
     }
-  }
-
-  // update the state of the other buttons
-  updateButtonState(explorer.button[4], event, type, oldClick);
-
-  if (explorer.button[4].state == B_CLICKED ||
-      explorer.button[4].state == B_DCLICKED) {
-    explorer.forestView = !explorer.forestView;
-
-    // initialize the file forest
-    if (explorer.forestView) {
-      Node<File> *oldHead = explorer.files.head;
-      explorer.files.head = oldHead->next;
-      explorer.files.length--;
-
-      init(explorer.fileForest, explorer.files,
-           explorer.files.head->data.background.getGlobalBounds().width);
-
-      explorer.files.head = oldHead;
-      explorer.files.length++;
-
-      // get scrollable height
-      int scrollableHeight =
-          getFileForestHeight(explorer.fileForest, explorer.heightFile);
-
-      // update the scrollable height
-      updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
-      updateScrollableHeight(explorer.scrollbar, scrollableHeight);
-
-      // update the coords of the files draw on the screen
-      int x = explorer.files.head->data.background.getPosition().x;
-      int y = explorer.files.head->data.background.getPosition().y;
-
-      updateFileForestXY(explorer.fileForest, x, y);
-    }
-    // free the file forest and restore the file list
-    else {
-      free(explorer.fileForest);
-
-      // update the scrollable height
-      int scrollableHeight = (explorer.heightFile + 1) * explorer.files.length;
-
-      // update the scrollable height
-      updateScrollbar(explorer.scrollbar, 0); // reset scrollbar to offset 0
-      updateScrollableHeight(explorer.scrollbar, scrollableHeight);
-
-      // update the coords of the files draw on the screen
-      int y = explorer.files.head->data.background.getPosition().y;
-
-      updateFilesY(explorer.files, y);
-    }
-
-    explorer.button[4].state = B_INACTIVE;
   }
 
   updateScrollbarState(explorer, event, type, oldClick);
@@ -444,6 +451,8 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                 *explorer.activeForest, newFiles,
                 explorer.activeForest->data.background.getGlobalBounds().width -
                     20);
+
+            newFiles.free();
           }
           // else toggle the hidden state
           else {
@@ -484,12 +493,17 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
       if (type == DCLICK && explorer.activeFile[0] &&
           isHovered(explorer.activeFile[0]->data.background.getGlobalBounds(),
                     event.mouseButton.x, event.mouseButton.y)) {
+        string path = explorer.search ? explorer.activeFile[0]->data.data.path
+                                      : explorer.path;
         if (explorer.activeFile[0]->data.data.size == "<DIR>") {
-          openFolder(explorer.path, explorer.activeFile[0]->data.data.filename);
+          openFolder(path, explorer.activeFile[0]->data.data.filename);
+
+          explorer.search = false;
+          explorer.path = path;
 
           refreshExplorer(explorer, activeExplorer, theme);
         } else {
-          openFile(explorer.path, explorer.activeFile[0]->data.data.filename,
+          openFile(path, explorer.activeFile[0]->data.data.filename,
                    explorer.activeFile[0]->data.data.ext);
         }
       } else {
@@ -519,7 +533,7 @@ void updateExplorerTheme(Explorer &explorer, Theme &theme) {
     updateFileForestTheme(explorer.fileForest, theme.colors.fileStateColors);
   }
 
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < MAX_BUTTONS; i++) {
     updateButtonTheme(explorer.button[i], theme.colors.buttonStateColors);
   }
 
@@ -541,17 +555,15 @@ void drawExplorer(RenderWindow &window, Explorer explorer) {
     drawFiles(window, explorer.files, miny, maxy);
   }
 
-  for (int i = 0; i < 4; i++) {
-    drawButton(window, explorer.button[i]);
-  }
-
   drawInput(window, explorer.input);
 
   for (int i = 0; i < 2; i++) {
     drawTextBox(window, explorer.textbox[i]);
   }
 
-  drawButton(window, explorer.button[4]);
+  for (int i = 0; i < MAX_BUTTONS; i++) {
+    drawButton(window, explorer.button[i]);
+  }
 
   drawScrollbar(window, explorer.scrollbar);
 }

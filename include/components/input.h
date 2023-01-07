@@ -27,6 +27,8 @@ Input createInput(string placeholder, string value, Font &font, int charSize,
 void updateInputState(Input &input, Event event, MouseEventType type,
                       Input *&activeInput);
 
+void updateInputText(Input &input, string newValue, string newPlaceholder = "");
+
 void updateInputTheme(Input &input, StateColors stateColors[I_MAX_STATES]);
 
 void insertChar(Input *activeInput, char c);

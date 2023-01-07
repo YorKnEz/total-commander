@@ -29,11 +29,15 @@ enum sortBy { FILE_NAME, FILE_EXT, FILE_SIZE, FILE_DATE };
 
 string getDefaultPath();
 
+File getFileFromEntry(const auto entry, Theme &theme, int x, int y, int width,
+                      int height);
+
 void getFilesFromPath(List<File> &l, string path, int x, int y, int width,
                       int height, Theme &theme,
                       bool ignoreBackwardsFolder = false);
 
-void searchFile(List<File> &search, string path, string nameToSearch);
+void searchFile(List<File> &results, string path, string searchQuery,
+                Theme &theme, int x, int y, int width, int height);
 
 void sortFiletree(List<File> &l, sortBy criteria, sortOrder order);
 

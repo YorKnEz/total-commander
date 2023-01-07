@@ -92,16 +92,16 @@ template <typename T> struct List {
   }
 
   void free() {
-    Node<T> *p = head->next;
-
     if (length == 0) {
       return;
     }
 
-    while (p) {
-      delete p->prev;
+    Node<T> *p = head;
 
+    while (p->next) {
       p = p->next;
+
+      delete p->prev;
     }
 
     delete p;

@@ -2,12 +2,12 @@
 
 void sort(List<File> &l, sortOrder order,
           bool (*sortCriteria)(Node<File> *a, Node<File> *b, sortOrder order)) {
-  if (l.length < 2) {
+  if (l.length == 0 || l.length == 1 && l.head->data.data.filename.compare("..") == 0) {
     return;
   }
 
   Node<File> *p =
-      l.head->data.data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
+      l.head->data.data.filename.compare("..") == 0 ? l.head->next : l.head;
   Node<File> *q;
   File aux;
 
@@ -71,21 +71,30 @@ void updateFilesY(List<File> &files, int y) {
 
     offsetYText = (backgroundBounds.height - charSize) / 2;
     offsetYIcon = (backgroundBounds.height - iconBounds.height) / 2;
-  }
 
-  while (p) {
-    p->data.background.setPosition(p->data.background.getPosition().x, fileY);
+    while (p) {
+      p->data.background.setPosition(p->data.background.getPosition().x, fileY);
 
-    p->data.icon.setPosition(p->data.icon.getPosition().x, fileY + offsetYIcon);
-    p->data.filename.setPosition(p->data.filename.getPosition().x,
-                                 fileY + offsetYText);
-    p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetYText);
-    p->data.size.setPosition(p->data.size.getPosition().x, fileY + offsetYText);
-    p->data.date.setPosition(p->data.date.getPosition().x, fileY + offsetYText);
+      p->data.icon.setPosition(p->data.icon.getPosition().x,
+                               fileY + offsetYIcon);
+      p->data.filename.setPosition(p->data.filename.getPosition().x,
+                                   fileY + offsetYText);
+      p->data.ext.setPosition(p->data.ext.getPosition().x, fileY + offsetYText);
+      p->data.size.setPosition(p->data.size.getPosition().x,
+                               fileY + offsetYText);
+      p->data.date.setPosition(p->data.date.getPosition().x,
+                               fileY + offsetYText);
 
-    fileY += p->data.background.getGlobalBounds().height + 1;
+      if (p->data.data.path.size() > 0) {
+        p->data.filename.setPosition(p->data.filename.getPosition().x, fileY + 4);
+        p->data.path.setPosition(p->data.filename.getPosition().x,
+                                 fileY + backgroundBounds.height - charSize - 4);
+      }
 
-    p = p->next;
+      fileY += backgroundBounds.height + 1;
+
+      p = p->next;
+    }
   }
 }
 

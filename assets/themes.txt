@@ -1,3 +1,23 @@
+light:
+12
+assets/hack.ttf
+assets/icons/24x24
+000000FF
+66666aFF
+a4a3aaFF
+cdccd4FF
+e6e5e9FF
+f5f5f6FF
+7b7a7fFF d7d6ddFF f5f5f6FF
+3d3d40FF d7d6ddFF e6e5e9FF
+000000FF d7d6ddFF f5f5f6FF
+000000FF d7d6ddFF f5f5f6FF
+66666aFF a4a3aaFF cdccd4FF f5f5f6FF
+66666aFF a4a3aaFF 00FF0032 f5f5f6FF
+66666aFF a4a3aaFF 0000FF32 f5f5f6FF
+7b7a7fFF e6e5e9FF f5f5f6FF
+3d3d40FF e6e5e9FF e6e5e9FF
+000000FF e6e5e9FF f5f5f6FF
 dark:
 12
 assets/hack.ttf

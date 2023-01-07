@@ -18,6 +18,7 @@ using namespace sf;
 using namespace std;
 
 #define E_MAX_STATES 2
+#define MAX_BUTTONS 6
 
 enum ExplorerState { E_INACTIVE, E_ACTIVE };
 enum Direction { UP = 50, DOWN = -50 };
@@ -35,15 +36,17 @@ struct Explorer {
   string activeForestPath;
   Forest *activeForest = nullptr;
 
+  bool search; // search toggle
+  Input input;
+
   int scrollOffset;
   int heightFile; // height of the files on the screen
   int heightComp; // height of the other components
   RectangleShape background;
-  Button button[5]; // 1-4: sorting, 5: toggle forestView
-  Input input;
+  Button button[MAX_BUTTONS]; // 0-3: sorting, 4: toggle forestView, 5: toggle search
   TextBox textbox[2];
-  ExplorerState state;
   Scrollbar scrollbar;
+  ExplorerState state;
 };
 
 void updateScrollbarState(Explorer &explorer, Event event, MouseEventType type,
