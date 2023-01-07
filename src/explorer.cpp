@@ -444,6 +444,8 @@ void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                 *explorer.activeForest, newFiles,
                 explorer.activeForest->data.background.getGlobalBounds().width -
                     20);
+
+            newFiles.free();
           }
           // else toggle the hidden state
           else {

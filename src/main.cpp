@@ -73,9 +73,15 @@ int main() {
           closeExplorer(explorer[i]);
         }
 
+        // break the theme cycle
+        themes.head->prev = nullptr;
+        themes.tail->next = nullptr;
+
         themes.free();
+        clipboard.free();
 
         window.close();
+
         break;
       case Event::MouseWheelScrolled:
         if (activeExplorer) {
