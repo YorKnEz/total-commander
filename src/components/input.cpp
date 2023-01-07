@@ -83,6 +83,19 @@ void updateInputText(Input &input, string newValue, string newPlaceholder) {
 
   shrinkInput(input);
 }
+
+void updateInputTheme(Input &input, StateColors stateColors[I_MAX_STATES]) {
+  // copy the state colors
+  for (int i = 0; i < I_MAX_STATES; i++) {
+    input.stateColors[i] = stateColors[i];
+  }
+
+  input.background.setFillColor(stateColors[input.state].background);
+  input.background.setOutlineColor(stateColors[input.state].border);
+
+  input.displayText.setFillColor(stateColors[input.state].text);
+}
+
 void insertChar(Input *activeInput, char c) {
   activeInput->value.insert(
       activeInput->startPosition + activeInput->cursorLocation, 1, c);
@@ -102,18 +115,6 @@ void insertChar(Input *activeInput, char c) {
   activeInput->displayText.setString(
       activeInput->value.substr(activeInput->startPosition,
                                 activeInput->displayLength)); // update string
-}
-
-void updateInputTheme(Input &input, StateColors stateColors[I_MAX_STATES]) {
-  // copy the state colors
-  for (int i = 0; i < I_MAX_STATES; i++) {
-    input.stateColors[i] = stateColors[i];
-  }
-
-  input.background.setFillColor(stateColors[input.state].background);
-  input.background.setOutlineColor(stateColors[input.state].border);
-
-  input.displayText.setFillColor(stateColors[input.state].text);
 }
 
 void eraseChar(Input *activeInput) {

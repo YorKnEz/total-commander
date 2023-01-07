@@ -2,12 +2,12 @@
 
 void sort(List<File> &l, sortOrder order,
           bool (*sortCriteria)(Node<File> *a, Node<File> *b, sortOrder order)) {
-  if (l.length < 2) {
+  if (l.length == 0 || l.length == 1 && l.head->data.data.filename.compare("..") == 0) {
     return;
   }
 
   Node<File> *p =
-      l.head->data.data.size.compare("<DIR>") == 0 ? l.head->next : l.head;
+      l.head->data.data.filename.compare("..") == 0 ? l.head->next : l.head;
   Node<File> *q;
   File aux;
 
