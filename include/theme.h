@@ -8,8 +8,12 @@
 #include "input.h"
 #include <SFML/Graphics.hpp>
 #include <filesystem>
-#include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include <string>
+
+using namespace std;
+namespace fs = filesystem;
 
 struct ColorTheme {
   Color textHighContrast, textMediumContrast, textLowContrast;
@@ -21,6 +25,7 @@ struct ColorTheme {
 };
 
 struct Theme {
+  string name;
   int charSize;
   Font font;
   // icons
@@ -31,9 +36,9 @@ struct Theme {
 
 void printList(List<Theme> l);
 
-void readColor(Color &color);
+void readColor(ifstream &theme, Color &color);
 
-void readColorTheme(ColorTheme &colors);
+void readColorTheme(ifstream &theme, ColorTheme &colors);
 
 // reads the themes file
 void loadThemes(List<Theme> &themes);

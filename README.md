@@ -51,9 +51,13 @@ File explorer is a multi-panel file explorer app, that allows all basic file ope
 
 ## Customizing
 
-You can create your own theme if you don't like the default ones, for that we have `themes-template.txt`, where you can see the format of the themes and an example. After you created your theme, you just need to add it at the end of `themes.txt` (that's where all the themes should be saved).
+You can create your own theme if you don't like the default ones, for that we have `template.theme`, where you can see the format of the themes and an example. After you created your theme, you just need to add it in the `themes` folder (that's where all the themes should be saved).
 
-### Note: modifying the code
+### Modifying the font/icons/charSize
+
+If you modify any of these and want to use the new theme, we highly recommend that you change the default-theme field from `settings.txt`, otherwise the font/icons/charSize will not be properly updated.
+
+### Modifying the code
 
 The best part about our project is that it is open source, that means you can take a look at the code and modify it. You can change literally anything you want (at your own risk).
 

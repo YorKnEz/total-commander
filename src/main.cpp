@@ -5,6 +5,7 @@
 #include "explorer.h"
 #include "filetree.h"
 #include "menu.h"
+#include "settings.h"
 #include "theme.h"
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -26,9 +27,20 @@ int main() {
       Vector2i(VideoMode::getDesktopMode().width / 2 - WINDOW_W / 2,
                VideoMode::getDesktopMode().height / 2 - WINDOW_H / 2));
 
+  // get the current settings
+  Settings settings;
+  loadSettings(settings);
+
+  // get the current themes
   List<Theme> themes;
   loadThemes(themes);
+
+  // load the default theme
   Node<Theme> *theme = themes.head;
+
+  while (theme->data.name != settings.defaultTheme && theme->next) {
+    theme = theme->next;
+  }
 
   int buttons = 5;
   int btnWidth = WINDOW_W / buttons, btnHeight = 32;
@@ -43,7 +55,7 @@ int main() {
                      btnHeight - 2, theme->data.colors.buttonStateColors, 1);
   }
 
-  int explorers = 2;
+  int explorers = settings.explorers;
   Explorer explorer[explorers];
 
   for (int i = 0; i < explorers; i++) {

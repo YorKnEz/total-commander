@@ -70,39 +70,39 @@ void printList(List<Theme> l) {
   } while (p != l.head);
 }
 
-void readColor(Color &color) {
+void readColor(ifstream &theme, Color &color) {
   unsigned int colorCode;
-  cin >> std::hex >> colorCode;
+  theme >> std::hex >> colorCode;
   color = Color(colorCode);
 }
 
-void readColorTheme(ColorTheme &colors) {
-  readColor(colors.textHighContrast);
-  readColor(colors.textMediumContrast);
-  readColor(colors.textLowContrast);
+void readColorTheme(ifstream &theme, ColorTheme &colors) {
+  readColor(theme, colors.textHighContrast);
+  readColor(theme, colors.textMediumContrast);
+  readColor(theme, colors.textLowContrast);
 
-  readColor(colors.bgBody);
-  readColor(colors.bgLowContrast);
+  readColor(theme, colors.bgBody);
+  readColor(theme, colors.bgLowContrast);
 
-  readColor(colors.border);
+  readColor(theme, colors.border);
 
   for (int i = 0; i < B_MAX_STATES; i++) {
-    readColor(colors.buttonStateColors[i].text);
-    readColor(colors.buttonStateColors[i].background);
-    readColor(colors.buttonStateColors[i].border);
+    readColor(theme, colors.buttonStateColors[i].text);
+    readColor(theme, colors.buttonStateColors[i].background);
+    readColor(theme, colors.buttonStateColors[i].border);
   }
 
   for (int i = 0; i < F_MAX_STATES; i++) {
-    readColor(colors.fileStateColors[i].textHighContrast);
-    readColor(colors.fileStateColors[i].textLowContrast);
-    readColor(colors.fileStateColors[i].background);
-    readColor(colors.fileStateColors[i].border);
+    readColor(theme, colors.fileStateColors[i].textHighContrast);
+    readColor(theme, colors.fileStateColors[i].textLowContrast);
+    readColor(theme, colors.fileStateColors[i].background);
+    readColor(theme, colors.fileStateColors[i].border);
   }
 
   for (int i = 0; i < I_MAX_STATES; i++) {
-    readColor(colors.inputStateColors[i].text);
-    readColor(colors.inputStateColors[i].background);
-    readColor(colors.inputStateColors[i].border);
+    readColor(theme, colors.inputStateColors[i].text);
+    readColor(theme, colors.inputStateColors[i].background);
+    readColor(theme, colors.inputStateColors[i].border);
   }
 }
 
@@ -124,41 +124,50 @@ void loadIcons(Theme &theme, string path) {
 void loadThemes(List<Theme> &themes) {
   themes.init();
 
-  string entry;
+  for (const auto &entry : fs::directory_iterator("assets/themes/")) {
+    string entryPath = entry.path();
 
-  FILE *themesPtr = freopen("assets/themes.txt", "r", stdin);
+    // check if the current file is a theme
+    if (entryPath.substr(entryPath.size() - 6) == ".theme" &&
+        entryPath.find("template.theme") == string::npos) {
+      ifstream themeFile;
+      themeFile.open(entryPath);
 
-  if (!themesPtr) {
-    return;
-  }
+      Theme currentTheme;
+      ColorTheme currentColors;
 
-  Theme currentTheme;
-  ColorTheme currentColors;
-  string path;
+      currentTheme.name = entryPath.substr(entryPath.find_last_of("/") + 1,
+                                           entryPath.find_last_of(".") -
+                                               entryPath.find_last_of("/") - 1);
 
-  // de citit din file de pus in variabila si de adaugat variabila in lista
-  while (cin >> entry) {
-    cin >> std::dec >> currentTheme.charSize; // read char size
-    cin.get();
-    getline(cin, path); // get path of the font
+      // de citit din file de pus in variabila si de adaugat variabila in lista
+      themeFile >> std::dec >> currentTheme.charSize; // read char size
+      themeFile.get();
 
-    // if loading the font fails, load the default one
-    if (!currentTheme.font.loadFromFile(path)) {
-      currentTheme.font.loadFromFile("assets/hack.ttf");
+      string path;
+
+      getline(themeFile, path); // get path of the font
+
+      // if loading the font fails, load the default one
+      if (!currentTheme.font.loadFromFile(path)) {
+        currentTheme.font.loadFromFile("assets/fonts/hack.ttf");
+      }
+
+      getline(themeFile, path); // get path of the icons
+
+      // if loading the icons fails, load the default ones
+      if (!currentTheme.diagram.loadFromFile(path + "/diagram.png")) {
+        loadIcons(currentTheme, "assets/icons/dark");
+      } else {
+        loadIcons(currentTheme, path);
+      }
+
+      readColorTheme(themeFile, currentTheme.colors); // read the color theme
+
+      themes.add(currentTheme, themes.length);
+
+      themeFile.close();
     }
-
-    getline(cin, path); // get path of the icons
-
-    // if loading the icons fails, load the default ones
-    if (!currentTheme.diagram.loadFromFile(path + "/diagram.png")) {
-      loadIcons(currentTheme, "assets/icons/dark");
-    } else {
-      loadIcons(currentTheme, path);
-    }
-
-    readColorTheme(currentTheme.colors); // read the color theme
-
-    themes.add(currentTheme, themes.length);
   }
 
   // add the default theme if the file is empty
@@ -186,10 +195,11 @@ void loadThemes(List<Theme> &themes) {
 
     Theme theme;
 
+    theme.name = "dark";
     theme.charSize = 12;
 
     // load font
-    theme.font.loadFromFile("assets/hack.ttf");
+    theme.font.loadFromFile("assets/fonts/hack.ttf");
 
     loadIcons(theme, "assets/icons/dark");
 
@@ -202,6 +212,4 @@ void loadThemes(List<Theme> &themes) {
   // make the theme list cyclable
   themes.head->prev = themes.tail;
   themes.tail->next = themes.head;
-
-  fclose(themesPtr);
 }

@@ -99,7 +99,9 @@ void searchFile(List<File> &results, string path, string searchQuery,
       string filename = (entry.path().filename()).generic_string();
 
       if (filename.find(searchQuery) != string::npos) {
-        File result = getFileFromEntry(entry, theme, x, y, width, height + 8);
+        File result = getFileFromEntry(
+            entry, theme, x, y, width,
+            max(2 * theme.charSize + 8, int(theme.diagram.getSize().y + 8)));
 
         result.data.path = path;
 

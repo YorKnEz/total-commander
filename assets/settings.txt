@@ -1,0 +1,2 @@
+default-theme: dark
+explorers: 2
