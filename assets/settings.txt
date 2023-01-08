@@ -1,2 +1,2 @@
-default-theme: dark
 explorers: 2
+default-theme: light

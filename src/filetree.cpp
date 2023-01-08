@@ -101,7 +101,7 @@ void searchFile(List<File> &results, string path, string searchQuery,
       if (filename.find(searchQuery) != string::npos) {
         File result = getFileFromEntry(
             entry, theme, x, y, width,
-            max(2 * theme.charSize + 8, int(theme.diagram.getSize().y + 8)));
+            max(2 * theme.charSize + 4, int(theme.diagram.getSize().y)) + 8);
 
         result.data.path = path;
 
@@ -109,7 +109,7 @@ void searchFile(List<File> &results, string path, string searchQuery,
             path, theme.font, theme.charSize,
             result.filename.getGlobalBounds().left,
             result.filename.getGlobalBounds().top,
-            result.filenameColumn - result.icon.getGlobalBounds().width - 4,
+            result.filenameColumn - 20 - result.icon.getGlobalBounds().width - 4,
             result.stateColors[result.state].textLowContrast);
 
         results.add(result, results.length);
