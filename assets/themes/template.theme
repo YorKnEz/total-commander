@@ -29,7 +29,7 @@ text background border // I_CLICKED
 // as an example, here is the default dark theme:
 dark:
 12
-assets/hack.ttf
+assets/fonts/hack.ttf
 assets/icons/dark
 FFFFFFFF
 999995FF
