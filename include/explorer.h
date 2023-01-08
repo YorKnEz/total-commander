@@ -65,6 +65,8 @@ void refreshExplorer(Explorer &explorer, Explorer *activeExplorer,
 
 void updateExplorerIndicator(Explorer *explorer, Explorer *&activeExplorer);
 
+void toggleForestView(Explorer &explorer);
+
 void updateExplorerState(Explorer &explorer, Event event, MouseEventType type,
                          Explorer *&activeExplorer, Vector2i &oldClick,
                          Input *&activeInput, Theme &theme);
