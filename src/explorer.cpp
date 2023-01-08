@@ -117,7 +117,7 @@ Explorer createExplorer(string path, int x, int y, int width, int height,
   Explorer explorer;
 
   int scrollbarWidth = 20;
-  explorer.heightFile = 27; // used for files and file sorting buttons
+  explorer.heightFile = max(theme.charSize, int(theme.diagram.getSize().y + 8)); // used for files and file sorting buttons
   explorer.heightComp = 30; // used for anything else
 
   explorer.path = path; // set path
