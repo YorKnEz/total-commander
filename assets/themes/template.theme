@@ -1,4 +1,3 @@
-themeName:
 // char size
 charSize
 // font location
@@ -26,8 +25,7 @@ text background border // I_INACTIVE
 text background border // I_HOVERED
 text background border // I_CLICKED
 
-// as an example, here is the default dark theme:
-dark:
+// as an example, here is the default dark theme, found in dark.theme:
 12
 assets/fonts/hack.ttf
 assets/icons/dark
