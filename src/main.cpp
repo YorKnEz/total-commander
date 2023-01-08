@@ -38,8 +38,13 @@ int main() {
   // load the default theme
   Node<Theme> *theme = themes.head;
 
-  while (theme->data.name != settings.defaultTheme && theme->next) {
+  while (theme->data.name != settings.defaultTheme &&
+         theme->next != themes.head) {
     theme = theme->next;
+  }
+
+  if (themes.tail->data.name == settings.defaultTheme) {
+    theme = themes.tail;
   }
 
   int buttons = 5;
@@ -51,18 +56,23 @@ int main() {
   for (int i = 0; i < buttons; i++) {
     button[i] =
         createButton(buttonString[i], theme->data.font, theme->data.charSize,
-                     i * btnWidth + 2, WINDOW_H - btnHeight + 1, btnWidth - 2,
+                     i * btnWidth + 1, WINDOW_H - btnHeight + 1, btnWidth - 2,
                      btnHeight - 2, theme->data.colors.buttonStateColors, 1);
   }
 
   int explorers = settings.explorers;
   Explorer explorer[explorers];
 
-  for (int i = 0; i < explorers; i++) {
+  for (int i = 0; i < explorers - 1; i++) {
     explorer[i] =
-        createExplorer(getDefaultPath(), i * WINDOW_W / explorers, 0,
+        createExplorer(getDefaultPath(), i * (WINDOW_W / explorers), 0,
                        WINDOW_W / explorers, WINDOW_H - btnHeight, theme->data);
   }
+
+  explorer[explorers - 1] =
+      createExplorer(getDefaultPath(), (explorers - 1) * (WINDOW_W / explorers),
+                     0, WINDOW_W - (explorers - 1) * (WINDOW_W / explorers),
+                     WINDOW_H - btnHeight, theme->data);
 
   // useful for determining double clicks
   Clock clock; // a timer that is set between two clicks

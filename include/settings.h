@@ -6,8 +6,8 @@
 using namespace std;
 
 struct Settings {
-  string defaultTheme; 
-  int explorers;
+  string defaultTheme = "dark"; 
+  int explorers = 2;
 };
 
 void loadSettings(Settings &settings);
