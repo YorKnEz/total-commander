@@ -125,7 +125,7 @@ void loadThemes(List<Theme> &themes) {
   themes.init();
 
   for (const auto &entry : fs::directory_iterator("assets/themes/")) {
-    string entryPath = entry.path();
+    string entryPath = entry.path().generic_string();
 
     // check if the current file is a theme
     if (entryPath.substr(entryPath.size() - 6) == ".theme" &&

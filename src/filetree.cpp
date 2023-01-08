@@ -98,7 +98,7 @@ void searchFile(List<File> &results, string path, string searchQuery,
     try {
       string filename = (entry.path().filename()).generic_string();
 
-      if (filename.find(searchQuery) != string::npos) {
+      if (toLower(filename).find(toLower(searchQuery)) != string::npos) {
         File result = getFileFromEntry(
             entry, theme, x, y, width,
             max(2 * theme.charSize + 4, int(theme.diagram.getSize().y)) + 8);

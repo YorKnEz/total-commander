@@ -1,2 +1,2 @@
-explorers: 2
+explorers: 3
 default-theme: light

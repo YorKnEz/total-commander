@@ -122,7 +122,8 @@ int main() {
 
         switch (event.key.code) {
         case Keyboard::A:
-          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+          if (activeExplorer && !activeExplorer->forestView &&
+              !activeExplorer->search && kbd.isKeyPressed(Keyboard::LControl)) {
             Node<File> *p = activeExplorer->files.head->next;
 
             while (p) {
@@ -133,12 +134,14 @@ int main() {
           }
           break;
         case Keyboard::X:
-          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+          if (activeExplorer && !activeExplorer->forestView &&
+              !activeExplorer->search && kbd.isKeyPressed(Keyboard::LControl)) {
             cut = true;
           }
         case Keyboard::C:
           // copy currently selected files into the clipboard
-          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+          if (activeExplorer && !activeExplorer->forestView &&
+              !activeExplorer->search && kbd.isKeyPressed(Keyboard::LControl)) {
             clipboard.free();
             clipboard.init();
             clipboardPath = activeExplorer->path;
@@ -156,7 +159,8 @@ int main() {
           }
           break;
         case Keyboard::D:
-          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+          if (activeExplorer && !activeExplorer->forestView &&
+              !activeExplorer->search && kbd.isKeyPressed(Keyboard::LControl)) {
             Node<File> *p = activeExplorer->files.head; // file list iterator
 
             while (p) {
@@ -167,7 +171,8 @@ int main() {
           }
           break;
         case Keyboard::I:
-          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+          if (activeExplorer && !activeExplorer->forestView &&
+              !activeExplorer->search && kbd.isKeyPressed(Keyboard::LControl)) {
             Node<File> *p =
                 activeExplorer->files.head->next; // file list iterator
 
@@ -203,6 +208,7 @@ int main() {
         case Keyboard::V:
           // paste the clipboard's contents into the currently active explorer
           if (clipboard.length > 0 && activeExplorer &&
+              !activeExplorer->forestView && !activeExplorer->search &&
               kbd.isKeyPressed(Keyboard::LControl)) {
             Node<File> *p = clipboard.head;
 
@@ -268,7 +274,8 @@ int main() {
               }
             }
             // open currently selected file
-            else if (activeExplorer->activeFile[0]) {
+            else if (!activeExplorer->forestView &&
+                     activeExplorer->activeFile[0]) {
               string currentEntryName =
                   activeExplorer->activeFile[0]->data.data.filename;
               string currentEntryExt =
@@ -280,11 +287,17 @@ int main() {
                 currentEntry += "." + currentEntryExt;
               }
 
-              openEntry(activeExplorer->path, currentEntryName,
-                        currentEntryExt);
+              string path =
+                  activeExplorer->activeFile[0]->data.data.path.size() > 0
+                      ? activeExplorer->activeFile[0]->data.data.path
+                      : activeExplorer->path;
+
+              openEntry(path, currentEntryName, currentEntryExt);
 
               // refresh the explorer if the user opened a folder
               if (activeExplorer->activeFile[0]->data.data.size == "<DIR>") {
+                activeExplorer->path = path;
+
                 refreshExplorer(*activeExplorer, activeExplorer, theme->data);
               }
             }
@@ -296,7 +309,8 @@ int main() {
             eraseChar(activeInput);
           }
           // go back one folder
-          else if (activeExplorer) {
+          else if (activeExplorer && !activeExplorer->forestView &&
+                   !activeExplorer->search) {
             openFolder(activeExplorer->path, "..");
 
             refreshExplorer(*activeExplorer, activeExplorer, theme->data);
@@ -321,7 +335,8 @@ int main() {
           }
           break;
         case Keyboard::Delete:
-          if (activeExplorer && activeExplorer->activeFile[0]) {
+          if (activeExplorer && activeExplorer->activeFile[0] &&
+              !activeExplorer->forestView && !activeExplorer->search) {
             handleMenuButtons(explorer, explorers, activeExplorer, DELETE_ENTRY,
                               TITLE, theme->data);
           }
@@ -436,7 +451,8 @@ int main() {
         case Keyboard::F6:
           // menu buttons shortcuts
           // they get triggered only when in normal view
-          if (activeExplorer && !activeExplorer->forestView) {
+          if (activeExplorer && !activeExplorer->forestView &&
+              !activeExplorer->search) {
             handleMenuButtons(explorer, explorers, activeExplorer,
                               MenuButtons(event.key.code - Keyboard::F2), TITLE,
                               theme->data);
@@ -481,7 +497,7 @@ int main() {
           updateButtonState(button[i], event, CLICK, oldClick);
 
           if (button[i].state == B_CLICKED && activeExplorer &&
-              !activeExplorer->forestView) {
+              !activeExplorer->forestView && !activeExplorer->search) {
             handleMenuButtons(explorer, explorers, activeExplorer,
                               MenuButtons(i), TITLE, theme->data);
           }

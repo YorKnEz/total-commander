@@ -1,6 +1,10 @@
 #include "forest.h"
 
 void init(Forest &forest, List<File> l, int width) {
+  if (l.length == 0) {
+    return;
+  }
+
   forest.length = l.length;
 
   forest.files = new Forest[forest.length];
