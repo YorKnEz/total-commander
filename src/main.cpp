@@ -443,7 +443,7 @@ int main() {
         case Keyboard::F4:
         case Keyboard::F5:
           // sorting shortcuts
-          if (activeExplorer && kbd.isKeyPressed(Keyboard::LControl)) {
+          if (activeExplorer && kbd.isKeyPressed(Keyboard::LShift)) {
             sortFiles(*activeExplorer, sortBy(event.key.code - Keyboard::F2),
                       &theme->data.upArrow, &theme->data.downArrow);
             break;
