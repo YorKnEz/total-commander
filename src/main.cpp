@@ -252,13 +252,27 @@ int main() {
                 FloatRect fileBounds = activeExplorer->files.head->data
                                            .background.getGlobalBounds();
 
-                // get rid of the old files
-                activeExplorer->files.free();
-                activeExplorer->files.init();
+                List<File> results;
+                results.init();
 
-                searchFile(activeExplorer->files, activeExplorer->path,
-                           activeInput->value, theme->data, fileBounds.left,
-                           fileBounds.top, fileBounds.width, fileBounds.height);
+                searchFile(results, activeExplorer->path, activeInput->value,
+                           theme->data, fileBounds.left, fileBounds.top,
+                           fileBounds.width, fileBounds.height);
+
+                if (results.length > 0) {
+                  // copy the results inside the list
+                  activeExplorer->files.free();
+                  activeExplorer->files.init();
+
+                  Node<File> *p = results.head;
+
+                  while (p) {
+                    activeExplorer->files.add(p->data, 0);
+                    p = p->next;
+                  }
+
+                  results.free();
+                }
 
                 refreshExplorer(*activeExplorer, activeExplorer, theme->data);
               } else {
