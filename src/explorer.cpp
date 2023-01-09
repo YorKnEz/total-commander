@@ -334,19 +334,28 @@ void updateExplorerIndicator(Explorer *explorer, Explorer *&activeExplorer) {
 }
 
 void toggleForestView(Explorer &explorer) {
+  if (explorer.files.length <= 1) {
+    return;
+  }
+
   explorer.forestView = !explorer.forestView;
 
   // initialize the file forest
   if (explorer.forestView) {
-    Node<File> *oldHead = explorer.files.head;
-    explorer.files.head = oldHead->next;
-    explorer.files.length--;
+    if (explorer.files.head->data.data.filename == "..") {
+      Node<File> *oldHead = explorer.files.head;
+      explorer.files.head = oldHead->next;
+      explorer.files.length--;
 
-    init(explorer.fileForest, explorer.files,
-         explorer.files.head->data.background.getGlobalBounds().width);
+      init(explorer.fileForest, explorer.files,
+           explorer.files.head->data.background.getGlobalBounds().width);
 
-    explorer.files.head = oldHead;
-    explorer.files.length++;
+      explorer.files.head = oldHead;
+      explorer.files.length++;
+    } else {
+      init(explorer.fileForest, explorer.files,
+           explorer.files.head->data.background.getGlobalBounds().width);
+    }
 
     // get scrollable height
     int scrollableHeight =

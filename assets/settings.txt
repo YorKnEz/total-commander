@@ -1,2 +1,2 @@
-explorers: 3
-default-theme: green
+explorers: 2
+default-theme: dark
