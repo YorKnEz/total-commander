@@ -34,12 +34,12 @@ Text createText(string textString, Font &font, int charSize, int x, int y,
   textObj.setFillColor(text);
 
   // shrink the text that is shown on the screen to avoid overflow
-  if (textObj.getGlobalBounds().width > width) {
+  if (textObj.getGlobalBounds().width > width && textString.size() > 0) {
     textString.append("..");
     textObj.setString(textString);
   }
 
-  while (textObj.getGlobalBounds().width > width) {
+  while (textObj.getGlobalBounds().width > width && textString.size() > 0) {
     textString.erase(textString.size() - 3, 1);
     textObj.setString(textString);
   }
@@ -52,12 +52,12 @@ void updateText(Text &text, string newText, FloatRect bounds) {
   text.setString(newText);
 
   // shrink the text that is shown on the screen to avoid overflow
-  if (text.getGlobalBounds().width > bounds.width) {
+  if (text.getGlobalBounds().width > bounds.width && newText.size() > 0) {
     newText.append("..");
     text.setString(newText);
   }
 
-  while (text.getGlobalBounds().width > bounds.width) {
+  while (text.getGlobalBounds().width > bounds.width && newText.size() > 0) {
     newText.erase(newText.size() - 3, 1);
     text.setString(newText);
   }

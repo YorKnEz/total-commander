@@ -26,13 +26,15 @@ void init(Forest &forest, List<File> l, int width) {
 
     // shrink the filename according to the new width
     if (forest.files[i].data.filename.getGlobalBounds().width >
-        width - 20 - iconBounds.width - 4) {
+            width - 20 - iconBounds.width - 4 &&
+        filename.size() > 0) {
       filename.append("..");
       forest.files[i].data.filename.setString(filename);
     }
 
     while (forest.files[i].data.filename.getGlobalBounds().width >
-           width - 20 - iconBounds.width - 4) {
+               width - 20 - iconBounds.width - 4 &&
+           filename.size() > 0) {
       filename.erase(filename.size() - 3, 1);
       forest.files[i].data.filename.setString(filename);
     }
