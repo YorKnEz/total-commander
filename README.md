@@ -4,7 +4,7 @@ File explorer is a multi-panel file explorer app, that allows all basic file ope
 
 ## Installation
 
-// to do
+Check out our [releases](https://github.com/YorKnEz/total-commander/releases) page.
 
 ## Shortcuts
 
